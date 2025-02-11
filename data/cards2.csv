@@ -1,0 +1,8 @@
+Num,Name,HP,Power,Special,Template
+1,Bear,4,4,,card1.py
+2,Griffon,3,6,flying,card2.py
+3,Lion,6,3,,card2.py
+4,Dolphin,2,2,,card2.py
+5,Penguin,1,1,,card1.py
+6,Goat,1,2,,card2.py
+7,Organgutan,5,2,,card1.py

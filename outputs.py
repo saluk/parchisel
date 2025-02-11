@@ -1,0 +1,79 @@
+from context import Context
+from io import BytesIO
+import base64
+
+class Renderer:
+    def update_context(self):
+        self.ui_image.source # = b64encoded string
+        self.ui_image.update()
+    def update(self, template):
+        self.clear()
+        self.render_cards()
+        self.update_context()
+
+class Output:
+    def __init__(self, data_source_name, rows=None, cols=None, width=None, height=None, 
+                offset_x = 10, offset_y = 10, spacing_x = 10, spacing_y = 10, 
+                template: str = None, template_field: str = None):
+        assert(template or template_field)
+        self.data_source_name = data_source_name
+
+        # TODO use all of these fields
+        self.rows = rows
+        self.cols = cols
+        self.width = width
+        self.height = height
+        self.offset_x = offset_x
+        self.offset_y = offset_y
+        self.spacing_x = spacing_x
+        self.spacing_y = spacing_y
+
+        self.template = template
+        self.template_field = template_field
+
+    def render(self, project):
+        self.w = 1800
+        self.h = 1800
+        self.context = Context(self.w, self.h)
+        # Greyish background
+        self.context.draw_box(0, 0, self.w, self.h, (200, 200, 200))
+
+        # Start drawing
+        x=self.offset_x
+        y=self.offset_y
+
+        #draw cards
+        data_source = project.get_data_source(self.data_source_name)
+        if not data_source:
+            self.context.draw_text(0, 0, f"No data source found: {self.data_source_name}")
+            return
+        template = None
+        if self.template:
+            template = project.templates[self.template]
+        template_cache = []  #These templates have been reloaded already
+        for card in data_source.cards:
+            card_context = Context(640, 480)
+
+            # Get template from row
+            if self.template_field:
+                template = project.templates[card[self.template_field]]
+            
+            if template not in template_cache:
+                template.load()
+                template_cache.append(template)
+
+            # TODO do the exec in the template
+            exec(template.code, {"card":card_context, "row":card})
+
+            self.context.draw_image(x, y, card_context.image)
+            x += card_context.image.width+10
+            if x+card_context.image.width > 1800:
+                x = 10
+                y += card_context.image.height+10
+
+    def b64encoded(self):
+        updated_image_buffer = BytesIO()
+        self.context.image.save(updated_image_buffer, format="PNG")
+        updated_image_bytes = updated_image_buffer.getvalue()
+        s = 'data:image/png;base64,' + base64.b64encode(updated_image_bytes).decode('utf8')
+        return s
