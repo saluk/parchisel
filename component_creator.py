@@ -167,12 +167,13 @@ with ui.tab_panels(tabs, value=project_view).classes('w-full'):
         )
         cc.ui_editor.tailwind.height("52")
         ui.label('Output')
-        render_output()
+        with ui.card():
+            render_output()
     with ui.tab_panel(sheet_view):
         ui.label('Google Sheets')
         ui.html('<iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTlAOJDERD5VIlvgjitaBc1rTfkBy__jH80-FcRQzUblef_3M_S0xJY0SS0Tv5h-EB-VYNjFAFPyI8A/pubhtml?widget=true&amp;headers=false" width=800 height=800></iframe>').classes('w-full')
 
 
 # NOTE: On Windows reload must be disabled to make asyncio.create_subprocess_exec work (see https://github.com/zauberzeug/nicegui/issues/486)
-ui.run(reload=platform.system() != 'Windows', native=True)
-#ui.run(reload=platform.system() != 'Windows', native=False)
+ui.run(reload=platform.system() != 'Windows', native=True, title="Parchisel Component Creator")
+#ui.run(reload=platform.system() != 'Windows', native=False, title="Parchisel Component Creator")
