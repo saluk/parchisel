@@ -2,21 +2,13 @@ from context import Context
 from io import BytesIO
 import base64
 
-class Renderer:
-    def update_context(self):
-        self.ui_image.source # = b64encoded string
-        self.ui_image.update()
-    def update(self, template):
-        self.clear()
-        self.render_cards()
-        self.update_context()
-
 class Output:
-    def __init__(self, data_source_name, rows=None, cols=None, width=None, height=None, 
+    def __init__(self, data_source_name, file_name, rows=None, cols=None, width=None, height=None, 
                 offset_x = 10, offset_y = 10, spacing_x = 10, spacing_y = 10, 
                 template: str = None, template_field: str = None):
         assert(template or template_field)
         self.data_source_name = data_source_name
+        self.file_name = file_name
 
         # TODO use all of these fields
         self.rows = rows
@@ -34,9 +26,17 @@ class Output:
     def render(self, project):
         self.w = 1800
         self.h = 1800
-        self.context = Context(self.w, self.h)
-        # Greyish background
-        self.context.draw_box(0, 0, self.w, self.h, (200, 200, 200))
+        # Don't use alpha for the first layer as blending doesn't work between two alpha surfaces in PIL
+        self.context = Context(self.w, self.h, "RGB")
+
+        # Checkerboard pattern
+        check_size = 25
+        colors = [(200, 200, 200, 255), (150, 150, 150, 255)]
+        for x in range(0, self.w, check_size):
+            for y in range(0, self.h, check_size):
+                self.context.draw_box(x, y, check_size, check_size, colors[0])
+                colors.reverse()
+            colors.reverse()
 
         # Start drawing
         x=self.offset_x
@@ -70,6 +70,9 @@ class Output:
             if x+card_context.image.width > 1800:
                 x = 10
                 y += card_context.image.height+10
+
+    def save(self):
+        self.context.image.save("outputs/"+self.file_name)
 
     def b64encoded(self):
         updated_image_buffer = BytesIO()

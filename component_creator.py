@@ -29,9 +29,9 @@ project.data_sources = datas = [
 project.load_data()
 project.load_templates()
 project.outputs = {
-    project.data_sources[0]: Output(project.data_sources[0].source, template="card1.py"),
-    project.data_sources[1]: Output(project.data_sources[1].source, template_field="Template"),
-    project.data_sources[2]: Output(project.data_sources[2].source, template="card1.py"),
+    project.data_sources[0]: Output(project.data_sources[0].source, "cards.png", template="card1.py"),
+    project.data_sources[1]: Output(project.data_sources[1].source, "cards2.png", template_field="Template"),
+    project.data_sources[2]: Output(project.data_sources[2].source, "cards3.png", template="card1.py"),
 }
 project.render_outputs()
 
@@ -169,6 +169,10 @@ with ui.tab_panels(tabs, value=project_view).classes('w-full'):
         ui.label('Output')
         with ui.card():
             render_output()
+        def save_output_btn():
+            project.save_outputs()
+            ui.notify("Saved!")
+        ui.button("Save Output", on_click=save_output_btn)
     with ui.tab_panel(sheet_view):
         ui.label('Google Sheets')
         ui.html('<iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTlAOJDERD5VIlvgjitaBc1rTfkBy__jH80-FcRQzUblef_3M_S0xJY0SS0Tv5h-EB-VYNjFAFPyI8A/pubhtml?widget=true&amp;headers=false" width=800 height=800></iframe>').classes('w-full')

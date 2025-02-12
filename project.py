@@ -72,3 +72,6 @@ class Project:
                 raise Exception("Error creating data source")
             data_source.load()
             self.data_sources.append(data_source)
+    def save_outputs(self):
+        for output in self.outputs.values():
+            output.save()

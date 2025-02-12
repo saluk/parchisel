@@ -1,10 +1,12 @@
 from PIL import Image, ImageDraw, ImageFont
 
+import cairo
+
 class Context:
-    def __init__(self, surface_width, surface_height):
-        self.resize(surface_width, surface_height)
-    def resize(self, sw, sh):
-        self.image = Image.new("RGBA", (sw, sh))
+    def __init__(self, surface_width, surface_height, mode="RGBA"):
+        self.resize(surface_width, surface_height, mode)
+    def resize(self, sw, sh, mode="RGBA"):
+        self.image = Image.new(mode, (sw, sh))
         self.draw = ImageDraw.Draw(self.image)
     def draw_box(self, x, y, w, h, color):
         self.draw.rectangle((x, y, x+w, y+h), color)
