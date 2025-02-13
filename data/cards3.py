@@ -5,5 +5,6 @@ def rows():
         yield ({
             "Name": "".join(name).capitalize(), 
             "Hp": random.randint(0,100),
-            "Power": random.randint(0,100)
+            "Power": random.randint(0,100),
+            "Icon":""
         })

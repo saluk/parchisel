@@ -1,8 +1,8 @@
-Num,Name,HP,Power,Special
-1,Bear,4,4,
-2,Griffon,3,6,flying
-3,Lion,6,3,
-4,Dolphin,2,2,
-5,Penguin,1,1,
-6,Goat,1,2,
-7,Organgutan,5,2,
+Num,Icon,Name,HP,Power,Special
+1,images/purple_sphere.png,Bear,4,4,
+2,images/purple_sphere.png,Griffon,3,6,flying
+3,,Lion,6,3,
+4,,Dolphin,2,2,
+5,images/purple_sphere.png,Penguin,1,1,
+6,,Goat,1,2,
+7,,Organgutan,5,2,

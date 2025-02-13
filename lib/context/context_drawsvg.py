@@ -29,7 +29,7 @@ class DrawSVGContext(Context):
         self.drawing = drawsvg.Drawing(sw, sh)
     def draw_box(self, x, y, w, h, color):
         r = drawsvg.Rectangle(x, y, w, h, fill=drawsvg_color(color))
-    def draw_image(self, x, y, context):
+    def draw_context(self, x, y, context):
         # Not implemented
         # Paint the contents of context into this context
         # Both contexts must match in type

@@ -48,7 +48,7 @@ class CairoContext(Context):
         self.c_context.fill()
 
         self.c_context.restore()
-    def draw_image(self, x, y, context):
+    def draw_context(self, x, y, context):
         self.c_context.save()
 
         #self.c_context.new_path()

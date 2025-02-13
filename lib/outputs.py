@@ -30,11 +30,11 @@ class Output:
         # Checkerboard pattern
         check_size = 25
         colors = [(200, 200, 200, 255), (150, 150, 150, 255)]
-        for x in range(0, self.w, check_size):
-            for y in range(0, self.h, check_size):
-                self.context.draw_box(x, y, check_size, check_size, colors[0])
-                colors.reverse()
-            colors.reverse()
+        #for x in range(0, self.w, check_size):
+        #    for y in range(0, self.h, check_size):
+        #        self.context.draw_box(x, y, check_size, check_size, colors[0])
+        #        colors.reverse()
+        #    colors.reverse()
 
         # Start drawing
         x=self.offset_x
@@ -63,11 +63,12 @@ class Output:
             # TODO do the exec in the template
             exec(template.code, {"card":card_context, "row":card})
 
-            self.context.draw_image(x, y, card_context)
+            self.context.draw_context(x, y, card_context)
             x += card_context.width+10
             if x+card_context.width > 1800:
                 x = 10
                 y += card_context.height+10
+            #return
 
     def save(self):
         self.context.save("outputs/"+self.file_name)
