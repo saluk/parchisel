@@ -1,4 +1,12 @@
+from lib.context import Context
 import cairo
+
+# Cairo benefits:
+#   - many advanced drawing functions
+#   - exports to pdf and svg
+# Cairo flaws:
+#   - text rendering primitive
+#   - interface confusing
 
 def cairo_color(color):
     if isinstance(color, (list, tuple)) and (len(color) >= 3 and len(color) <= 4):

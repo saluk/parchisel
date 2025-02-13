@@ -1,4 +1,13 @@
+from lib.context import Context
+
 import drawsvg
+
+# drawsvg benefits:
+#   - svg is probably most powerful renderer
+# cons:
+#   - still have to convert to png with another
+#     tool (like cairo)
+
 def drawsvg_color(color):
     if isinstance(color, str) and color.startswith("#"):
         return color
@@ -7,7 +16,7 @@ def drawsvg_color(color):
             return f"rgb({",".join(str(int(x*100))+"%" for x in color)})"
         else:
             return f"rgb({",".join(x+"%" for x in color)})"
-class DrawSVGContext:
+class DrawSVGContext(Context):
     def __init__(self, surface_width, surface_height, mode="RGBA"):
         self.resize(surface_width, surface_height, mode)
     @property

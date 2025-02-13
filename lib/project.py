@@ -1,6 +1,6 @@
 import os
 
-import datasource
+import lib.datasource as datasource
 
 class Template:
     def __init__(self, filename):
