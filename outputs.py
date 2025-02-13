@@ -1,6 +1,4 @@
-from context import Context
-from io import BytesIO
-import base64
+from lib.context import Context
 
 class Output:
     def __init__(self, data_source_name, file_name, rows=None, cols=None, width=None, height=None, 
@@ -52,7 +50,7 @@ class Output:
             template = project.templates[self.template]
         template_cache = []  #These templates have been reloaded already
         for card in data_source.cards:
-            card_context = Context(640, 480)
+            card_context = Context(640, 480, "RGB")
 
             # Get template from row
             if self.template_field:
@@ -65,18 +63,14 @@ class Output:
             # TODO do the exec in the template
             exec(template.code, {"card":card_context, "row":card})
 
-            self.context.draw_image(x, y, card_context.image)
-            x += card_context.image.width+10
-            if x+card_context.image.width > 1800:
+            self.context.draw_image(x, y, card_context)
+            x += card_context.width+10
+            if x+card_context.width > 1800:
                 x = 10
-                y += card_context.image.height+10
+                y += card_context.height+10
 
     def save(self):
-        self.context.image.save("outputs/"+self.file_name)
+        self.context.save("outputs/"+self.file_name)
 
     def b64encoded(self):
-        updated_image_buffer = BytesIO()
-        self.context.image.save(updated_image_buffer, format="PNG")
-        updated_image_bytes = updated_image_buffer.getvalue()
-        s = 'data:image/png;base64,' + base64.b64encode(updated_image_bytes).decode('utf8')
-        return s
+        return self.context.b64encoded()

@@ -15,7 +15,6 @@ from nicegui import ui
 from multiprocessing import freeze_support
 freeze_support()
 
-from context import Context
 from datasource import CSVData, PythonData
 from project import Project
 from outputs import Output
