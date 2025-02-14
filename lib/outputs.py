@@ -1,4 +1,7 @@
+import time
+
 from lib.context import Context
+from lib.context import SkiaContext as Context
 
 class Output:
     def __init__(self, data_source_name, file_name, rows=None, cols=None, width=None, height=None, 
@@ -21,11 +24,14 @@ class Output:
         self.template = template
         self.template_field = template_field
 
-    def render(self, project):
+        self.rendered_string = ""   # Clear to rerender
         self.w = 1800
         self.h = 1800
-        # Don't use alpha for the first layer as blending doesn't work between two alpha surfaces in PIL
         self.context = Context(self.w, self.h, "RGB")
+        self.card_context = Context(640, 480, "RGB")
+    def render(self, project):
+        start_time = time.time()
+        self.context.clear([0,0,0,0])
 
         # Checkerboard pattern
         check_size = 25
@@ -50,7 +56,8 @@ class Output:
             template = project.templates[self.template]
         template_cache = []  #These templates have been reloaded already
         for card in data_source.cards:
-            card_context = Context(640, 480, "RGB")
+            card_context = self.card_context
+            card_context.clear([0, 0, 0, 0])
 
             # Get template from row
             if self.template_field:
@@ -69,9 +76,16 @@ class Output:
                 x = 10
                 y += card_context.height+10
             #return
+        end_time = time.time()
+        render_time = end_time-start_time
+        print("Render time:", self.file_name, render_time)
 
     def save(self):
         self.context.save("outputs/"+self.file_name)
 
-    def b64encoded(self):
-        return self.context.b64encoded()
+    def b64encoded(self, project):
+        if self.rendered_string:
+            return self.rendered_string
+        self.render(project)
+        self.rendered_string = self.context.b64encoded()
+        return self.rendered_string

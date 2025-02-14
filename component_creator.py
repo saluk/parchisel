@@ -28,11 +28,10 @@ project.data_sources = datas = [
 project.load_data()
 project.load_templates()
 project.outputs = {
-    project.data_sources[0]: Output(project.data_sources[0].source, "cards.png", template="card1.py"),
-    project.data_sources[1]: Output(project.data_sources[1].source, "cards2.png", template_field="Template"),
-    project.data_sources[2]: Output(project.data_sources[2].source, "cards3.png", template="card1.py"),
+    project.data_sources[0].source: Output(project.data_sources[0].source, "cards.png", template="card1.py"),
+    project.data_sources[1].source: Output(project.data_sources[1].source, "cards2.png", template_field="Template"),
+    project.data_sources[2].source: Output(project.data_sources[2].source, "cards3.png", template="card1.py"),
 }
-project.render_outputs()
 
 class CodeContext:
     def __init__(self):
@@ -50,7 +49,7 @@ class CodeContext:
         self.template.save()
         # TODO only refresh if template is applied to output images
         # TODO only refresh output images that could have changed
-        project.render_outputs()
+        project.dirty_outputs()
         self.output_images.refresh()
 cc = CodeContext()
 cc.template = project.templates["card1.py"]
@@ -76,18 +75,51 @@ ov = OutputView()
 
 #### UI CODE
 @ui.refreshable
-def render_output():
+def render_selected_project_outputs():
+    for output_key in ov.viewed_output:
+        output = project.outputs[output_key]
+        with ui.card():
+            ui.label(output.data_source_name)
+            ui.image(output.b64encoded(project)).classes('w-80')
+@ui.refreshable
+def render_project_outputs():
     if not ov.viewed_output:
-        ov.viewed_output = list(project.outputs.values())[0].data_source_name
-    def sv(e):
-        ov.viewed_output = e.value
-    with ui.carousel(value=ov.viewed_output, animated=True, arrows=True, navigation=True)\
-            .on_value_change(sv):
-        for output in project.outputs.values():
-            with ui.carousel_slide(output.data_source_name):
-                ui.label(output.data_source_name)
-                ui.image(output.b64encoded()).classes('w-80')
-cc.output_images = render_output
+        ov.viewed_output = [list(project.outputs.keys())[0]]
+    with ui.row():
+        with ui.column():
+            with ui.card():
+                def save_output_btn():
+                    project.save_outputs()
+                    ui.notify("Saved!")
+                ui.button("Save Output", on_click=save_output_btn)
+            with ui.card():
+                ui.label("View outputs:")
+                checks = []
+                with ui.button_group():
+                    def f_all():
+                        for k,c in checks:
+                            c.set_value(True)
+                    ui.button("All", on_click=f_all)
+                    def f_none():
+                        for k,c in checks:
+                            c.set_value(False)
+                    ui.button("None", on_click=f_none)
+                for output_key in project.outputs.keys():
+                    output = project.outputs[output_key]
+                    c = ui.checkbox(output.data_source_name, value=output_key in ov.viewed_output)
+                    checks.append((output_key,c))
+                def set_check():
+                    viewed_output = []
+                    for output_key, check in checks:
+                        if check.value:
+                            viewed_output.append(output_key)
+                    ov.viewed_output = viewed_output
+                    cc.output_images.refresh()
+                [c[1].on_value_change(set_check) for c in checks]
+        with ui.card():
+            render_selected_project_outputs()
+
+cc.output_images = render_selected_project_outputs
 
 @ui.refreshable
 def ui_datasources():
@@ -166,12 +198,7 @@ with ui.tab_panels(tabs, value=project_view).classes('w-full'):
         )
         cc.ui_editor.tailwind.height("52")
         ui.label('Output')
-        with ui.card():
-            render_output()
-        def save_output_btn():
-            project.save_outputs()
-            ui.notify("Saved!")
-        ui.button("Save Output", on_click=save_output_btn)
+        render_project_outputs()
     with ui.tab_panel(sheet_view):
         ui.label('Google Sheets')
         ui.html('<iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTlAOJDERD5VIlvgjitaBc1rTfkBy__jH80-FcRQzUblef_3M_S0xJY0SS0Tv5h-EB-VYNjFAFPyI8A/pubhtml?widget=true&amp;headers=false" width=800 height=800></iframe>').classes('w-full')

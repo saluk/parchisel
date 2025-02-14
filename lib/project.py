@@ -35,6 +35,9 @@ class Project:
     def load_templates(self):
         for template in os.listdir("data/templates"):
             self.templates[template] = Template("data/templates/"+template)
+    def dirty_outputs(self):
+        for output in self.outputs.values():
+            output.rendered_string = None
     def render_outputs(self):
         for output in self.outputs.values():
             output.render(self)
@@ -74,4 +77,6 @@ class Project:
             self.data_sources.append(data_source)
     def save_outputs(self):
         for output in self.outputs.values():
+            if not output.rendered_string:
+                output.render(self)
             output.save()
