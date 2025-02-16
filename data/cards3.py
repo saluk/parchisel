@@ -6,5 +6,5 @@ def rows():
             "Name": "".join(name).capitalize(), 
             "Hp": random.randint(0,100),
             "Power": random.randint(0,100),
-            "Icon":""
+            "Icon":"images/purple_sphere.png"
         })

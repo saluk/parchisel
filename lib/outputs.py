@@ -27,11 +27,10 @@ class Output:
         self.rendered_string = ""   # Clear to rerender
         self.w = 1800
         self.h = 1800
-        self.context = Context(self.w, self.h, "RGB")
-        self.card_context = Context(640, 480, "RGB")
     def render(self, project):
+        self.context = Context(self.w, self.h, "RGB")
         start_time = time.time()
-        self.context.clear([0,0,0,0])
+        self.context.clear((0,0,0,0))
 
         # Checkerboard pattern
         check_size = 25
@@ -56,8 +55,8 @@ class Output:
             template = project.templates[self.template]
         template_cache = []  #These templates have been reloaded already
         for card in data_source.cards:
-            card_context = self.card_context
-            card_context.clear([0, 0, 0, 0])
+            card_context = Context(640, 480, "RGB")
+            card_context.clear((0, 0, 0, 0))
 
             # Get template from row
             if self.template_field:

@@ -50,6 +50,7 @@ class Project:
         ds = self.get_data_source(fn)
         if ds:
             self.data_sources.remove(ds)
+            self.dirty_outputs()
     def add_data_source(self, fn):
         fn = fn.strip()
         if self.get_data_source(fn):
@@ -75,6 +76,7 @@ class Project:
                 raise Exception("Error creating data source")
             data_source.load()
             self.data_sources.append(data_source)
+            self.dirty_outputs()
     def save_outputs(self):
         for output in self.outputs.values():
             if not output.rendered_string:

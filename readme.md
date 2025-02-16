@@ -75,3 +75,9 @@ This tool was built on top of some great technology:
 
 Includes fonts from Google Font:
 https://openfontlicense.org/open-font-license-official-text/
+
+
+
+# TODO 
+- add editing of outputs
+- general project management

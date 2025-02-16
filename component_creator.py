@@ -179,6 +179,9 @@ with ui.tabs().classes('w-full') as tabs:
     project_view = ui.tab("Project")
     template_view = ui.tab('Templates')
     sheet_view = ui.tab('Google Sheets')
+    tabs.on_value_change(
+        lambda: cc.output_images.refresh()
+    )
 with ui.tab_panels(tabs, value=project_view).classes('w-full'):
     with ui.tab_panel(project_view):
         ui.label("Current Project")

@@ -1,2 +1,4 @@
 card.draw_box(0, 0, 640, 480, (155, 255, 255, 255))
 card.draw_box(0,0,300,100,(50,250,100,50))
+if row["Icon"]:
+    card.draw_image(0,20,row["Icon"])
