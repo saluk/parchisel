@@ -28,6 +28,8 @@ class Context:
     def resize(self, sw, sh, mode="RGBA"):
         self.image = Image.new(mode, (sw, sh))
         self.draw = ImageDraw.Draw(self.image, "RGBA")
+    def clear(self, color):
+        self.draw.rectangle((0,0,self.image.size[0],self.image.size[1]), color)
     def log(self, image):
         return
         image.save(f"step{Context.step}.png")
