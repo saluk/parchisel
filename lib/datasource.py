@@ -4,14 +4,12 @@ class DataSource:
     def __init__(self, source):
         self.source = source
         self.cards = []
+        self.fieldnames = []
     def load(self):
         pass
     def save(self):
         pass
 class CSVData(DataSource):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fieldnames = []
     def load(self):
         self.cards = []
         with open(self.source) as csvfile:
@@ -31,3 +29,7 @@ class PythonData(DataSource):
         with open(self.source) as f:
             exec(f.read(), g)
         self.cards = [row for row in g["rows"]()]
+        for card in self.cards:
+            for field in card:
+                if field not in self.fieldnames:
+                    self.fieldnames.append(field)

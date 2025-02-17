@@ -6,6 +6,7 @@ import shlex
 import sys
 import re
 import os
+import random
 
 import numpy as np
 from nicegui import ui
@@ -28,9 +29,9 @@ project.data_sources = datas = [
 project.load_data()
 project.load_templates()
 project.outputs = {
-    project.data_sources[0].source: Output(project.data_sources[0].source, "cards.png", template="card1.py"),
+    project.data_sources[0].source: Output(project.data_sources[0].source, "cards.png", template_name="card1.py"),
     project.data_sources[1].source: Output(project.data_sources[1].source, "cards2.png", template_field="Template"),
-    project.data_sources[2].source: Output(project.data_sources[2].source, "cards3.png", template="card1.py"),
+    project.data_sources[2].source: Output(project.data_sources[2].source, "cards3.png", template_name="card1.py"),
 }
 
 class CodeContext:
@@ -69,8 +70,17 @@ class OutputView:
     def __init__(self):
         self.columns = None
         self.viewed_output = None
-ov = OutputView()
 
+        self.project = None
+        # TODO: Make a View class. View class stores the project, and modifies 
+        #       project data modifications to refresh the correct parts of the view
+    def refresh_outputs(self):
+        if self.viewed_output:
+            self.viewed_output = [key for key in self.viewed_output if key in self.project.outputs]
+        self.ui_outputs.refresh()
+        self.render_project_outputs.refresh()
+ov = OutputView()
+ov.project = project
 
 
 #### UI CODE
@@ -83,7 +93,7 @@ def render_selected_project_outputs():
             ui.image(output.b64encoded(project)).classes('w-80')
 @ui.refreshable
 def render_project_outputs():
-    if not ov.viewed_output:
+    if not ov.viewed_output and project.outputs:
         ov.viewed_output = [list(project.outputs.keys())[0]]
     with ui.row():
         with ui.column():
@@ -118,6 +128,7 @@ def render_project_outputs():
                 [c[1].on_value_change(set_check) for c in checks]
         with ui.card():
             render_selected_project_outputs()
+ov.render_project_outputs = render_project_outputs
 
 cc.output_images = render_selected_project_outputs
 
@@ -164,6 +175,61 @@ def ui_datasources():
 ov.ui_datasources = ui_datasources
 ov.new_data_path = ""
 
+@ui.refreshable
+def ui_outputs():
+    for out_key in project.outputs:
+        out = project.outputs[out_key]
+        def unlink_output(out=out):
+            out.rendered_string = ""
+            project.remove_output(out)
+            ov.refresh_outputs()
+        with ui.grid(columns=5):
+            def edit_name(inp, out=out):
+                # TODO edit
+                project.rename_output(out, inp.value)
+                ov.refresh_outputs()
+            imp = ui.input(value=out.file_name)
+            imp.on('keydown.enter', lambda imp=imp: edit_name(imp))
+
+            def select_source(evt, out=out, project=project):
+                out.data_source_name = evt.value
+                out.rendered_string = ""
+                ov.refresh_outputs()
+            ui.select([source.source for source in project.data_sources], value=out.data_source_name,
+                      on_change=select_source)
+            
+            def select_template(evt, out=out, project=project):
+                out.template_name = evt.value
+                out.rendered_string = ""
+                ov.refresh_outputs()
+            ui.select([""] + [name for name in project.templates], value=out.template_name,
+                      on_change=select_template)
+            
+            def select_template_field(evt, out=out, project=project):
+                out.template_field = evt.value
+                out.rendered_string = ""
+                ov.refresh_outputs()
+            ds = project.get_data_source(out.data_source_name)
+            if ds:
+                ui.select([""] + [key for key in ds.fieldnames], value=out.template_field,
+                        on_change=select_template_field)
+
+            ui.button('Remove', on_click=unlink_output)
+    ui.separator()
+    def add_output():
+        new_out = Output("", "new_output.png")
+        # Choose a data source that isn't output yet, or pick at random
+        used = set([out.data_source_name for out in project.outputs.values()])
+        for s in project.data_sources:
+            if s.source not in used:
+                new_out.data_source_name = s.source
+        if not new_out.data_source_name:
+            new_out.data_source_name = random.choice(list(used))
+        project.outputs[new_out.file_name] = new_out
+        ov.refresh_outputs()
+    ui.button("Add", on_click=add_output)
+ov.ui_outputs = ui_outputs
+
 with ui.dialog() as new_template_dialog, ui.card():
     ui.input(label="New template filename:",
              on_change=lambda e: cc.set_new_filename(e.value))
@@ -188,6 +254,9 @@ with ui.tab_panels(tabs, value=project_view).classes('w-full'):
         with ui.card():
             ui.label("Data Sources")
             ui_datasources()
+        with ui.card():
+            ui.label("Outputs")
+            ui_outputs()
     with ui.tab_panel(template_view):
         ui.label('Templates')
         with ui.button_group():

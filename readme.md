@@ -79,5 +79,5 @@ https://openfontlicense.org/open-font-license-official-text/
 
 
 # TODO 
-- add editing of outputs
+- change data source path updates data source
 - general project management

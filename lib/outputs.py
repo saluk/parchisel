@@ -6,10 +6,11 @@ from lib.context import SkiaContext as Context
 class Output:
     def __init__(self, data_source_name, file_name, rows=None, cols=None, width=None, height=None, 
                 offset_x = 10, offset_y = 10, spacing_x = 10, spacing_y = 10, 
-                template: str = None, template_field: str = None):
-        assert(template or template_field)
+                template_name: str = None, template_field: str = None):
         self.data_source_name = data_source_name
         self.file_name = file_name
+        self.template_name = template_name
+        self.template_field = template_field
 
         # TODO use all of these fields
         self.rows = rows
@@ -21,13 +22,12 @@ class Output:
         self.spacing_x = spacing_x
         self.spacing_y = spacing_y
 
-        self.template = template
-        self.template_field = template_field
-
         self.rendered_string = ""   # Clear to rerender
         self.w = 1800
         self.h = 1800
+        
     def render(self, project):
+        print(f"RENDERING: {self.data_source_name} as {self.file_name}")
         self.context = Context(self.w, self.h, "RGB")
         start_time = time.time()
         self.context.clear((0,0,0,0))
@@ -51,8 +51,8 @@ class Output:
             self.context.draw_text(0, 0, f"No data source found: {self.data_source_name}")
             return
         template = None
-        if self.template:
-            template = project.templates[self.template]
+        if self.template_name:
+            template = project.templates[self.template_name]
         template_cache = []  #These templates have been reloaded already
         for card in data_source.cards:
             card_context = Context(640, 480, "RGB")
@@ -61,6 +61,9 @@ class Output:
             # Get template from row
             if self.template_field:
                 template = project.templates[card[self.template_field]]
+
+            if not template:
+                continue
             
             if template not in template_cache:
                 template.load()

@@ -77,6 +77,17 @@ class Project:
             data_source.load()
             self.data_sources.append(data_source)
             self.dirty_outputs()
+
+    def remove_output(self, output):
+        for key in self.outputs:
+            if self.outputs[key] == output:
+                del self.outputs[key]
+                return
+        raise Exception("Output not found")
+    def rename_output(self, output, file_name):
+        del self.outputs[output.file_name]
+        output.file_name = file_name
+        self.outputs[output.file_name] = output
     def save_outputs(self):
         for output in self.outputs.values():
             if not output.rendered_string:
