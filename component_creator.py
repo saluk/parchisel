@@ -159,7 +159,7 @@ def ui_datasources():
             ov.ui_datasources.refresh()
             ov.refresh_outputs()
         with ui.grid(columns=3):
-            imp = ui.input(value=ds.source)
+            imp = ui.input("path", value=ds.source)
             def edit_source(imp=imp, ds=ds):
                 try:
                     project.rename_data_source(ds, imp.value)
@@ -170,6 +170,7 @@ def ui_datasources():
                 ov.ui_datasources.refresh()
                 ov.refresh_outputs()
             imp.on("keydown.enter", edit_source)
+            imp.on("blur", edit_source)
             if isinstance(ds, CSVData):
                 ui.label("CSV File")
             elif isinstance(ds, PythonData):
@@ -191,7 +192,7 @@ def ui_datasources():
                 ov.new_data_path = file
 
         ui.button('choose file', on_click=choose_file)
-        ui.input().bind_value(ov, "new_data_path")
+        ui.input("path").bind_value(ov, "new_data_path").on("keydown.enter", add_file)
         ui.button("Add", on_click=add_file)
 ov.ui_datasources = ui_datasources
 ov.new_data_path = ""
@@ -207,11 +208,12 @@ def ui_outputs():
             project.remove_output(out)
             ov.refresh_outputs()
         with ui.grid(columns=5).classes("w-full"):
-            imp = ui.input(value=out.file_name)
+            imp = ui.input("path", value=out.file_name)
             def edit_name(inp=imp, out=out):
                 project.rename_output(out, inp.value)
                 ov.refresh_outputs()
             imp.on('keydown.enter', edit_name)
+            imp.on('blur', edit_name)
 
             def select_source(evt, out=out, project=project):
                 out.data_source_name = evt.value
@@ -237,7 +239,11 @@ def ui_outputs():
                 ov.refresh_outputs()
             ds = project.get_data_source(out.data_source_name)
             if ds:
-                ui.select([""] + [key for key in ds.fieldnames], value=out.template_field,
+                values = [key for key in ds.fieldnames]
+                value = out.template_field
+                if value not in values:
+                    value = ""
+                ui.select([""] + values, value=value,
                         on_change=select_template_field)
 
             ui.button('Remove', on_click=unlink_output)
