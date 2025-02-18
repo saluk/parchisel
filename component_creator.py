@@ -152,12 +152,24 @@ def ui_datasources():
             return
         ov.new_data_path = ""
         ov.ui_datasources.refresh()
+        ov.refresh_outputs()
     for ds in project.data_sources:
         def unlink_source(source=ds.source):
             project.remove_data_source(source)
             ov.ui_datasources.refresh()
+            ov.refresh_outputs()
         with ui.grid(columns=3):
-            ui.input(value=ds.source)
+            imp = ui.input(value=ds.source)
+            def edit_source(imp=imp, ds=ds):
+                try:
+                    project.rename_data_source(ds, imp.value)
+                except Exception:
+                    ui.notify(f"{imp.value} could not be loaded")
+                    return
+                ui.notify(f"Renamed")
+                ov.ui_datasources.refresh()
+                ov.refresh_outputs()
+            imp.on("keydown.enter", edit_source)
             if isinstance(ds, CSVData):
                 ui.label("CSV File")
             elif isinstance(ds, PythonData):
@@ -186,25 +198,30 @@ ov.new_data_path = ""
 
 @ui.refreshable
 def ui_outputs():
+    with ui.grid(columns=5).classes("w-full font-bold"):
+        ui.label("Name");ui.label("Data");ui.label("Template");ui.label("Field");ui.label("")
     for out_key in project.outputs:
         out = project.outputs[out_key]
         def unlink_output(out=out):
             out.rendered_string = ""
             project.remove_output(out)
             ov.refresh_outputs()
-        with ui.grid(columns=5):
-            def edit_name(inp, out=out):
-                # TODO edit
+        with ui.grid(columns=5).classes("w-full"):
+            imp = ui.input(value=out.file_name)
+            def edit_name(inp=imp, out=out):
                 project.rename_output(out, inp.value)
                 ov.refresh_outputs()
-            imp = ui.input(value=out.file_name)
-            imp.on('keydown.enter', lambda imp=imp: edit_name(imp))
+            imp.on('keydown.enter', edit_name)
 
             def select_source(evt, out=out, project=project):
                 out.data_source_name = evt.value
                 out.rendered_string = ""
                 ov.refresh_outputs()
-            ui.select([source.source for source in project.data_sources], value=out.data_source_name,
+            options = [source.source for source in project.data_sources]
+            value = ""
+            if out.data_source_name in options:
+                value = out.data_source_name
+            ui.select([""] + [source.source for source in project.data_sources], value=value,
                       on_change=select_source)
             
             def select_template(evt, out=out, project=project):

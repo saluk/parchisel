@@ -80,6 +80,6 @@ https://openfontlicense.org/open-font-license-official-text/
 
 # TODO 
 - edit output rows/cols/width/height
-- change data source path updates data source
 - general project management
 - refactor with more nicegui native bindings
+- more ui.notify for CRUD (maybe put into Project)

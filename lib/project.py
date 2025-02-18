@@ -51,32 +51,24 @@ class Project:
         if ds:
             self.data_sources.remove(ds)
             self.dirty_outputs()
+    def rename_data_source(self, ds, source):
+        i = self.data_sources.index(ds)
+        new_ds = datasource.create_data_source(source)
+        new_ds.load()
+        self.data_sources[i] = new_ds
     def add_data_source(self, fn):
         fn = fn.strip()
         if self.get_data_source(fn):
             raise Exception("Datasource already linked")
         if not fn:
             raise Exception("No datasource entered")
-        # This could be a more elaborate google sheet implementation
-        if fn.startswith("https://docs.google.com/"):
-            raise Exception("google docs not yet supported")
-        # These functions add files from a url that can be redownloaded
-        elif fn.startswith("http"):
-            raise Exception("url download not yet supported")
-        # These functions add files from the local filesystem
-        else:
-            if not os.path.exists(fn):
-                raise Exception("File not found")
-            data_source = None
-            if fn.endswith(".csv"):
-                data_source = datasource.CSVData(fn)
-            elif fn.endswith(".py"):
-                data_source = datasource.PythonData(fn)
-            if not data_source:
-                raise Exception("Error creating data source")
+        data_source = datasource.create_data_source(fn)
+        try:
             data_source.load()
-            self.data_sources.append(data_source)
-            self.dirty_outputs()
+        except Exception:
+            raise
+        self.data_sources.append(data_source)
+        self.dirty_outputs()
 
     def remove_output(self, output):
         for key in self.outputs:
@@ -85,7 +77,7 @@ class Project:
                 return
         raise Exception("Output not found")
     def rename_output(self, output, file_name):
-        del self.outputs[output.file_name]
+        del self.outputs[output.data_source_name]
         output.file_name = file_name
         self.outputs[output.file_name] = output
     def save_outputs(self):

@@ -33,3 +33,13 @@ class PythonData(DataSource):
             for field in card:
                 if field not in self.fieldnames:
                     self.fieldnames.append(field)
+
+def get_class_for_source(source):
+    if source.endswith(".csv"):
+        return CSVData
+    if source.endswith(".py"):
+        return PythonData
+
+def create_data_source(source):
+    cls = get_class_for_source(source)
+    return cls(source)

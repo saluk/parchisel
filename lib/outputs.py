@@ -46,8 +46,11 @@ class Output:
         y=self.offset_y
 
         #draw cards
-        data_source = project.get_data_source(self.data_source_name)
-        if not data_source:
+        try:
+            data_source = project.get_data_source(self.data_source_name)
+            assert(data_source)
+            data_source.load()
+        except Exception:
             self.context.draw_text(0, 0, f"No data source found: {self.data_source_name}")
             return
         template = None
@@ -61,17 +64,22 @@ class Output:
 
             # Get template from row
             if self.template_field:
-                template = project.templates[card[self.template_field]]
+                template = None
+                try:
+                    template = project.templates[card[self.template_field]]
+                except Exception:
+                    card_context.draw_text(0, 0, f"No data source found:")
+                    card_context.draw_text(0, 45, f"{card[self.template_field]}")
+                    card_context.draw_text(0, 90, f"from")
+                    card_context.draw_text(0, 125, f"{self.template_field}")
 
-            if not template:
-                continue
-            
-            if template not in template_cache:
-                template.load()
-                template_cache.append(template)
+            if template:
+                if template not in template_cache:
+                    template.load()
+                    template_cache.append(template)
 
-            # TODO do the exec in the template
-            exec(template.code, {"card":card_context, "row":card})
+                # TODO do the exec in the template
+                exec(template.code, {"card":card_context, "row":card})
 
             self.context.draw_context(x, y, card_context)
             if card_context.height > maxh:
