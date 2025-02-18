@@ -1,10 +1,12 @@
 import time
 
+from nicegui import ui
+
 from lib.context import Context
 from lib.context import SkiaContext as Context
 
 class Output:
-    def __init__(self, data_source_name, file_name, rows=None, cols=None, width=None, height=None, 
+    def __init__(self, data_source_name, file_name, rows=None, cols=None, width=1800, height=1800, 
                 offset_x = 0, offset_y = 0, spacing_x = 0, spacing_y = 0, 
                 template_name: str = None, template_field: str = None):
         self.data_source_name = data_source_name
@@ -23,12 +25,10 @@ class Output:
         self.spacing_y = spacing_y
 
         self.rendered_string = ""   # Clear to rerender
-        self.w = 3000
-        self.h = 1800
         
-    def render(self, project):
+    async def render(self, project):
         print(f"RENDERING: {self.data_source_name} as {self.file_name}")
-        self.context = Context(self.w, self.h, "RGB")
+        self.context = Context(self.width, self.height, "RGB")
         start_time = time.time()
         self.context.clear((0,0,0,0))
 
@@ -85,7 +85,7 @@ class Output:
             if card_context.height > maxh:
                 maxh = card_context.height
             x += card_context.width+self.spacing_x
-            if x+card_context.width > self.w:
+            if x+card_context.width > self.width:
                 x = self.offset_x
                 y += maxh+self.spacing_y
                 maxh = 0
@@ -97,9 +97,9 @@ class Output:
     def save(self):
         self.context.save("outputs/"+self.file_name)
 
-    def b64encoded(self, project):
+    async def b64encoded(self, project):
         if self.rendered_string:
             return self.rendered_string
-        self.render(project)
+        await self.render(project)
         self.rendered_string = self.context.b64encoded()
         return self.rendered_string

@@ -46,11 +46,8 @@ class SkiaContext:
         image = skia.Image.open("data/"+image_file)
         self.canvas.drawImage(image, x, y)
     def draw_text(self, x, y, text):
-        print(list(self.fontmgr))
         styles = self.fontmgr.matchFamily('Raleway')
-        print(styles)
         typeface = styles.createTypeface(0)
-        print(typeface)
         builder = skia.TextBlobBuilder()
         builder.allocRun(text, skia.Font(typeface, 60), 0, 60)
         blob = builder.make()

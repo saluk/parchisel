@@ -1,6 +1,7 @@
 import csv
 
 class DataSource:
+    type_label = "Unknown Data Source"
     def __init__(self, source):
         self.source = source
         self.cards = []
@@ -10,6 +11,7 @@ class DataSource:
     def save(self):
         pass
 class CSVData(DataSource):
+    type_label = "CSV File"
     def load(self):
         self.cards = []
         with open(self.source) as csvfile:
@@ -24,6 +26,7 @@ class CSVData(DataSource):
             for card in self.cards:
                 writer.writerow(card)
 class PythonData(DataSource):
+    type_label = "Python File (generator)"
     def load(self):
         g = {}
         with open(self.source) as f:
