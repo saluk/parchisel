@@ -82,3 +82,4 @@ https://openfontlicense.org/open-font-license-official-text/
 - edit output rows/cols/width/height
 - change data source path updates data source
 - general project management
+- refactor with more nicegui native bindings

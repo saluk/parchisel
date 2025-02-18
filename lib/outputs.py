@@ -5,7 +5,7 @@ from lib.context import SkiaContext as Context
 
 class Output:
     def __init__(self, data_source_name, file_name, rows=None, cols=None, width=None, height=None, 
-                offset_x = 10, offset_y = 10, spacing_x = 10, spacing_y = 10, 
+                offset_x = 0, offset_y = 0, spacing_x = 0, spacing_y = 0, 
                 template_name: str = None, template_field: str = None):
         self.data_source_name = data_source_name
         self.file_name = file_name
@@ -23,7 +23,7 @@ class Output:
         self.spacing_y = spacing_y
 
         self.rendered_string = ""   # Clear to rerender
-        self.w = 1800
+        self.w = 3000
         self.h = 1800
         
     def render(self, project):
@@ -33,8 +33,8 @@ class Output:
         self.context.clear((0,0,0,0))
 
         # Checkerboard pattern
-        check_size = 25
-        colors = [(200, 200, 200, 255), (150, 150, 150, 255)]
+        #check_size = 25
+        #colors = [(200, 200, 200, 255), (150, 150, 150, 255)]
         #for x in range(0, self.w, check_size):
         #    for y in range(0, self.h, check_size):
         #        self.context.draw_box(x, y, check_size, check_size, colors[0])
@@ -54,6 +54,7 @@ class Output:
         if self.template_name:
             template = project.templates[self.template_name]
         template_cache = []  #These templates have been reloaded already
+        maxh = 0
         for card in data_source.cards:
             card_context = Context(640, 480, "RGB")
             card_context.clear((0, 0, 0, 0))
@@ -73,10 +74,13 @@ class Output:
             exec(template.code, {"card":card_context, "row":card})
 
             self.context.draw_context(x, y, card_context)
-            x += card_context.width+10
-            if x+card_context.width > 1800:
-                x = 10
-                y += card_context.height+10
+            if card_context.height > maxh:
+                maxh = card_context.height
+            x += card_context.width+self.spacing_x
+            if x+card_context.width > self.w:
+                x = self.offset_x
+                y += maxh+self.spacing_y
+                maxh = 0
             #return
         end_time = time.time()
         render_time = end_time-start_time

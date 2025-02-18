@@ -86,11 +86,20 @@ ov.project = project
 #### UI CODE
 @ui.refreshable
 def render_selected_project_outputs():
+    with ui.dialog() as zoomed, ui.card().classes("w-full h-full") as zoomed_card:
+        with ui.scroll_area().style("max-height:initial").classes("w-full h-full"):
+            zoomed_image = ui.image()
     for output_key in ov.viewed_output:
         output = project.outputs[output_key]
         with ui.card():
             ui.label(output.data_source_name)
-            ui.image(output.b64encoded(project)).classes('w-80')
+            def zoom_image(out=output):
+                zoomed_image.set_source(out.b64encoded(project))
+                zoomed_image.props(f"width={out.w*2} height={out.h*2}")
+                zoomed_image.update()
+                zoomed_card.style(f"max-width:initial; max-height:initial")
+                zoomed.open()
+            ui.image(output.b64encoded(project)).classes('w-80').on("click", zoom_image).style("cursor: zoom-in;")
 @ui.refreshable
 def render_project_outputs():
     if not ov.viewed_output and project.outputs:
