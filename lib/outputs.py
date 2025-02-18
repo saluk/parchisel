@@ -53,18 +53,18 @@ class Output:
         except Exception:
             self.context.draw_text(0, 0, f"No data source found: {self.data_source_name}")
             return
-        template = None
+        main_template = None
         if self.template_name:
-            template = project.templates[self.template_name]
+            main_template = project.templates[self.template_name]
         template_cache = []  #These templates have been reloaded already
         maxh = 0
         for card in data_source.cards:
             card_context = Context(640, 480, "RGB")
             card_context.clear((0, 0, 0, 0))
 
+            template = main_template
             # Get template from row
             if self.template_field:
-                template = None
                 try:
                     template = project.templates[card[self.template_field]]
                 except Exception:
