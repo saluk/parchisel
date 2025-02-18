@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
-import asyncio
 import os.path
 import platform
-import shlex
-import sys
-import re
 import os
 import random
 
-import numpy as np
 from nicegui import ui
-from PIL import Image
 
 from nicegui import ui
 from multiprocessing import freeze_support
@@ -200,7 +194,7 @@ ov.new_data_path = ""
 @ui.refreshable
 def ui_outputs():
     with ui.grid(columns=5).classes("w-full font-bold"):
-        ui.label("Name");ui.label("Data");ui.label("Template");ui.label("Field");ui.label("")
+        ui.label("Name");ui.label("Data Source");ui.label("Template");ui.label("Field");ui.label("")
     for out_key in project.outputs:
         out = project.outputs[out_key]
         def unlink_output(out=out):

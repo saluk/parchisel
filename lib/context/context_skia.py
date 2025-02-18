@@ -1,8 +1,5 @@
-from PIL import Image
 import base64
 import skia
-import numpy
-import math
 
 # SKIA advantage
 #   - full featured and modern

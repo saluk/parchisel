@@ -83,3 +83,5 @@ https://openfontlicense.org/open-font-license-official-text/
 - general project management
 - refactor with more nicegui native bindings
 - more ui.notify for CRUD (maybe put into Project)
+- edit csv files
+- widgets to edit current line of template
