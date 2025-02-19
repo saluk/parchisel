@@ -42,16 +42,54 @@ class SkiaContext:
         # Paint the contents of context into this context
         # Both contexts must match in type
         context.surface.draw(self.canvas, x, y)
-    def draw_image(self, x, y, image_file):
+    def draw_image(self, x, y, image_file, width=None, height=None):
         image = skia.Image.open("data/"+image_file)
-        self.canvas.drawImage(image, x, y)
+        if width or height:
+            if not width: width = image.bounds().width()
+            if not height: height = image.bounds().height()
+            try:
+                self.canvas.drawImageRect(
+                    image, 
+                    skia.Rect.MakeXYWH(x, y, width, height),
+                    skia.SamplingOptions(skia.FilterMode.kLinear))
+            except Exception as exc:
+                import traceback
+                traceback.print_exception(exc)
+        else:
+            self.canvas.drawImage(image, x, y)
     def draw_text(self, x, y, text):
         styles = self.fontmgr.matchFamily('Raleway')
         typeface = styles.createTypeface(0)
+        font = skia.Font(typeface, 60)
+        sections = []
+        while text:
+            if text.startswith("<"):
+                icon = text[:text.find(">")+1]
+                sections.append(icon)
+                text = text.replace(icon, "", 1)
+            else:
+                if "<" in text:
+                    blob = text[:text.find("<")]
+                    sections.append(blob)
+                    text = text.replace(blob, "", 1)
+                else:
+                    sections.append(text)
+                    break
         builder = skia.TextBlobBuilder()
-        builder.allocRun(text, skia.Font(typeface, 60), 0, 60)
+        builder.allocRun("H", font, 0, 60)
         blob = builder.make()
-        self.canvas.drawTextBlob(blob, x, y, skia.Paint(AntiAlias=True))
+        icon_size = blob.bounds()
+        for section in sections:
+            if section.startswith("<"):
+                image_file = section[1:-1]
+                self.draw_image(x, y, "images/"+image_file, icon_size.width(), icon_size.height())
+                x += icon_size.width()
+            else:
+                builder = skia.TextBlobBuilder()
+                builder.allocRun(section, font, 0, 60)
+                blob = builder.make()
+                self.canvas.drawTextBlob(blob, x, y, skia.Paint(AntiAlias=True))
+                x += blob.bounds().width()
     def b64encoded(self):
         self.surface.flushAndSubmit()
         image = self.surface.makeImageSnapshot()

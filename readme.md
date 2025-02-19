@@ -85,3 +85,4 @@ https://openfontlicense.org/open-font-license-official-text/
 - more ui.notify for CRUD (maybe put into Project)
 - edit csv files
 - widgets to edit current line of template
+- icons in draw_text positioned correctly

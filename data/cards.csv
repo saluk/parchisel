@@ -1,5 +1,5 @@
 Num,Icon,Name,HP,Power,Special
-1,images/purple_sphere.png,Bear,4,4,
+1,images/purple_sphere.png,Bear<purple_sphere.png>,4,4,
 2,images/purple_sphere.png,Griffon,3,6,flying
 3,,Lion,6,3,
 4,,Dolphin,2,2,
