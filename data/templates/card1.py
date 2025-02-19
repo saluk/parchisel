@@ -1,6 +1,6 @@
-card.resize(400,400)
-card.draw_box(0, 0, 400, 400, (0, 0, 0, 255))
-card.draw_box(1, 1, 398, 398, (215, 215, 255, 255))
+card.resize(450,400)
+card.draw_box(0, 0, 400, 400, (50, 0, 0, 255))
+card.draw_box(1, 1, 398, 398, (255, 215, 255, 255))
 card.draw_box(100, 150, 200, 200, (100,100,100,50))
 if row["Icon"]:
     card.draw_image(600-64,0,row["Icon"])

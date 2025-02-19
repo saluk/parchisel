@@ -44,10 +44,8 @@ class CodeContext:
         # TODO only save if things are rendering OK
         # We could have a button to force save
         self.template.save()
-        # TODO only refresh if template is applied to output images
-        # TODO only refresh output images that could have changed
-        project.dirty_outputs()
-        self.output_images.refresh()
+        if project.dirty_outputs(for_templates=[self.template.filename], for_outputs=ov.viewed_output):   # only redraw outputs that use this template
+            self.output_images.refresh()
 cc = CodeContext()
 cc.template = project.templates["card1.py"]
 

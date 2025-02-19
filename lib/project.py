@@ -35,9 +35,20 @@ class Project:
     def load_templates(self):
         for template in os.listdir("data/templates"):
             self.templates[template] = Template("data/templates/"+template)
-    def dirty_outputs(self):
+    def dirty_outputs(self, for_templates=[], for_outputs=[]):
+        any_dirty = False
         for output in self.outputs.values():
+            if for_templates:
+                all_used = set(["data/templates/"+used for used in output.templates_used(self)])
+                all_templates = set(for_templates)
+                print(all_used, all_templates)
+                if not all_used.intersection(all_templates):
+                    continue
             output.rendered_string = None
+            # Dirty everything, but dont refresh view if we aren't watching this output
+            if not for_outputs or output.data_source_name in for_outputs:
+                any_dirty = True
+        return any_dirty
     def render_outputs(self):
         for output in self.outputs.values():
             output.render(self)

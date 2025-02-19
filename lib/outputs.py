@@ -25,7 +25,23 @@ class Output:
         self.spacing_y = spacing_y
 
         self.rendered_string = ""   # Clear to rerender
-        
+
+    def templates_used(self, project):
+        rows = []
+        data_source = project.get_data_source(self.data_source_name)
+        if not data_source:
+            return [self.template_name]
+        try:
+            data_source.load()
+        except Exception:
+            return rows
+        for card in data_source.cards:
+            template = self.template_name
+            if self.template_field:
+                template = card.get(self.template_field, template)
+            rows.append(template)
+        return rows
+
     async def render(self, project):
         print(f"RENDERING: {self.data_source_name} as {self.file_name}")
         self.context = Context(self.width, self.height, "RGB")
@@ -103,3 +119,4 @@ class Output:
         await self.render(project)
         self.rendered_string = self.context.b64encoded()
         return self.rendered_string
+    
