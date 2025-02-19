@@ -1,10 +1,9 @@
 card.resize(400,400)
-card.draw_box(0, 0, 600, 400, (0, 0, 0, 255))
-card.draw_box(1, 1, 598, 398, (215, 215, 255, 255))
+card.draw_box(0, 0, 400, 400, (0, 0, 0, 255))
+card.draw_box(1, 1, 398, 398, (215, 215, 255, 255))
 card.draw_box(100, 150, 200, 200, (100,100,100,50))
 if row["Icon"]:
     card.draw_image(600-64,0,row["Icon"])
-card.draw_text(65,60,"N:"+row['Name'])
 y = 50
 x = 50
 for i in range(8):
@@ -13,3 +12,10 @@ for i in range(8):
     x += 3
     if y > 400:
         y -= 450
+
+name_width = 220
+name_height = 120
+name_x = 20
+name_y = 50
+card.draw_box(name_x, name_y, name_width, name_height, (200,200,200,225))
+card.draw_text(name_x,name_y,"N:"+row["Name"]+"<purple_sphere.png>",name_width,name_height,60,25)

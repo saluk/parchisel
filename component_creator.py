@@ -62,6 +62,7 @@ def change_template(fn):
     cc.ui_editor.value = cc.template.reload_code
     cc.ui_template_list.set_options(list(project.templates.keys()), value=fn)
 
+
 class OutputView:
     def __init__(self):
         self.columns = None
