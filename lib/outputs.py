@@ -94,8 +94,15 @@ class Output:
                     template.load()
                     template_cache.append(template)
 
-                # TODO do the exec in the template
-                exec(template.code, {"card":card_context, "row":card})
+                try:
+                    # TODO do the exec in the template
+                    exec(template.code, {"card":card_context, "row":card})
+                except Exception as exc:
+                    import traceback
+                    traceback.print_exc()
+                    ui.notify(str(exc))
+                    card_context.draw_text(0, 0, f"Template")
+                    card_context.draw_text(0, 45, f"Error")
 
             self.context.draw_context(x, y, card_context)
             if card_context.height > maxh:

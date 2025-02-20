@@ -86,9 +86,13 @@ class SkiaContext:
                     builder.allocRun(self.text, font, 0, font_size)
                     self.blob = builder.make()
                 def width(self):
+                    if not self.blob:
+                        return 0
                     trailing_space = len(self.text)-len(self.text.rstrip())
                     return self.blob.bounds().left()+self.blob.bounds().width() + ((trailing_space) * space_width)
                 def draw(self, ctx):
+                    if not self.blob:
+                        return
                     ctx.canvas.drawTextBlob(
                         self.blob, 
                         self.start_x, 
