@@ -122,8 +122,8 @@ async def render_selected_project_outputs():
 async def render_project_outputs():
     if not ov.viewed_output and project.outputs:
         ov.viewed_output = [list(project.outputs.keys())[0]]
-    with ui.row():
-        with ui.column():
+    with ui.row().classes("w-full"):
+        with ui.column().classes("w-[20%]"):
             with ui.card():
                 def save_output_btn():
                     project.save_outputs()
@@ -153,8 +153,10 @@ async def render_project_outputs():
                     ov.viewed_output = viewed_output
                     cc.output_images.refresh()
                 [c[1].on_value_change(set_check) for c in checks]
-        with ui.card():
-            render_selected_project_outputs()
+        with ui.column().classes("w-[70%]"):
+            with ui.card().classes("w-full"):
+                with ui.scroll_area().classes("w-full"):
+                    render_selected_project_outputs()
 ov.render_project_outputs = render_project_outputs
 
 cc.output_images = render_selected_project_outputs
