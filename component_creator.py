@@ -39,13 +39,14 @@ class CodeContext:
         self.output_images = None
     def set_new_filename(self, fn):
         self.new_filename = fn
-    def update_code(self, code):
+    async def update_code(self, code):
         self.template.code = code
         # TODO only save if things are rendering OK
         # We could have a button to force save
         self.template.save()
         if project.dirty_outputs(for_templates=[self.template.filename], for_outputs=ov.viewed_output):   # only redraw outputs that use this template
-            self.output_images.refresh()
+            await render_images(ov.image_element_list, ov.output_list)
+            #self.output_images.refresh()
 cc = CodeContext()
 cc.template = project.templates["card1.py"]
 
@@ -89,11 +90,9 @@ async def render_images(image_element_list, output_list):
             ui.notify(str(e))
             continue
     ov.progress.dismiss()
+zoom_levels = range(200, 1200, 200)
 @ui.refreshable
 async def render_selected_project_outputs():
-    with ui.dialog() as zoomed, ui.card().classes("w-full h-full") as zoomed_card:
-        with ui.scroll_area().style("max-height:initial").classes("w-full h-full"):
-            zoomed_image = ui.image()
     if ov.progress:
         ov.progress.dismiss()
     ov.progress = ui.notification(f"Building output images", 
@@ -101,22 +100,53 @@ async def render_selected_project_outputs():
         type="ongoing",
         spinner=True
     )
-    image_element_list = []
-    output_list = []
+    # TODO move this to the output view class
+    ov.image_element_list = []
+    ov.output_list = []
     for output_key in ov.viewed_output:
         output = project.outputs[output_key]
         with ui.card():
-            ui.label(output.data_source_name)
-            async def zoom_image(out=output):
-                zoomed_image.set_source(await out.b64encoded(project))
-                zoomed_image.props(f"width={out.width*2} height={out.height*2}")
-                zoomed_image.update()
-                zoomed_card.style(f"max-width:initial; max-height:initial")
-                zoomed.open()
-            im_el = ui.image("").classes('w-80').on("click", zoom_image).style("cursor: zoom-in;")
-            image_element_list.append(im_el)
-            output_list.append(output)
-    ui.timer(0.1, lambda:render_images(image_element_list, output_list), once=True)
+            with ui.button_group():
+                zin:ui.button = ui.button("zoomin")
+                zin.tailwind.font_size('xs')
+                zout:ui.button = ui.button("zoomout")
+                zout.tailwind.font_size('xs')
+                ui.label(output.data_source_name)
+            zoom = zoom_levels[len(zoom_levels)//2]
+            im_el = ui.image("").classes(f'w-[{zoom}px]').style("cursor: zoom-in;")
+            im_el.zoom = zoom
+            def set_zoom(adj):
+                i = zoom_levels.index(im_el.zoom)
+                i += adj
+                if i<0 or i>=len(zoom_levels):
+                    return
+                im_el.zoom = zoom_levels[i]
+                im_el.classes(replace=f"w-[{int(im_el.zoom)}px]")
+                im_el.update()
+            zin.on_click(lambda:set_zoom(1))
+            zout.on_click(lambda:set_zoom(-1))
+            ov.image_element_list.append(im_el)
+            ov.output_list.append(output)
+    ui.timer(0.1, lambda:render_images(ov.image_element_list, ov.output_list), once=True)
+
+def dragscroll(el, scroll_area:ui.scroll_area, speed=1):
+    if not hasattr(el, "is_scrolling"):
+        el.is_scrolling = False
+    def toggle_scroll(on):
+        el.is_scrolling = on
+    def doscroll(evt):
+        if not el.is_scrolling:
+            return
+        if not hasattr(scroll_area, "position"):
+            scroll_area.position = [0,0]
+        scroll_area.position[0] -= evt.args['movementX']*speed
+        scroll_area.position[1] -= evt.args['movementY']*speed
+        scroll_area.scroll_to(pixels=scroll_area.position[0], axis='horizontal')
+        scroll_area.scroll_to(pixels=scroll_area.position[1], axis='vertical')
+        return False
+    el.on('mousedown', lambda: toggle_scroll(True))
+    ov.toplevel.on('mouseup', lambda: toggle_scroll(False))
+    el.on('mousemove', doscroll)
 
 @ui.refreshable
 async def render_project_outputs():
@@ -154,8 +184,9 @@ async def render_project_outputs():
                     cc.output_images.refresh()
                 [c[1].on_value_change(set_check) for c in checks]
         with ui.column().classes("w-[70%]"):
-            with ui.card().classes("w-full"):
-                with ui.scroll_area().classes("w-full"):
+            with ui.card().classes("w-full") as dragable_card:
+                with ui.scroll_area().classes("w-full") as draggable_scroll:
+                    dragscroll(dragable_card, draggable_scroll, 2)
                     render_selected_project_outputs()
 ov.render_project_outputs = render_project_outputs
 
@@ -178,6 +209,7 @@ with ui.dialog() as new_template_dialog, ui.card():
 
 
 with ui.tabs().classes('w-full') as tabs:
+    ov.toplevel = list(tabs.ancestors())[0]
     project_view = ui.tab("Project")
     template_view = ui.tab('Templates')
     sheet_view = ui.tab('Google Sheets')
