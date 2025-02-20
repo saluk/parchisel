@@ -91,8 +91,11 @@ class Project:
         del self.outputs[output.data_source_name]
         output.file_name = file_name
         self.outputs[output.file_name] = output
-    def save_outputs(self):
+
+    async def save_outputs(self):
         for output in self.outputs.values():
+            print(f"Look at output {output}")
             if not output.rendered_string:
-                output.render(self)
+                print(f"render output {output}")
+                await output.render(self)
             output.save()

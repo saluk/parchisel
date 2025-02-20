@@ -115,7 +115,7 @@ async def render_selected_project_outputs():
             zoom = zoom_levels[len(zoom_levels)//2]
             im_el = ui.image("").classes(f'w-[{zoom}px]').style("cursor: zoom-in;")
             im_el.zoom = zoom
-            def set_zoom(adj):
+            def set_zoom(adj, im_el=im_el):
                 i = zoom_levels.index(im_el.zoom)
                 i += adj
                 if i<0 or i>=len(zoom_levels):
@@ -123,8 +123,8 @@ async def render_selected_project_outputs():
                 im_el.zoom = zoom_levels[i]
                 im_el.classes(replace=f"w-[{int(im_el.zoom)}px]")
                 im_el.update()
-            zin.on_click(lambda:set_zoom(1))
-            zout.on_click(lambda:set_zoom(-1))
+            zin.on_click(lambda im_el=im_el:set_zoom(1, im_el))
+            zout.on_click(lambda im_el=im_el:set_zoom(-1, im_el))
             ov.image_element_list.append(im_el)
             ov.output_list.append(output)
     ui.timer(0.1, lambda:render_images(ov.image_element_list, ov.output_list), once=True)
@@ -146,7 +146,7 @@ def dragscroll(el, scroll_area:ui.scroll_area, speed=1):
         return False
     el.on('mousedown', lambda: toggle_scroll(True))
     ov.toplevel.on('mouseup', lambda: toggle_scroll(False))
-    el.on('mousemove', doscroll)
+    ov.toplevel.on('mousemove', doscroll)
 
 @ui.refreshable
 async def render_project_outputs():
@@ -155,8 +155,8 @@ async def render_project_outputs():
     with ui.row().classes("w-full"):
         with ui.column().classes("w-[20%]"):
             with ui.card():
-                def save_output_btn():
-                    project.save_outputs()
+                async def save_output_btn():
+                    await project.save_outputs()
                     ui.notify("Saved!")
                 ui.button("Save Output", on_click=save_output_btn)
             with ui.card():
@@ -186,7 +186,7 @@ async def render_project_outputs():
         with ui.column().classes("w-[70%]"):
             with ui.card().classes("w-full") as dragable_card:
                 with ui.scroll_area().classes("w-full") as draggable_scroll:
-                    dragscroll(dragable_card, draggable_scroll, 2)
+                    dragscroll(dragable_card, draggable_scroll, 3)
                     render_selected_project_outputs()
 ov.render_project_outputs = render_project_outputs
 
@@ -233,9 +233,14 @@ async def ui_panels():
                                             on_change=lambda e: change_template(e.value), 
                                             value="card1.py")
                 ui.button('New', on_click=lambda:new_template_dialog.open() )
+            def queue_update(value):
+                if getattr(ov, "code_update_timer", None):
+                    ov.code_update_timer.deactivate()
+                ov.code_update_timer = ui.timer(0.5, lambda: cc.update_code(value), once=True)
+
             cc.ui_editor = ui.codemirror(
                 value=cc.template.code, language="Python", theme="abcdef",
-                on_change=lambda e: cc.update_code(e.value)
+                on_change=lambda e: queue_update(e.value)
             )
             cc.ui_editor.tailwind.height("52")
             ui.label('Output')

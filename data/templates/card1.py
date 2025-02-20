@@ -18,4 +18,4 @@ name_height = 120
 name_x = 20
 name_y = 50
 card.draw_box(name_x, name_y, name_width, name_height, (200,200,200,225))
-card.draw_text(name_x+5,name_y+5,"N:"+row["Name"]+"<purple_sphere.png>",name_width,name_height,30)
+card.draw_text(name_x+5,name_y+5,"N:"+row["Name"]+" hello to you you beautiful person",name_width,name_height,30, 24)
