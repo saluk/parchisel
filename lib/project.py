@@ -105,6 +105,14 @@ class LocalProject(Project):
         super().__init__()
     def create(self):
         """Call to actually create the files"""
+        if os.path.exists(self.root_path):
+            raise Exception(f"{self.root_path} already exists")
+        os.mkdir(self.root_path)
+        os.mkdir(self.rel_path(self.output_path))
+        os.mkdir(self.rel_path(self.template_path))
+        os.mkdir(self.rel_path(self.data_path))
+        os.mkdir(self.rel_path(self.image_path))
+        self.save()
     def load(self):
         with open(f"{self.root_path}/prchsl_cc_proj.json") as f:
             d = json.loads(f.read())
@@ -151,9 +159,12 @@ class LocalProject(Project):
         return path
     def get_image_path(self):
         return self.rel_path(self.image_path)
+    def get_template_path(self):
+        return self.rel_path(self.template_path)
     def load_templates(self):
-        tp = self.rel_path(self.template_path)
+        tp = self.get_template_path()
         for template in os.listdir(tp):
+            print(f"check template {template}")
             self.templates[template] = Template(f"{tp}/"+template)
     async def save_outputs(self):
         for output in self.outputs.values():

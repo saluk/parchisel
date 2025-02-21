@@ -21,5 +21,7 @@ class Template:
         with open(self.filename,"r") as f:
             self._code = f.read()
     def save(self):
+        if self._code is None:
+            self._code = ""
         with open(self.filename,"w") as f:
             f.write(self._code)

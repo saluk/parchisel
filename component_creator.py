@@ -16,6 +16,7 @@ from lib.outputs import Output
 from lib.components.project_manage import ProjectManagement
 from lib.components.project_outputs import ProjectOutputs
 from lib.components.project_data_sources import ProjectDataSources
+from lib.template import Template
 
 project = LocalProject("test", "projects/test")
 # project.data_sources = datas = [
@@ -52,15 +53,14 @@ class CodeContext:
             await render_images(ov.image_element_list, ov.output_list)
 
 def create_template(fn):
-    with open("data/templates/"+fn,"w") as f:
-        f.write("")
-    project.load_templates()
-    change_template(fn)
+    t = Template(f"{ov.project.get_template_path()}/{fn}")
+    t.save()
+    ov.project.templates[t.name] = t
+    change_template(t.name)
 
-def change_template(fn):
-    ov.cc.template = project.templates[fn]
-    ov.cc.ui_editor.value = ov.cc.template.reload_code
-    ov.cc.ui_template_list.set_options(list(project.templates.keys()), value=fn)
+def change_template(template_name):
+    ov.cc.template = ov.project.templates[template_name]
+    ov.ui_template_editor.refresh(ov.cc.template)
 
 
 class OutputView:
@@ -183,7 +183,7 @@ async def render_project_outputs():
                     ui.button("None", on_click=f_none)
                 for output_key in ov.project.outputs.keys():
                     output = ov.project.outputs[output_key]
-                    c = ui.checkbox(output.data_source_name, value=output_key in ov.viewed_output)
+                    c = ui.checkbox(output.file_name, value=output_key in ov.viewed_output)
                     checks.append((output_key,c))
                 def set_check():
                     viewed_output = []
@@ -209,17 +209,19 @@ ov.ui_outputs = ProjectOutputs(ov)
 ov.ui_project_manage = ProjectManagement(ov)
 
 @ui.refreshable
-def render_code_editor():
+def render_code_editor(template=None):
     cc = CodeContext()
-    if not ov.project.templates:
-        return
-    cc.template = list(ov.project.templates.values())[0]
+    if ov.project.templates and not template:
+        template = list(ov.project.templates.values())[0]
+    cc.template = template
     ov.cc = cc
     with ui.button_group():
+        ui.button('New', on_click=lambda:new_template_dialog.open() )
+        if not ov.project.templates:
+            return
         cc.ui_template_list = ui.select(list(ov.project.templates.keys()), 
             on_change=lambda e: change_template(e.value), 
-            value=list(ov.project.templates.keys())[0])
-        ui.button('New', on_click=lambda:new_template_dialog.open() )
+            value=template.name)
         def queue_update(value):
             if getattr(ov, "code_update_timer", None):
                 ov.code_update_timer.deactivate()

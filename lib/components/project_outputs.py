@@ -68,7 +68,7 @@ class ProjectOutputs:
             for s in project.data_sources:
                 if s.source not in used:
                     new_out.data_source_name = s.source
-            if not new_out.data_source_name:
+            if not new_out.data_source_name and used:
                 new_out.data_source_name = random.choice(list(used))
             project.outputs[new_out.file_name] = new_out
             ov.refresh_outputs()
