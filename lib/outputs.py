@@ -8,13 +8,13 @@ from lib.context import SkiaContext as Context
 class Output:
     def __init__(self, data_source_name, file_name, rows=None, cols=None, width=1800, height=1800, 
                 offset_x = 0, offset_y = 0, spacing_x = 0, spacing_y = 0, 
-                template_name: str = None, template_field: str = None):
+                template_name: str = None, template_field: str = None, card_range:tuple = None):
         self.data_source_name = data_source_name
         self.file_name = file_name
         self.template_name = template_name
         self.template_field = template_field
 
-        self.card_range = None      # Set to a (start, end) tuple to only render those cards
+        self.card_range = tuple(card_range) if card_range else None  # Set to a (start, end) tuple to only render those cards
 
         # TODO use all of these fields
         self.rows = rows
@@ -32,6 +32,16 @@ class Output:
         if self.card_range and not total:
             return self.card_range
         return (0, len(project.get_data_source(self.data_source_name).cards))
+    
+    def set_card_range(self, project, range_or_None):
+        total = self.get_card_range(project, True)
+        if not range_or_None:
+            range_or_none = total
+        min, max = range_or_None
+        if min == total[0] and max == total[1]:
+            self.card_range = None
+            return
+        self.card_range = [min, max]
 
     def templates_used(self, project):
         rows = []

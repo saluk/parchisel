@@ -1,29 +1,10 @@
 import os
+import random
 import json
 
 import lib.datasource as datasource
 from lib.template import Template
 from lib.outputs import Output
-
-# A project consists of:
-#   A set of data sources (linked to local or remote files, or database links)
-#   A set of templates (may be backed to local files, or a database)
-#   A set of outputs (the filenames to generate, in local mode files 
-#       are output to a local folder)
-#   A set of image stores (local folder to search or a name linked to a image url)
-#   location project data is stored (local json file, or database index in db mode)
-#   local project only:
-#       output folder
-#       templates folder
-#       default data source folder
-#       default image folder
-
-# To init a new LOCAL project
-# - choose a root folder and a name for the project
-# - create a project folder to hold data
-# - create a subfolder for outputs, templates, sources, and images
-# - create a json file for the project in that folder (prchsl_cc_proj.json)
-#   save the local project data to the json
 
 class Project:
     def __init__(self):
@@ -61,11 +42,13 @@ class Project:
         if ds:
             self.data_sources.remove(ds)
             self.dirty_outputs()
+        self.save()
     def rename_data_source(self, ds, source):
         i = self.data_sources.index(ds)
         new_ds = datasource.create_data_source(source)
         new_ds.load()
         self.data_sources[i] = new_ds
+        self.save()
     def add_data_source(self, fn):
         fn = fn.strip()
         if self.get_data_source(fn):
@@ -79,20 +62,50 @@ class Project:
             raise
         self.data_sources.append(data_source)
         self.dirty_outputs()
+        self.save()
 
+    def add_template(self, template_name):
+        t = Template(f"{self.get_template_path()}/{template_name}")
+        t.save()
+        self.templates[t.name] = t
+        self.save()
+        return t
+
+    def add_output(self, output_name):
+        new_out = Output("", output_name)
+        # Choose a data source that isn't output yet, or pick at random
+        used = set([out.data_source_name for out in self.outputs.values()])
+        for s in self.data_sources:
+            if s.source not in used:
+                new_out.data_source_name = s.source
+        if not new_out.data_source_name and used:
+            new_out.data_source_name = random.choice(list(used))
+        self.outputs[new_out.file_name] = new_out
+        self.save()
+        return new_out
     def remove_output(self, output):
         for key in self.outputs:
             if self.outputs[key] == output:
                 del self.outputs[key]
+                self.save()
                 return
         raise Exception("Output not found")
     def rename_output(self, output, file_name):
         del self.outputs[output.data_source_name]
         output.file_name = file_name
         self.outputs[output.file_name] = output
+        self.save()
 
     async def save_outputs(self):
-        raise NotImplemented
+        raise NotImplementedError()
+    
+    def save(self):
+        """ Save project data """
+        raise NotImplementedError()
+    
+    def load(self):
+        """ Load project data """
+        raise NotImplementedError()
 
 class LocalProject(Project):
     def __init__(self, name, root_path):
@@ -149,10 +162,12 @@ class LocalProject(Project):
                 "data_source_name": o.data_source_name,
                 "file_name": o.file_name,
                 "template_name": o.template_name,
-                "template_field": o.template_field
+                "template_field": o.template_field,
+                "card_range": o.card_range
             }
+        txt = json.dumps(d)
         with open(f"{self.root_path}/prchsl_cc_proj.json", "w") as f:
-            f.write(json.dumps(d))
+            f.write(txt)
     def rel_path(self, path):
         if not path.startswith("/") and not ":" in path:
             return self.root_path + "/" + path

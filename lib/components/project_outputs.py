@@ -38,6 +38,7 @@ class ProjectOutputs:
                     out.data_source_name = evt.value
                     out.rendered_string = ""
                     ov.refresh_outputs()
+                    project.save()
                 options = [source.source for source in project.data_sources]
                 value = ""
                 if out.data_source_name in options:
@@ -48,7 +49,8 @@ class ProjectOutputs:
                     total_range = out.get_card_range(project, True)
                     card_range = out.get_card_range(project)
                     def set_range(e, out=out):
-                        out.card_range = (e.value["min"],e.value["max"])
+                        out.set_card_range(project, (e.value["min"],e.value["max"]))
+                        project.save()
                         out.rendered_string = ""
                         self.queue_update(ov.refresh_outputs)
                     ui.range(
@@ -58,6 +60,7 @@ class ProjectOutputs:
                     ).props('label-always snap').on_value_change(lambda e, out=out: set_range(e, out))
                 def select_template(evt, out=out, project=project):
                     out.template_name = evt.value
+                    project.save()
                     out.rendered_string = ""
                     ov.refresh_outputs()
                 ui.select([""] + [name for name in project.templates], value=out.template_name,
@@ -65,6 +68,7 @@ class ProjectOutputs:
                 
                 def select_template_field(evt, out=out, project=project):
                     out.template_field = evt.value
+                    project.save()
                     out.rendered_string = ""
                     ov.refresh_outputs()
                 ds = project.get_data_source(out.data_source_name)
@@ -79,14 +83,6 @@ class ProjectOutputs:
                 ui.button('Remove', on_click=unlink_output)
         ui.separator()
         def add_output():
-            new_out = Output("", "new_output.png")
-            # Choose a data source that isn't output yet, or pick at random
-            used = set([out.data_source_name for out in project.outputs.values()])
-            for s in project.data_sources:
-                if s.source not in used:
-                    new_out.data_source_name = s.source
-            if not new_out.data_source_name and used:
-                new_out.data_source_name = random.choice(list(used))
-            project.outputs[new_out.file_name] = new_out
+            project.add_output("new_output.png")
             ov.refresh_outputs()
         ui.button("Add", on_click=add_output)

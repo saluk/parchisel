@@ -6,3 +6,4 @@ Num,Icon,Name,HP,Power,Special
 5,purple_sphere.png,Penguin,1,1,
 6,,Goat <purple_sphere.png>,1,2,
 7,,Orangutan,5,2,
+8,purple_sphere.png,Zebra,3,3,run

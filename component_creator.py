@@ -52,10 +52,8 @@ class CodeContext:
             print(ov.image_element_list, ov.output_list)
             await render_images(ov.image_element_list, ov.output_list)
 
-def create_template(fn):
-    t = Template(f"{ov.project.get_template_path()}/{fn}")
-    t.save()
-    ov.project.templates[t.name] = t
+def create_template(template_name):
+    t = project.add_template(template_name)
     change_template(t.name)
 
 def change_template(template_name):
