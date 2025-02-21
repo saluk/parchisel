@@ -6,13 +6,12 @@ from lib.outputs import Output
 class ProjectOutputs:
     def __init__(self, ov):
         self.view = ov
-        self.project = ov.project
     def refresh(self):
         self.build.refresh()
     @ui.refreshable
     def build(self):
         ov = self.view
-        project = self.project
+        project = ov.project
         with ui.grid(columns=5).classes("w-full font-bold"):
             ui.label("Name");ui.label("Data Source");ui.label("Template");ui.label("Field");ui.label("")
         for out_key in project.outputs:

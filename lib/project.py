@@ -1,7 +1,9 @@
 import os
+import json
 
 import lib.datasource as datasource
 from lib.template import Template
+from lib.outputs import Output
 
 # A project consists of:
 #   A set of data sources (linked to local or remote files, or database links)
@@ -98,9 +100,51 @@ class LocalProject(Project):
         self.root_path = root_path           # absolute path to project folder, no trailing slash
         self.output_path = "outputs"         # absolute or relative path to where to write outputs
         self.template_path = "templates"     # absolute or relative path to where to read/write templates
-        self.data_path = "data"
-        self.image_path = "images"
+        self.data_path = "data"              # absolute or relative path for csv data
+        self.image_path = "images"           # absolute or relative path for image files
         super().__init__()
+    def create(self):
+        """Call to actually create the files"""
+    def load(self):
+        with open(f"{self.root_path}/prchsl_cc_proj.json") as f:
+            d = json.loads(f.read())
+        self.output_path = d["output_path"]
+        self.template_path = d["template_path"]
+        self.data_path = d["data_path"]
+        self.image_path = d["image_path"]
+        self.data_sources = []
+        for source in d["data_sources"]:
+            self.data_sources.append(
+                datasource.create_data_source(source)
+            )
+        for key in d["templates"]:
+            self.templates[key] = Template(d["templates"][key])
+        for key in d["outputs"]:
+            self.outputs[key] = Output(**d["outputs"][key])
+        self.load_data()
+    def save(self):
+        d = {}
+        d["output_path"] = self.output_path
+        d["template_path"] = self.template_path
+        d["data_path"] = self.data_path
+        d["image_path"] = self.image_path
+        d["data_sources"] = []
+        for source in self.data_sources:
+            d["data_sources"].append(source.source)
+        d["templates"] = {}
+        for key in self.templates:
+            d["templates"][key] = self.templates[key].filename
+        d["outputs"] = {}
+        for key in self.outputs:
+            o = self.outputs[key]
+            d["outputs"][key] = {
+                "data_source_name": o.data_source_name,
+                "file_name": o.file_name,
+                "template_name": o.template_name,
+                "template_field": o.template_field
+            }
+        with open(f"{self.root_path}/prchsl_cc_proj.json", "w") as f:
+            f.write(json.dumps(d))
     def rel_path(self, path):
         if not path.startswith("/") and not ":" in path:
             return self.root_path + "/" + path

@@ -4,13 +4,12 @@ from nicegui import ui
 class ProjectDataSources:
     def __init__(self, ov):
         self.view = ov
-        self.project = ov.project
     def refresh(self):
         self.build.refresh()
     @ui.refreshable
     def build(self):
         ov = self.view
-        project = self.project
+        project = ov.project
         def add_file():
             file = ov.new_data_path.strip()
             try:
