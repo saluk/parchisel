@@ -1,7 +1,10 @@
+import os
+
 from nicegui import ui
 from nicegui import app
 import webview
 
+from lib.exceptions import NotifyException
 from lib.project import LocalProject
 
 # Show current project information if there is one
@@ -30,12 +33,12 @@ class ProjectManagement:
             async def new_project():
                 file = (await app.native.main_window.create_file_dialog(
                     webview.SAVE_DIALOG,
-                    directory="projects/",
+                    directory=os.path.abspath("projects/"),
                     save_filename="project_name"
-                )).replace("\\", "/")
-                if not file:
+                ))
+                if not file: # Cancel chosen
                     return
-                new_project = LocalProject(file.rsplit("/", 1)[-1], file)
+                new_project = LocalProject(file.replace("\\", "/").rsplit("/", 1)[-1], file)
                 new_project.create()
                 self.view.project = new_project
                 self.view.refresh_project()
@@ -43,10 +46,12 @@ class ProjectManagement:
             async def open_project():
                 file = (await app.native.main_window.create_file_dialog(
                     webview.FOLDER_DIALOG,
-                    directory="projects/"
+                    directory=os.path.abspath("projects/")
                 ))[0].replace("\\", "/")
                 if not file:
                     return
+                if not os.path.exists(f"{file}/prchsl_cc_proj.json"):
+                    raise NotifyException(f"No parchisel component creator project exists at {file}")
                 new_project = LocalProject(file.rsplit("/", 1)[-1], file)
                 new_project.load()
                 self.view.project = new_project

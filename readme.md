@@ -79,7 +79,7 @@ https://openfontlicense.org/open-font-license-official-text/
 
 
 # TODO 
-- general project management
+- ensure project data is saved when necessary
 - edit output rows/cols/width/height
 - refactor with more nicegui native bindings
 - more ui.notify for CRUD (maybe put into Project)
@@ -89,3 +89,4 @@ https://openfontlicense.org/open-font-license-official-text/
 
 # Longterm Ideas
 - Database backed project data for web hosted version
+- SVG templates, svgeditor to edit them
