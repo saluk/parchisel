@@ -86,3 +86,6 @@ https://openfontlicense.org/open-font-license-official-text/
 - edit csv files
 - widgets to edit current line of template
 - icons in draw_text positioned correctly
+
+# Longterm Ideas
+- Database backed project data for web hosted version

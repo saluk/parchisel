@@ -10,17 +10,17 @@ from multiprocessing import freeze_support
 freeze_support()
 
 from lib.datasource import CSVData, PythonData
-from lib.project import Project
+from lib.project import LocalProject
 from lib.outputs import Output
 
 from lib.components.project_outputs import ProjectOutputs
 from lib.components.project_data_sources import ProjectDataSources
 
-project = Project()
+project = LocalProject("test", "projects/test")
 project.data_sources = datas = [
-    CSVData("data/cards.csv"),
-    CSVData("data/cards2.csv"),
-    PythonData("data/cards3.py")
+    CSVData("projects/test/data/cards.csv"),
+    CSVData("projects/test/data/cards2.csv"),
+    PythonData("projects/test/data/cards3.py")
 ]
 project.load_data()
 project.load_templates()
@@ -44,7 +44,7 @@ class CodeContext:
         # TODO only save if things are rendering OK
         # We could have a button to force save
         self.template.save()
-        if project.dirty_outputs(for_templates=[self.template.filename], for_outputs=ov.viewed_output):   # only redraw outputs that use this template
+        if project.dirty_outputs(for_templates=[self.template.name], for_outputs=ov.viewed_output):   # only redraw outputs that use this template
             await render_images(ov.image_element_list, ov.output_list)
             #self.output_images.refresh()
 cc = CodeContext()

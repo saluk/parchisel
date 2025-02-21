@@ -44,7 +44,7 @@ class Output:
 
     async def render(self, project):
         print(f"RENDERING: {self.data_source_name} as {self.file_name}")
-        self.context = Context(self.width, self.height, "RGB")
+        self.context = Context(self.width, self.height, project, "RGB")
         start_time = time.time()
         self.context.clear((0,0,0,0))
 
@@ -75,7 +75,7 @@ class Output:
         template_cache = []  #These templates have been reloaded already
         maxh = 0
         for card in data_source.cards:
-            card_context = Context(640, 480, "RGB")
+            card_context = Context(640, 480, project, "RGB")
             card_context.clear((0, 0, 0, 0))
 
             template = main_template
@@ -117,8 +117,13 @@ class Output:
         render_time = end_time-start_time
         print("Render time:", self.file_name, render_time)
 
-    def save(self):
-        self.context.save("outputs/"+self.file_name)
+    def save(self, folder):
+        fn = self.file_name
+        if folder:
+            if not folder.endswith("/"):
+                folder += "/"
+            fn = folder + self.file_name
+        self.context.save(fn)
 
     async def b64encoded(self, project):
         if self.rendered_string:

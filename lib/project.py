@@ -1,29 +1,27 @@
 import os
 
 import lib.datasource as datasource
+from lib.template import Template
 
-class Template:
-    def __init__(self, filename):
-        self.filename = filename
-        self._code = None
-    @property
-    def code(self):
-        if not self._code:
-            self.load()
-        return self._code
-    @code.setter
-    def code(self, code):
-        self._code = code
-    @property
-    def reload_code(self):
-        self.load()
-        return self._code
-    def load(self):
-        with open(self.filename,"r") as f:
-            self._code = f.read()
-    def save(self):
-        with open(self.filename,"w") as f:
-            f.write(self._code)
+# A project consists of:
+#   A set of data sources (linked to local or remote files, or database links)
+#   A set of templates (may be backed to local files, or a database)
+#   A set of outputs (the filenames to generate, in local mode files 
+#       are output to a local folder)
+#   A set of image stores (local folder to search or a name linked to a image url)
+#   location project data is stored (local json file, or database index in db mode)
+#   local project only:
+#       output folder
+#       templates folder
+#       default data source folder
+#       default image folder
+
+# To init a new LOCAL project
+# - choose a root folder and a name for the project
+# - create a project folder to hold data
+# - create a subfolder for outputs, templates, sources, and images
+# - create a json file for the project in that folder (prchsl_cc_proj.json)
+#   save the local project data to the json
 
 class Project:
     def __init__(self):
@@ -33,13 +31,12 @@ class Project:
     def load_data(self):
         [d.load() for d in self.data_sources]
     def load_templates(self):
-        for template in os.listdir("data/templates"):
-            self.templates[template] = Template("data/templates/"+template)
+        raise NotImplemented
     def dirty_outputs(self, for_templates=[], for_outputs=[]):
         any_dirty = False
         for output in self.outputs.values():
             if for_templates:
-                all_used = set(["data/templates/"+used for used in output.templates_used(self)])
+                all_used = set(output.templates_used(self))
                 all_templates = set(for_templates)
                 print(all_used, all_templates)
                 if not all_used.intersection(all_templates):
@@ -93,9 +90,31 @@ class Project:
         self.outputs[output.file_name] = output
 
     async def save_outputs(self):
+        raise NotImplemented
+
+class LocalProject(Project):
+    def __init__(self, name, root_path):
+        self.name = name
+        self.root_path = root_path           # absolute path to project folder, no trailing slash
+        self.output_path = "outputs"         # absolute or relative path to where to write outputs
+        self.template_path = "templates"     # absolute or relative path to where to read/write templates
+        self.data_path = "data"
+        self.image_path = "images"
+        super().__init__()
+    def rel_path(self, path):
+        if not path.startswith("/") and not ":" in path:
+            return self.root_path + "/" + path
+        return path
+    def get_image_path(self):
+        return self.rel_path(self.image_path)
+    def load_templates(self):
+        tp = self.rel_path(self.template_path)
+        for template in os.listdir(tp):
+            self.templates[template] = Template(f"{tp}/"+template)
+    async def save_outputs(self):
         for output in self.outputs.values():
             print(f"Look at output {output}")
             if not output.rendered_string:
                 print(f"render output {output}")
                 await output.render(self)
-            output.save()
+            output.save(self.rel_path(self.output_path))

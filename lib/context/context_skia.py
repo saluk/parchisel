@@ -10,9 +10,10 @@ import skia
 class SkiaContext:
     step = 0
     fontmgr = skia.FontMgr.New_Custom_Directory(".")
-    def __init__(self, surface_width, surface_height, mode="RGBA"):
+    def __init__(self, surface_width, surface_height, project, mode="RGBA"):
         self.surface = None
         self.canvas = None
+        self.project = project # Store this so we can get image paths
         self.resize(surface_width, surface_height, mode)
     @property
     def width(self):
@@ -43,7 +44,7 @@ class SkiaContext:
         # Both contexts must match in type
         context.surface.draw(self.canvas, x, y)
     def draw_image(self, x, y, image_file, width=None, height=None):
-        image = skia.Image.open("data/"+image_file)
+        image = skia.Image.open(f"{self.project.get_image_path()}/{image_file}")
         if width or height:
             if not width: width = image.bounds().width()
             if not height: height = image.bounds().height()
@@ -108,7 +109,7 @@ class SkiaContext:
                 def width(self):
                     return icon_size+space_width
                 def draw(self, ctx):
-                    ctx.draw_image(self.start_x+icon_rect.left(), self.start_y+icon_rect.top(), "images/"+self.filename, icon_size, icon_size)
+                    ctx.draw_image(self.start_x+icon_rect.left(), self.start_y+icon_rect.top(), self.filename, icon_size, icon_size)
             _text = text
             while _text:
                 if _text.startswith("<") and ">" in _text:
