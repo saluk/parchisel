@@ -14,6 +14,8 @@ class Output:
         self.template_name = template_name
         self.template_field = template_field
 
+        self.card_range = None      # Set to a (start, end) tuple to only render those cards
+
         # TODO use all of these fields
         self.rows = rows
         self.cols = cols
@@ -25,6 +27,11 @@ class Output:
         self.spacing_y = spacing_y
 
         self.rendered_string = ""   # Clear to rerender
+
+    def get_card_range(self, project, total=False):
+        if self.card_range and not total:
+            return self.card_range
+        return (0, len(project.get_data_source(self.data_source_name).cards))
 
     def templates_used(self, project):
         rows = []
@@ -74,7 +81,9 @@ class Output:
             main_template = project.templates[self.template_name]
         template_cache = []  #These templates have been reloaded already
         maxh = 0
-        for card in data_source.cards:
+        card_range = self.get_card_range(project)
+        for card_index in range(*card_range):
+            card = data_source.cards[card_index]
             card_context = Context(640, 480, project, "RGB")
             card_context.clear((0, 0, 0, 0))
 

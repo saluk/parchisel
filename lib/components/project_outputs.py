@@ -6,8 +6,13 @@ from lib.outputs import Output
 class ProjectOutputs:
     def __init__(self, ov):
         self.view = ov
+        self.update_timer = None
     def refresh(self):
         self.build.refresh()
+    def queue_update(self, func, delay=0.5):
+        if self.update_timer:
+            self.update_timer.deactivate()
+        self.update_timer = ui.timer(delay, func, once=True)
     @ui.refreshable
     def build(self):
         ov = self.view
@@ -28,6 +33,7 @@ class ProjectOutputs:
                 imp.on('keydown.enter', edit_name)
                 imp.on('blur', edit_name)
 
+                # TODO popout data source selection to choose both source and range
                 def select_source(evt, out=out, project=project):
                     out.data_source_name = evt.value
                     out.rendered_string = ""
@@ -36,9 +42,20 @@ class ProjectOutputs:
                 value = ""
                 if out.data_source_name in options:
                     value = out.data_source_name
-                ui.select([""] + [source.source for source in project.data_sources], value=value,
+                with ui.column():
+                    ui.select([""] + [source.source for source in project.data_sources], value=value,
                         on_change=select_source)
-                
+                    total_range = out.get_card_range(project, True)
+                    card_range = out.get_card_range(project)
+                    def set_range(e, out=out):
+                        out.card_range = (e.value["min"],e.value["max"])
+                        out.rendered_string = ""
+                        self.queue_update(ov.refresh_outputs)
+                    ui.range(
+                        min=total_range[0], 
+                        max=total_range[1], 
+                        value={'min': card_range[0], 'max': card_range[1]}
+                    ).props('label-always snap').on_value_change(lambda e, out=out: set_range(e, out))
                 def select_template(evt, out=out, project=project):
                     out.template_name = evt.value
                     out.rendered_string = ""
