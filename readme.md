@@ -79,6 +79,7 @@ https://openfontlicense.org/open-font-license-official-text/
 
 
 # nearterm projects
+# TODO - when loading a project, validate outputs have correct data and template values
 # TODO - ensure project data is saved when necessary
 # TODO - make output, datasource, and template paths relative to project
 # TODO - shorten data source name on output list editor

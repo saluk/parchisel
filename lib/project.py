@@ -23,11 +23,14 @@ class Project:
                 all_templates = set(for_templates)
                 print(all_used, all_templates)
                 if not all_used.intersection(all_templates):
+                    print("no intersection")
                     continue
             output.rendered_string = None
             # Dirty everything, but dont refresh view if we aren't watching this output
-            if not for_outputs or output.data_source_name in for_outputs:
+            print(f"output data name: {output.file_name}, outputs chosen:{for_outputs}")
+            if not for_outputs or output.file_name in for_outputs:
                 any_dirty = True
+        print(f"was dirty: {any_dirty}")
         return any_dirty
     def render_outputs(self):
         for output in self.outputs.values():

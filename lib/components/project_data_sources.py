@@ -10,6 +10,9 @@ class ProjectDataSources:
     def build(self):
         ov = self.view
         project = ov.project
+        if not project:
+            ui.label("No Project")
+            return
         def add_file():
             file = ov.new_data_path.strip()
             try:

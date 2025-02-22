@@ -28,10 +28,16 @@ class Output:
 
         self.rendered_string = ""   # Clear to rerender
 
+    def get_data_source(self, project):
+        return project.get_data_source(self.data_source_name)
+
     def get_card_range(self, project, total=False):
         if self.card_range and not total:
             return self.card_range
-        return (0, len(project.get_data_source(self.data_source_name).cards))
+        source = self.get_data_source(project)
+        if not source:
+            return None
+        return (0, len(source.cards))
     
     def set_card_range(self, project, range_or_None):
         total = self.get_card_range(project, True)
@@ -92,6 +98,8 @@ class Output:
         template_cache = []  #These templates have been reloaded already
         maxh = 0
         card_range = self.get_card_range(project)
+        if not card_range:
+            return
         for card_index in range(*card_range):
             card = data_source.cards[card_index]
             card_context = Context(640, 480, project, "RGB")

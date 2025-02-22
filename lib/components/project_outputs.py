@@ -17,7 +17,11 @@ class ProjectOutputs:
     def build(self):
         ov = self.view
         project = ov.project
-        with ui.grid(columns=5).classes("w-full font-bold"):
+        grid = "10% 35% 20% 15% 5%"
+        if not project:
+            ui.label("No project")
+            return
+        with ui.grid(columns=grid).classes("w-full font-bold"):
             ui.label("Name");ui.label("Data Source");ui.label("Template");ui.label("Field");ui.label("")
         for out_key in project.outputs:
             out = project.outputs[out_key]
@@ -25,7 +29,7 @@ class ProjectOutputs:
                 out.rendered_string = ""
                 project.remove_output(out)
                 ov.refresh_outputs()
-            with ui.grid(columns=5).classes("w-full"):
+            with ui.grid(columns=grid).classes("w-full"):
                 imp = ui.input("path", value=out.file_name)
                 def edit_name(inp=imp, out=out):
                     project.rename_output(out, inp.value)
@@ -53,11 +57,12 @@ class ProjectOutputs:
                         project.save()
                         out.rendered_string = ""
                         self.queue_update(ov.refresh_outputs)
-                    ui.range(
-                        min=total_range[0], 
-                        max=total_range[1], 
-                        value={'min': card_range[0], 'max': card_range[1]}
-                    ).props('label-always snap').on_value_change(lambda e, out=out: set_range(e, out))
+                    if total_range:
+                        ui.range(
+                            min=total_range[0], 
+                            max=total_range[1], 
+                            value={'min': card_range[0], 'max': card_range[1]}
+                        ).props('label-always snap').on_value_change(lambda e, out=out: set_range(e, out))
                 def select_template(evt, out=out, project=project):
                     out.template_name = evt.value
                     project.save()
@@ -80,7 +85,7 @@ class ProjectOutputs:
                     ui.select([""] + values, value=value,
                             on_change=select_template_field)
 
-                ui.button('Remove', on_click=unlink_output)
+                ui.button('X', on_click=unlink_output).classes("h-[25px]")
         ui.separator()
         def add_output():
             project.add_output("new_output.png")

@@ -18,28 +18,11 @@ from lib.components.project_outputs import ProjectOutputs
 from lib.components.project_data_sources import ProjectDataSources
 from lib.template import Template
 
-project = LocalProject("test", "projects/test")
-# project.data_sources = datas = [
-#     CSVData("projects/test/data/cards.csv"),
-#     CSVData("projects/test/data/cards2.csv"),
-#     PythonData("projects/test/data/cards3.py")
-# ]
-# project.load_data()
-# project.load_templates()
-# project.outputs = {
-#     project.data_sources[0].source: Output(project.data_sources[0].source, "cards.png", template_name="card1.py"),
-#     project.data_sources[1].source: Output(project.data_sources[1].source, "cards2.png", template_field="Template"),
-#     project.data_sources[2].source: Output(project.data_sources[2].source, "cards3.png", template_name="card1.py", height=4000),
-# }
-# project.save()
-project.load()
-
 class CodeContext:
     def __init__(self):
         self.template = None
         self.new_filename = ""
         self.ui_editor = None
-        self.possible_templates = list(project.templates.keys())
     def set_new_filename(self, fn):
         self.new_filename = fn
     async def update_code(self, code):
@@ -47,13 +30,13 @@ class CodeContext:
         # TODO only save if things are rendering OK
         # We could have a button to force save
         self.template.save()
-        if project.dirty_outputs(for_templates=[self.template.name], for_outputs=ov.viewed_output):   # only redraw outputs that use this template
+        if ov.project.dirty_outputs(for_templates=[self.template.name], for_outputs=ov.viewed_output):   # only redraw outputs that use this template
             print("rerender images")
             print(ov.image_element_list, ov.output_list)
             await render_images(ov.image_element_list, ov.output_list)
 
 def create_template(template_name):
-    t = project.add_template(template_name)
+    t = ov.project.add_template(template_name)
     change_template(t.name)
 
 def change_template(template_name):
@@ -64,7 +47,7 @@ def change_template(template_name):
 class OutputView:
     def __init__(self):
         self.columns = None
-        self.viewed_output = None
+        self.viewed_output = []
 
         self.project = None
         self.progress = None
@@ -82,7 +65,7 @@ class OutputView:
         self.ui_datasources.build.refresh()
         self.ui_template_editor.refresh()
 ov = OutputView()
-ov.project = project
+#ov.project = project
 
 
 #### UI CODE
@@ -93,7 +76,7 @@ async def render_images(image_element_list, output_list):
             print("updating output image")
             image_element_list[i].set_source(await output_list[i].b64encoded(ov.project))
         except Exception as e:
-            ui.notify(str(e))
+            ui.notify(repr(e))
             continue
     ov.progress.dismiss()
 zoom_levels = range(200, 1200, 200)
@@ -114,11 +97,12 @@ async def render_selected_project_outputs():
         output = ov.project.outputs[output_key]
         with ui.card():
             with ui.button_group():
-                zin:ui.button = ui.button("zoomin")
+                zin:ui.button = ui.button("+")
                 zin.tailwind.font_size('xs')
-                zout:ui.button = ui.button("zoomout")
+                zout:ui.button = ui.button("-")
                 zout.tailwind.font_size('xs')
-                ui.label(output.data_source_name)
+                ui.label(output.file_name).classes("m-3 font-bold")
+                ui.label(output.data_source_name).classes("m-3 font-italic")
             zoom = zoom_levels[len(zoom_levels)//2]
             im_el = ui.image("").classes(f'w-[{zoom}px]').style("cursor: zoom-in;")
             im_el.zoom = zoom
@@ -158,41 +142,37 @@ def dragscroll(el, scroll_area:ui.scroll_area, speed=1):
 @ui.refreshable
 async def render_project_outputs():
     print("render project outputs")
+    if not ov.project:
+        ui.label("No project")
+        return
     if not ov.viewed_output and ov.project.outputs:
         ov.viewed_output = [list(ov.project.outputs.keys())[0]]
     with ui.row().classes("w-full"):
-        with ui.column().classes("w-[20%]"):
-            with ui.card():
-                async def save_output_btn():
-                    await ov.project.save_outputs()
-                    ui.notify("Saved!")
-                ui.button("Save Output", on_click=save_output_btn)
-            with ui.card():
-                ui.label("View outputs:")
-                checks = []
-                with ui.button_group():
-                    def f_all():
-                        for k,c in checks:
-                            c.set_value(True)
-                    ui.button("All", on_click=f_all)
-                    def f_none():
-                        for k,c in checks:
-                            c.set_value(False)
-                    ui.button("None", on_click=f_none)
-                for output_key in ov.project.outputs.keys():
-                    output = ov.project.outputs[output_key]
-                    c = ui.checkbox(output.file_name, value=output_key in ov.viewed_output)
-                    checks.append((output_key,c))
-                def set_check():
-                    viewed_output = []
-                    for output_key, check in checks:
-                        if check.value:
-                            viewed_output.append(output_key)
-                    ov.viewed_output = viewed_output
-                    ov.render_selected_project_outputs.refresh()
-                [c[1].on_value_change(set_check) for c in checks]
-        with ui.column().classes("w-[70%]"):
-            with ui.card().classes("w-full") as dragable_card:
+        with ui.grid(columns="200px auto"):
+            with ui.card().classes("w-[500px]").tight() as dragable_card:
+                with ui.expansion("Viewed Outputs").classes("font-size-8 padding-0"):
+                    checks = []
+                    with ui.button_group():
+                        def f_all():
+                            for k,c in checks:
+                                c.set_value(True)
+                        ui.button("All", on_click=f_all)
+                        def f_none():
+                            for k,c in checks:
+                                c.set_value(False)
+                        ui.button("None", on_click=f_none)
+                    for output_key in ov.project.outputs.keys():
+                        output = ov.project.outputs[output_key]
+                        c = ui.checkbox(output.file_name, value=output_key in ov.viewed_output)
+                        checks.append((output_key,c))
+                    def set_check():
+                        viewed_output = []
+                        for output_key, check in checks:
+                            if check.value:
+                                viewed_output.append(output_key)
+                        ov.viewed_output = viewed_output
+                        ov.render_selected_project_outputs.refresh()
+                    [c[1].on_value_change(set_check) for c in checks]
                 with ui.scroll_area().classes("w-full") as draggable_scroll:
                     dragscroll(dragable_card, draggable_scroll, 3)
                     print("about to render selected project outputs")
@@ -209,26 +189,27 @@ ov.ui_project_manage = ProjectManagement(ov)
 @ui.refreshable
 def render_code_editor(template=None):
     cc = CodeContext()
-    if ov.project.templates and not template:
+    if ov.project and ov.project.templates and not template:
         template = list(ov.project.templates.values())[0]
     cc.template = template
     ov.cc = cc
-    with ui.button_group():
-        ui.button('New', on_click=lambda:new_template_dialog.open() )
-        if not ov.project.templates:
-            return
-        cc.ui_template_list = ui.select(list(ov.project.templates.keys()), 
-            on_change=lambda e: change_template(e.value), 
-            value=template.name)
-        def queue_update(value):
-            if getattr(ov, "code_update_timer", None):
-                ov.code_update_timer.deactivate()
-            ov.code_update_timer = ui.timer(0.5, lambda: cc.update_code(value), once=True)
+    with ui.grid(columns="80px 550px"):
+        with ui.column():
+            ui.button('New', on_click=lambda:new_template_dialog.open() )
+            if not ov.project or not ov.project.templates:
+                return
+            cc.ui_template_list = ui.select(list(ov.project.templates.keys()), 
+                on_change=lambda e: change_template(e.value), 
+                value=template.name)
+            def queue_update(value):
+                if getattr(ov, "code_update_timer", None):
+                    ov.code_update_timer.deactivate()
+                ov.code_update_timer = ui.timer(0.5, lambda: cc.update_code(value), once=True)
 
         cc.ui_editor = ui.codemirror(
             value=cc.template.code, language="Python", theme="abcdef",
             on_change=lambda e: queue_update(e.value)
-        )
+        ).classes("w-550px")
         cc.ui_editor.tailwind.height("52")
 ov.ui_template_editor = render_code_editor
 
@@ -243,12 +224,13 @@ with ui.dialog() as new_template_dialog, ui.card():
         ui.button("Create", on_click=create_cb)
 
 
-with ui.tabs().classes('w-full') as tabs:
-    ov.toplevel = list(tabs.ancestors())[0]
-    project_view = ui.tab("Project")
-    template_view = ui.tab('Templates')
-    sheet_view = ui.tab('Google Sheets')
-    tabs.on_value_change(ov.refresh_outputs)
+with ui.header().classes(replace='row items-center'):
+    with ui.tabs() as tabs:
+        ov.toplevel = list(tabs.ancestors())[1]
+        project_view = ui.tab("Project")
+        template_view = ui.tab('Templates')
+        sheet_view = ui.tab('Google Sheets')
+        tabs.on_value_change(ov.refresh_outputs)
 async def ui_panels():
     with ui.tab_panels(tabs, value=project_view).classes('w-full'):
         with ui.tab_panel(project_view):
@@ -261,9 +243,13 @@ async def ui_panels():
                 ui.label("Outputs")
                 ov.ui_outputs.build()
         with ui.tab_panel(template_view):
+            async def save_output_btn():
+                await ov.project.save_outputs()
+                ui.notify("Saved!")
+            ui.button("Save All Project Images", on_click=save_output_btn)
             ui.label('Templates')
-            ov.ui_template_editor()
-            ui.label('Output')
+            with ui.card().tight():
+                ov.ui_template_editor()
             await render_project_outputs()
         with ui.tab_panel(sheet_view):
             ui.label('Google Sheets')
