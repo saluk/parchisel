@@ -11,15 +11,15 @@ class Project:
         self.data_sources = []
         self.templates = {}
         self.outputs = {}
-    def load_data(self):
-        [d.load() for d in self.data_sources]
+    async def load_data(self):
+        [await d.load_data() for d in self.data_sources]
     def load_templates(self):
         raise NotImplemented
-    def dirty_outputs(self, for_templates=[], for_outputs=[]):
+    async def dirty_outputs(self, for_templates=[], for_outputs=[]):
         any_dirty = False
         for output in self.outputs.values():
             if for_templates:
-                all_used = set(output.templates_used(self))
+                all_used = set(await output.templates_used(self))
                 all_templates = set(for_templates)
                 print(all_used, all_templates)
                 if not all_used.intersection(all_templates):
@@ -40,19 +40,19 @@ class Project:
         for ds in self.data_sources:
             if ds.source == fn:
                 return ds
-    def remove_data_source(self, fn):
+    async def remove_data_source(self, fn):
         ds = self.get_data_source(fn)
         if ds:
             self.data_sources.remove(ds)
-            self.dirty_outputs()
+            await self.dirty_outputs()
         self.save()
-    def rename_data_source(self, ds, source):
+    async def rename_data_source(self, ds, source):
         i = self.data_sources.index(ds)
         new_ds = datasource.create_data_source(source)
-        new_ds.load()
+        await new_ds.load_data()
         self.data_sources[i] = new_ds
         self.save()
-    def add_data_source(self, fn):
+    async def add_data_source(self, fn):
         fn = fn.strip()
         if self.get_data_source(fn):
             raise Exception("Datasource already linked")
@@ -60,11 +60,11 @@ class Project:
             raise Exception("No datasource entered")
         data_source = datasource.create_data_source(fn)
         try:
-            data_source.load()
+            await data_source.load_data()
         except Exception:
             raise
         self.data_sources.append(data_source)
-        self.dirty_outputs()
+        await self.dirty_outputs()
         self.save()
 
     def add_template(self, template_name):
@@ -129,7 +129,7 @@ class LocalProject(Project):
         os.mkdir(self.rel_path(self.data_path))
         os.mkdir(self.rel_path(self.image_path))
         self.save()
-    def load(self):
+    async def load(self):
         with open(f"{self.root_path}/prchsl_cc_proj.json") as f:
             d = json.loads(f.read())
         self.output_path = d["output_path"]
@@ -145,7 +145,7 @@ class LocalProject(Project):
             self.templates[key] = Template(d["templates"][key])
         for key in d["outputs"]:
             self.outputs[key] = Output(**d["outputs"][key])
-        self.load_data()
+        await self.load_data()
     def save(self):
         d = {}
         d["output_path"] = self.output_path

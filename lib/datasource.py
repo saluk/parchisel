@@ -1,25 +1,26 @@
 import csv
 
+from lib.files import File
+
 class DataSource:
     type_label = "Unknown Data Source"
     def __init__(self, source):
         self.source = source
         self.cards = []
         self.fieldnames = []
-    def load(self):
+    async def load_data(self):
         pass
-    def save(self):
+    def save_data(self):
         pass
 class CSVData(DataSource):
     type_label = "CSV File"
-    def load(self):
+    async def load_data(self):
         self.cards = []
-        with open(self.source) as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                self.cards.append(row)
+        reader = csv.DictReader((await File(self.source).read()).splitlines())
+        for row in reader:
+            self.cards.append(row)
         self.fieldnames = self.cards[0].keys()
-    def save(self):
+    def save_data(self):
         with open(self.source, "w") as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=self.fieldnames)
             writer.writeheader()
@@ -27,7 +28,7 @@ class CSVData(DataSource):
                 writer.writerow(card)
 class PythonData(DataSource):
     type_label = "Python File (generator)"
-    def load(self):
+    async def load_data(self):
         g = {}
         with open(self.source) as f:
             exec(f.read(), g)

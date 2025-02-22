@@ -52,13 +52,13 @@ class Output:
             return
         self.card_range = [min, max]
 
-    def templates_used(self, project):
+    async def templates_used(self, project):
         rows = []
         data_source = project.get_data_source(self.data_source_name)
         if not data_source:
             return [self.template_name]
         try:
-            data_source.load()
+            await data_source.load_data()
         except Exception:
             return rows
         for card in data_source.cards:
@@ -91,7 +91,7 @@ class Output:
         try:
             data_source = project.get_data_source(self.data_source_name)
             assert(data_source)
-            data_source.load()
+            await data_source.load_data()
         except Exception:
             self.context.draw_text(0, 0, f"No data source found: {self.data_source_name}")
             return

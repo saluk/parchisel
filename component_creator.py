@@ -30,7 +30,7 @@ class CodeContext:
         # TODO only save if things are rendering OK
         # We could have a button to force save
         self.template.save()
-        if ov.project.dirty_outputs(for_templates=[self.template.name], for_outputs=ov.viewed_output):   # only redraw outputs that use this template
+        if await ov.project.dirty_outputs(for_templates=[self.template.name], for_outputs=ov.viewed_output):   # only redraw outputs that use this template
             print("rerender images")
             print(ov.image_element_list, ov.output_list)
             await render_images(ov.image_element_list, ov.output_list)

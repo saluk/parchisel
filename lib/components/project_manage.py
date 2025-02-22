@@ -46,7 +46,7 @@ class ProjectManagement:
             if not os.path.exists(f"{file}/prchsl_cc_proj.json"):
                 raise NotifyException(f"No parchisel component creator project exists at {file}")
             new_project = LocalProject(file.rsplit("/", 1)[-1], file)
-            new_project.load()
+            await new_project.load()
             self.view.project = new_project
             self.view.refresh_project()
             self.build.refresh()

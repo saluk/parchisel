@@ -13,10 +13,10 @@ class ProjectDataSources:
         if not project:
             ui.label("No Project")
             return
-        def add_file():
+        async def add_file():
             file = ov.new_data_path.strip()
             try:
-                project.add_data_source(file)
+                await project.add_data_source(file)
             except Exception as e:
                 ui.notify(str(e))
                 return
@@ -24,15 +24,15 @@ class ProjectDataSources:
             ov.ui_datasources.refresh()
             ov.refresh_outputs()
         for ds in project.data_sources:
-            def unlink_source(source=ds.source):
-                project.remove_data_source(source)
+            async def unlink_source(source=ds.source):
+                await project.remove_data_source(source)
                 ov.ui_datasources.refresh()
                 ov.refresh_outputs()
             with ui.grid(columns=3):
                 imp = ui.input("path", value=ds.source)
-                def edit_source(imp=imp, ds=ds):
+                async def edit_source(imp=imp, ds=ds):
                     try:
-                        project.rename_data_source(ds, imp.value)
+                        await project.rename_data_source(ds, imp.value)
                     except Exception:
                         ui.notify(f"{imp.value} could not be loaded")
                         return

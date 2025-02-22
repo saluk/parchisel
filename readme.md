@@ -83,7 +83,7 @@ https://openfontlicense.org/open-font-license-official-text/
 # ongoing - when loading a project, validate outputs have correct data and template values
 # ongoing - ensure project data is saved when necessary
 
-# TODO - network data sources
+# TODO - google sheet data source
 # TODO - make output, datasource, and template paths relative to project
 # TODO - shorten data source name on output list editor
 # TODO - auto split output images if cards exceed max height (output could have sub images)
@@ -95,6 +95,7 @@ https://openfontlicense.org/open-font-license-official-text/
 # TODO - icons in draw_text positioned correctly
 # TODO - screentop export: (allow single back image somehow)
 # TODO - screentop export: (ensure output images are suitable for rows and columns)
+# TODO - tests
 
 # Longterm Ideas
 - Database backed project data for web hosted version
