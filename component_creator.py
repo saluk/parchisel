@@ -247,6 +247,10 @@ async def ui_panels():
                 await ov.project.save_outputs()
                 ui.notify("Saved!")
             ui.button("Save All Project Images", on_click=save_output_btn)
+            def save_screentop():
+                from lib.exports import ExportComponents
+                ExportComponents(ov.project)
+            ui.button("Export Screentop", on_click=save_screentop)
             ui.label('Templates')
             with ui.card().tight():
                 ov.ui_template_editor()

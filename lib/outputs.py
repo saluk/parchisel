@@ -8,11 +8,14 @@ from lib.context import SkiaContext as Context
 class Output:
     def __init__(self, data_source_name, file_name, rows=None, cols=None, width=1800, height=1800, 
                 offset_x = 0, offset_y = 0, spacing_x = 0, spacing_y = 0, 
-                template_name: str = None, template_field: str = None, card_range:tuple = None):
+                template_name: str = None, template_field: str = None, card_range:tuple = None,
+                component=None):
         self.data_source_name = data_source_name
         self.file_name = file_name
         self.template_name = template_name
         self.template_field = template_field
+
+        self.component = component   # This should be a dict of {component_name, asset_side}
 
         self.card_range = tuple(card_range) if card_range else None  # Set to a (start, end) tuple to only render those cards
 

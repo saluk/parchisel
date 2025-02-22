@@ -1,3 +1,5 @@
+import json
+
 # Exports are like outputs but for text
 # Screentop Example:
 # {
@@ -53,19 +55,28 @@ class ExportComponentSpan:
     def __init__(self, data_source, card_range, output_map: dict):
         self.data_source = data_source
         self.card_range = card_range
-        self.output_map = output_map
-        assert "front" in self.outputs
+        self.output_map = output_map  # front output, back output etc
 class ExportComponents:
     def __init__(self, project):
-        self.outputs = []   # All outputs to consider
-        self.spans = []
-        for output in self.outputs:
-            asset_side = output.asset_side
+        self.project = project
+        self.components = {}
+
+        for output in project.outputs.values():
+            if not output.component:
+                continue
+
+            component_name = output.component["component_name"]
+            if component_name in self.components:
+                spans = self.components[component_name]
+            else:
+                self.components[component_name] = spans = []
+
+            asset_side = output.component["asset_side"]
             data_source = project.get_data_source(output.data_source_name)
-            card_range = output.card_range   # Make sure to get the actual card range here
+            card_range = output.get_card_range(project)
 
             existing = False
-            for span in self.spans:
+            for span in spans:
                 if span.card_range == card_range and span.data_source == data_source:
                     span.output_map[asset_side] = output
                     existing = True
@@ -74,6 +85,28 @@ class ExportComponents:
                 span = ExportComponentSpan(data_source, card_range, {
                     asset_side: output
                 })
-        # TODO implement further
-        print(self.spans)
-                
+                spans.append(span)
+
+        screen_top = {}
+        for component_name in self.components:
+            print(f"Component: {component_name}")
+            card_index = 1
+            spans = self.components[component_name]
+            for span in spans:
+                span_index = 1
+                for card in span.data_source.cards:
+                    d = {
+                        "kind": "TILE",
+                        "name": f"{component_name} - {card_index}",
+                        "frontFillColor": "#ffffff",
+                        "backFillColor": "#ffc8a1",
+                        "strokeColor": "#000000",
+                        "frontAsset": span.output_map["front"].file_name,
+                        "frontAssetIndex": span_index,
+                        "backAsset": span.output_map["back"].file_name,
+                        "backAssetIndex": span_index
+                    }
+                    screen_top[str(card_index)] = d
+                    card_index += 1
+                    span_index += 1
+        print(json.dumps(screen_top, indent=4))

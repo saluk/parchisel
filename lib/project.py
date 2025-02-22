@@ -94,7 +94,7 @@ class Project:
                 return
         raise Exception("Output not found")
     def rename_output(self, output, file_name):
-        del self.outputs[output.data_source_name]
+        del self.outputs[output.file_name]
         output.file_name = file_name
         self.outputs[output.file_name] = output
         self.save()
@@ -166,7 +166,8 @@ class LocalProject(Project):
                 "file_name": o.file_name,
                 "template_name": o.template_name,
                 "template_field": o.template_field,
-                "card_range": o.card_range
+                "card_range": o.card_range,
+                "component": o.component
             }
         txt = json.dumps(d)
         with open(f"{self.root_path}/prchsl_cc_proj.json", "w") as f:
