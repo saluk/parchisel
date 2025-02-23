@@ -13,6 +13,7 @@ from lib.datasource import CSVData, PythonData
 from lib.project import LocalProject
 from lib.outputs import Output
 
+from lib.components.mainmenu import MainMenu
 from lib.components.project_manage import ProjectManagement
 from lib.components.project_outputs import ProjectOutputs
 from lib.components.project_data_sources import ProjectDataSources
@@ -232,6 +233,7 @@ with ui.dialog() as new_template_dialog, ui.card():
 
 
 with ui.header().classes(replace='row items-center'):
+    MainMenu(ov, ov.ui_project_manage).build()
     with ui.tabs() as tabs:
         ov.toplevel = list(tabs.ancestors())[1]
         project_view = ui.tab("Project")
