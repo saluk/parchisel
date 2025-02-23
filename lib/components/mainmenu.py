@@ -12,5 +12,6 @@ class MainMenu:
             with ui.menu() as menu:
                 ui.menu_item("Create New Project").on_click(lambda: self.project_manager.new_project())
                 ui.menu_item("Open Project").on_click(lambda: self.project_manager.open_project())
+                ui.menu_item("Save project").on_click(lambda: self.project_manager.save_project())
                 ui.separator()
                 ui.menu_item('Quit')

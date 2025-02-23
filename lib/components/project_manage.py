@@ -43,6 +43,11 @@ class ProjectManagement:
         self.view.project = new_project
         self.view.refresh_project()
         self.build.refresh()
+    async def save_project(self):
+        if not self.view.project:
+            return ui.notify("No project loaded")
+        self.view.project.save()
+        ui.notify("Saved!", type="positive")
     def refresh(self):
         self.build.refresh()
     @ui.refreshable
