@@ -1,6 +1,8 @@
 import os
 from nicegui import ui
 
+from lib import exceptions
+
 class ProjectDataSources:
     def __init__(self, ov):
         self.view = ov
@@ -18,8 +20,7 @@ class ProjectDataSources:
             try:
                 await project.add_data_source(file)
             except Exception as e:
-                ui.notify(str(e))
-                return
+                raise exceptions.NotifyException(f"Couldn't load file/url {file}")
             ov.new_data_path = ""
             ov.ui_datasources.refresh()
             ov.refresh_outputs()

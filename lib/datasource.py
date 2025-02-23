@@ -39,7 +39,9 @@ class PythonData(DataSource):
                     self.fieldnames.append(field)
 
 def get_class_for_source(source):
-    if source.endswith(".csv"):
+    source = File(source).abs_path
+    print(source)
+    if source.endswith(".csv") or source.endswith("format=csv"):
         return CSVData
     if source.endswith(".py"):
         return PythonData

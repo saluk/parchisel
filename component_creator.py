@@ -173,6 +173,11 @@ async def render_project_outputs():
                         ov.viewed_output = viewed_output
                         ov.render_selected_project_outputs.refresh()
                     [c[1].on_value_change(set_check) for c in checks]
+                async def refresh_all():
+                    await ov.project.dirty_outputs()
+                    await ov.project.load_data()
+                    render_selected_project_outputs.refresh()
+                ui.button("Refresh all").on_click(refresh_all)
                 with ui.scroll_area().classes("w-full") as draggable_scroll:
                     dragscroll(dragable_card, draggable_scroll, 3)
                     print("about to render selected project outputs")
@@ -241,7 +246,7 @@ async def ui_panels():
                 ov.ui_datasources.build()
             with ui.card():
                 ui.label("Outputs")
-                ov.ui_outputs.build()
+                await ov.ui_outputs.build()
         with ui.tab_panel(template_view):
             async def save_output_btn():
                 await ov.project.save_outputs()

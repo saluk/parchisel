@@ -83,7 +83,7 @@ https://openfontlicense.org/open-font-license-official-text/
 # ongoing - when loading a project, validate outputs have correct data and template values
 # ongoing - ensure project data is saved when necessary
 
-# TODO - google sheet data source
+# TODO - more consideration on dirty the data
 # TODO - make output, datasource, and template paths relative to project
 # TODO - shorten data source name on output list editor
 # TODO - auto split output images if cards exceed max height (output could have sub images)

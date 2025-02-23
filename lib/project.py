@@ -186,6 +186,8 @@ class LocalProject(Project):
             print(f"check template {template}")
             self.templates[template] = Template(f"{tp}/"+template)
     async def save_outputs(self):
+        await self.load_data()
+        await self.dirty_outputs()
         for output in self.outputs.values():
             print(f"Look at output {output}")
             if not output.rendered_string:
