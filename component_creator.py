@@ -17,6 +17,7 @@ from lib.components.project_manage import ProjectManagement
 from lib.components.project_outputs import ProjectOutputs
 from lib.components.project_data_sources import ProjectDataSources
 from lib.template import Template
+from lib.files import global_cache
 
 class CodeContext:
     def __init__(self):
@@ -174,6 +175,7 @@ async def render_project_outputs():
                         ov.render_selected_project_outputs.refresh()
                     [c[1].on_value_change(set_check) for c in checks]
                 async def refresh_all():
+                    global_cache.clear()
                     await ov.project.dirty_outputs()
                     await ov.project.load_data()
                     render_selected_project_outputs.refresh()

@@ -1,5 +1,7 @@
 import csv
 
+from nicegui import ui
+
 from lib.files import File
 
 class DataSource:
@@ -8,6 +10,15 @@ class DataSource:
         self.source = source
         self.cards = []
         self.fieldnames = []
+    async def read_file(self):
+        file = File(self.source)
+        n = None
+        if file.is_url:
+            n = ui.notification("Loading...", position="top-right", type="ongoing")
+        content = await file.read()
+        if n:
+            n.dismiss()
+        return content
     async def load_data(self):
         pass
     def save_data(self):
@@ -16,7 +27,7 @@ class CSVData(DataSource):
     type_label = "CSV File"
     async def load_data(self):
         self.cards = []
-        reader = csv.DictReader((await File(self.source).read()).splitlines())
+        reader = csv.DictReader((await self.read_file()).splitlines())
         for row in reader:
             self.cards.append(row)
         self.fieldnames = self.cards[0].keys()
@@ -30,8 +41,7 @@ class PythonData(DataSource):
     type_label = "Python File (generator)"
     async def load_data(self):
         g = {}
-        with open(self.source) as f:
-            exec(f.read(), g)
+        exec(await self.read_file(), g)
         self.cards = [row for row in g["rows"]()]
         for card in self.cards:
             for field in card:
