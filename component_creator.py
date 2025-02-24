@@ -180,6 +180,7 @@ async def render_project_outputs():
                     await ov.project.dirty_outputs()
                     await ov.project.load_data()
                     render_selected_project_outputs.refresh()
+                    ov.ui_datasources.build.refresh()
                 ui.button("Refresh all").on_click(refresh_all)
                 with ui.scroll_area().classes("w-full") as draggable_scroll:
                     dragscroll(dragable_card, draggable_scroll, 3)

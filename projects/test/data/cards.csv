@@ -1,9 +1,9 @@
-Num,Icon,Name,HP,Power,Special
-1,purple_sphere.png,Bear<purple_sphere.png>,4,4,
-2,purple_sphere.png,Griffon<purple_sphere.png>,3,6,flying
-3,,Lion,6,3,
-4,,Dolphin,2,2,
-5,purple_sphere.png,Penguin,1,1,
-6,,Goat <purple_sphere.png>,1,2,
-7,,Orangutan,5,2,
-8,purple_sphere.png,Zebra,3,3,run
+Num,Icon,Name,HP,Power,Special,__id
+1,purple_sphere.png,Bear and Hamster,4,4,,0
+2,purple_sphere.png,Griffon<purple_sphere.png>,3,6,flying,1
+3,,y,6,3,,2
+4,,Dolphin,2,2,,3
+5,purple_sphere.png,Penguin,1,1,,4
+6,,Goat <purple_sphere.png>,1,2,,5
+7,,Orangutan,5,2,,6
+8,purple_sphere.png,Zebra,3,3,run,7

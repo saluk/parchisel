@@ -44,6 +44,36 @@ class ProjectDataSources:
                 imp.on("blur", edit_source)
                 ui.label(ds.type_label)
                 ui.button('Unlink', on_click=unlink_source)
+                with ui.expansion("view data").classes('col-span-3'):
+                    cols = [
+                        {"name": n, "label": n, "field": n, 
+                         "headerClasses":'hidden' if n.startswith("__") else '',
+                         'classes':'hidden' if n.startswith("__") else ''} for n in ds.fieldnames
+                    ]
+                    table = ui.table(columns=cols,
+                        rows=ds.cards
+                    )
+                    if ds.is_editable():
+                        async def alter_cell(e, ds=ds):
+                            for card in ds.cards:
+                                if e.args['__id'] == card['__id']:
+                                    card.update(e.args)
+                                    ds.save_data()
+                                    await project.dirty_outputs()
+                                    ov.refresh_outputs()
+                                    ui.notify("updated")
+                                    return
+                        for col in cols:
+                            table.add_slot(f'body-cell-{col['field']}', f'''
+                                <q-td key="{col['field']}" :props="props">
+                                    <q-input
+                                        v-model="props.row.{col['field']}"
+                                        @blur="() => $parent.$emit('alter_cell', props.row)"
+                                        @validate:model-value="() => $parent.$emit('alter_cell', props.row)"
+                                    />
+                                </q-td>
+                            ''')
+                        table.on('alter_cell', alter_cell)
         ui.separator()
         with ui.grid(columns=3):
             from nicegui import app
