@@ -84,7 +84,7 @@ https://openfontlicense.org/open-font-license-official-text/
 # ongoing - ensure project data is saved when necessary
 
 # TODO - more consideration on dirty the data
-# TODO - make output, datasource, and template paths relative to project
+# TODO - make output, and template paths relative to project
 # TODO - shorten data source name on output list editor
 # TODO - auto split output images if cards exceed max height (output could have sub images)
 # TODO - edit output rows/cols/width/height

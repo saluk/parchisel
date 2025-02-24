@@ -5,6 +5,7 @@ import json
 import lib.datasource as datasource
 from lib.template import Template
 from lib.outputs import Output
+from lib.files import File
 
 class Project:
     def __init__(self):
@@ -48,7 +49,7 @@ class Project:
         self.save()
     async def rename_data_source(self, ds, source):
         i = self.data_sources.index(ds)
-        new_ds = datasource.create_data_source(source)
+        new_ds = datasource.create_data_source(source, self)
         await new_ds.load_data()
         self.data_sources[i] = new_ds
         self.save()
@@ -58,7 +59,7 @@ class Project:
             raise Exception("Datasource already linked")
         if not fn:
             raise Exception("No datasource entered")
-        data_source = datasource.create_data_source(fn)
+        data_source = datasource.create_data_source(fn, self)
         try:
             await data_source.load_data()
         except Exception:
@@ -113,7 +114,7 @@ class Project:
 class LocalProject(Project):
     def __init__(self, name, root_path):
         self.name = name
-        self.root_path = root_path           # absolute path to project folder, no trailing slash
+        self.root_path = root_path.replace("\\", "/")           # absolute path to project folder, no trailing slash
         self.output_path = "outputs"         # absolute or relative path to where to write outputs
         self.template_path = "templates"     # absolute or relative path to where to read/write templates
         self.data_path = "data"              # absolute or relative path for csv data
@@ -138,8 +139,10 @@ class LocalProject(Project):
         self.image_path = d["image_path"]
         self.data_sources = []
         for source in d["data_sources"]:
+            source = File(source, self.root_path).rel_path(self.root_path)
+            print(source, self.root_path)
             self.data_sources.append(
-                datasource.create_data_source(source)
+                datasource.create_data_source(source, self)
             )
         for key in d["templates"]:
             self.templates[key] = Template(d["templates"][key])
@@ -154,7 +157,7 @@ class LocalProject(Project):
         d["image_path"] = self.image_path
         d["data_sources"] = []
         for source in self.data_sources:
-            d["data_sources"].append(source.source)
+            d["data_sources"].append(File(source.source, self.root_path).rel_path(self.root_path))
         d["templates"] = {}
         for key in self.templates:
             d["templates"][key] = self.templates[key].filename

@@ -6,12 +6,13 @@ from lib.files import File
 
 class DataSource:
     type_label = "Unknown Data Source"
-    def __init__(self, source):
+    def __init__(self, source, project):
         self.source = source
         self.cards = []   # Simple dictionaries
         self.fieldnames = []
+        self.project = project
     async def read_file(self):
-        file = File(self.source)
+        file = File(self.source, self.project.root_path)
         n = None
         if file.is_url:
             n = ui.notification("Loading...", position="top-right", type="ongoing")
@@ -42,7 +43,8 @@ class CSVData(DataSource):
         self.fieldnames = self.cards[0].keys()
         await super().load_data()
     def save_data(self):
-        with open(self.source, "w") as csvfile:
+        file = File(self.source, self.project.root_path)
+        with open(file.abs_path, "w") as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=self.fieldnames)
             writer.writeheader()
             for card in self.cards:
@@ -72,6 +74,6 @@ def get_class_for_source(source):
     if source.endswith(".py"):
         return PythonData
 
-def create_data_source(source):
+def create_data_source(source, project):
     cls = get_class_for_source(source)
-    return cls(source)
+    return cls(source, project)

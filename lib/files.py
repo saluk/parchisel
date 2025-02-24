@@ -78,14 +78,23 @@ class File:
             self.abs_path = convert_google_sheet(path)
             self.is_url = True
         elif self.path.startswith("/") or ":/" in self.path:
-            self.abs_path = self.path
+            self.abs_path = self.path.replace("\\","/")
         else:
             # Relative to given path
-            if root_path:
-                self.abs_path = self.root_path + "/" + self.path
+            if root_path!=None:
+                self.abs_path = root_path + "/" + self.path.replace("\\", "/")
             # Relative to parchisel path
             else:
-                self.abs_path = os.path.abspath(self.path)
+                self.abs_path = os.path.abspath(self.path).replace("\\", "/")
+
+    def rel_path(self, root):
+        if self.is_url:
+            return self.abs_path
+        path = self.abs_path
+        print(root+"/", path)
+        if root+"/" in path:
+            return path.replace(root+"/", "")
+        return path
 
     async def read(self, return_mode=None):
         if not return_mode:
@@ -121,4 +130,4 @@ class File:
         if self.is_url:
             raise Exception("Cannot write to a url")
         with open(self.abs_path, "w") as f:
-            f.write(text) 
+            f.write(text)
