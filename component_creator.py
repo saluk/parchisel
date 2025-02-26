@@ -232,17 +232,24 @@ with ui.dialog() as new_template_dialog, ui.card():
             new_template_dialog.close()
         ui.button("Create", on_click=create_cb)
 
+@ui.page('/')
+async def main():
+    with ui.header().classes(replace='row items-center'):
+        MainMenu(ov, ov.ui_project_manage).build()
+        with ui.tabs() as tabs:
+            ov.toplevel = list(tabs.ancestors())[1]
+            project_view = ui.tab("Project")
+            template_view = ui.tab('Templates')
+            sheet_view = ui.tab('Google Sheets')
+            virtual_table_view = ui.tab('Virtual Tables')
+            tabs.on_value_change(ov.refresh_outputs)
 
-with ui.header().classes(replace='row items-center'):
-    MainMenu(ov, ov.ui_project_manage).build()
-    with ui.tabs() as tabs:
-        ov.toplevel = list(tabs.ancestors())[1]
-        project_view = ui.tab("Project")
-        template_view = ui.tab('Templates')
-        sheet_view = ui.tab('Google Sheets')
-        tabs.on_value_change(ov.refresh_outputs)
-async def ui_panels():
     with ui.tab_panels(tabs, value=project_view).classes('w-full'):
+        with ui.tab_panel(virtual_table_view):
+            from lib import virtual_table
+            view = virtual_table.TableView()
+            with ui.card():
+                view.build()
         with ui.tab_panel(project_view):
             with ui.card():
                 ov.ui_project_manage.build()
@@ -269,8 +276,8 @@ async def ui_panels():
             ui.label('Google Sheets')
             ui.html('<iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTlAOJDERD5VIlvgjitaBc1rTfkBy__jH80-FcRQzUblef_3M_S0xJY0SS0Tv5h-EB-VYNjFAFPyI8A/pubhtml?widget=true&amp;headers=false" width=800 height=800></iframe>').classes('w-full')
 
-app.on_startup(ui_panels)
+app.on_startup(main)
 
 # NOTE: On Windows reload must be disabled to make asyncio.create_subprocess_exec work (see https://github.com/zauberzeug/nicegui/issues/486)
-ui.run(reload=platform.system() != 'Windows', native=True, title="Parchisel Component Creator")
-#ui.run(reload=platform.system() != 'Windows', native=False, title="Parchisel Component Creator")
+#ui.run(reload=platform.system() != 'Windows', native=True, title="Parchisel Component Creator")
+ui.run(reload=platform.system() != 'Windows', native=False, title="Parchisel Component Creator")
