@@ -83,6 +83,7 @@ https://openfontlicense.org/open-font-license-official-text/
 # ongoing - when loading a project, validate outputs have correct data and template values
 # ongoing - ensure project data is saved when necessary
 
+# TODO - what is the template api?
 # TODO - more consideration on dirty the data
 # TODO - make output, and template paths relative to project
 # TODO - shorten data source name on output list editor
@@ -90,9 +91,7 @@ https://openfontlicense.org/open-font-license-official-text/
 # TODO - edit output rows/cols/width/height
 # TODO - refactor with more nicegui native bindings
 # TODO - more ui.notify for CRUD (maybe put into Project)
-# TODO - edit csv files
 # TODO - widgets to edit current line of template
-# TODO - icons in draw_text positioned correctly
 # TODO - screentop export: (allow single back image somehow)
 # TODO - screentop export: (ensure output images are suitable for rows and columns)
 # TODO - tests

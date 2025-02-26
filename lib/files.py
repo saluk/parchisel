@@ -63,6 +63,16 @@ def convert_google_sheet(url):
         return f"https://docs.google.com/spreadsheets/d/{spreadsheet_ids[0]}/export?format=csv"
     return url
 
+def google_sheet_edit(url):
+    print("convert for google editing", url)
+    if "docs.google.com/spreadsheets/" in url:
+        spreadsheet_ids = re.findall("docs\.google.com\/spreadsheets\/d\/(.*?)\/", url)
+        if not spreadsheet_ids:
+            # Well, we tried
+            return url
+        return f"https://docs.google.com/spreadsheets/d/{spreadsheet_ids[0]}/edit"
+    return None
+
 class File:
     TEXT="text"
     BYTES="bytes"
@@ -72,11 +82,13 @@ class File:
 
         self.abs_path = None
         self.is_url = False
+        self.google_sheet_edit = None
         # If path is a url, save as url string
         
         if path.startswith("http://") or path.startswith("https://"):
             self.abs_path = convert_google_sheet(path)
             self.is_url = True
+            self.google_sheet_edit = google_sheet_edit(path)
         elif self.path.startswith("/") or ":/" in self.path:
             self.abs_path = self.path.replace("\\","/")
         else:
