@@ -279,5 +279,5 @@ async def main():
 app.on_startup(main)
 
 # NOTE: On Windows reload must be disabled to make asyncio.create_subprocess_exec work (see https://github.com/zauberzeug/nicegui/issues/486)
-#ui.run(reload=platform.system() != 'Windows', native=True, title="Parchisel Component Creator")
-ui.run(reload=platform.system() != 'Windows', native=False, title="Parchisel Component Creator")
+ui.run(reload=platform.system() != 'Windows', native=True, title="Parchisel Component Creator")
+#ui.run(reload=platform.system() != 'Windows', native=False, title="Parchisel Component Creator")
