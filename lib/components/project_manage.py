@@ -2,7 +2,10 @@ import os
 
 from nicegui import ui
 from nicegui import app
-import webview
+try:
+    import webview
+except:
+    webview = None
 
 from lib.exceptions import NotifyException
 from lib.project import LocalProject

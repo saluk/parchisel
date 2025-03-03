@@ -64,11 +64,12 @@ class VirtualTable:
         if table_view.player not in self.players:
             self.join(table_view.player)
         table_view.player.current_virtual_table = self
+        for player in self.players:
+            player.table_view.build.refresh()
     def join(self, player):
         self.players.append(player)
         card = Card(0, 0, 50, 50, player)
         self.cards.append(card)
-        self.build.refresh()
 
 # Model - Make one global instance
 class Tables:
@@ -84,9 +85,12 @@ class Tables:
         await t.set_view(table_view)
         # TODO this only refreshes the view for one player
         # If someone else is joined already they wont see the list update
-        table_view.build.refresh()
+        for player in players:
+            player.table_view.build.refresh()
 
 tables = Tables()
+
+players = []
 
 # Model - each player has a separate one
 # Doesn't hold any game specfic information, really a user
@@ -97,6 +101,7 @@ class Player:
         self.table_view = None
         self.dragging = None
         self.dragging_point = None
+        players.append(self)
 
 # View - show all running tables with option to join one
 # Once joined, show the table
@@ -131,11 +136,11 @@ class TableView:
             ui.label("BLAH")
             ui.button("New Table").on_click(lambda:tables.new_table(self))
 
-if __name__ == "__main__":
+if __name__ in {"__main__", "__mp_main__"}:
     @ui.page('/')
     async def main():
         view = TableView()
         with ui.card():
             await view.build()
     app.on_startup(main)
-    ui.run(reload=platform.system() != 'Windows', native=False, title="Virtual Tabletop")
+    ui.run(reload=platform.system() != 'Windows', native=False, title="Virtual Tabletop", port=6812)
