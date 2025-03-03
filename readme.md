@@ -92,6 +92,7 @@ https://openfontlicense.org/open-font-license-official-text/
 # TODO - refactor with more nicegui native bindings
 # TODO - more ui.notify for CRUD (maybe put into Project)
 # TODO - widgets to edit current line of template
+# TODO - screentop export: don't tie spans to data source, just give them an offset 
 # TODO - screentop export: (allow single back image somehow)
 # TODO - screentop export: (ensure output images are suitable for rows and columns)
 # TODO - tests
