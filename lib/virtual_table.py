@@ -25,6 +25,7 @@ class VirtualTable:
     # This is a ui that is generated independant for each player
     @ui.refreshable
     def build(self, view):
+        print("building the interactive mode", view)
         player = view.player
         view.content = self.gen_content(player)
         with ui.card() as card:
@@ -46,8 +47,6 @@ class VirtualTable:
     def click_component_up(self, player):
         player.dragging = None
     def move_component(self, view, e):
-        print("mouse move")
-        print(e.args)
         player = view.player
         if not player.dragging:
             return
@@ -61,11 +60,10 @@ class VirtualTable:
         view.interactive.content = view.content
         view.interactive.update()
         #self.build.refresh()
-    def set_view(self, table_view):
+    async def set_view(self, table_view):
         if table_view.player not in self.players:
             self.join(table_view.player)
         table_view.player.current_virtual_table = self
-        table_view.build.refresh()
     def join(self, player):
         self.players.append(player)
         card = Card(0, 0, 50, 50, player)
@@ -78,12 +76,12 @@ class Tables:
         self.tables = {}
     def get_all(self):
         return [table for table in self.tables.values()]
-    def new_table(self, table_view):
+    async def new_table(self, table_view):
         # Make table
         t = VirtualTable()
         self.tables[t.table_id] = t
         # Join table
-        t.set_view(table_view)
+        await t.set_view(table_view)
         # TODO this only refreshes the view for one player
         # If someone else is joined already they wont see the list update
         table_view.build.refresh()
@@ -116,10 +114,9 @@ class TableView:
         self.interactive.update()
 
     @ui.refreshable
-    def build(self):
-        print("building")
+    async def build(self):
+        print("building a table view")
         if self.player.current_virtual_table:
-            print("Current table")
             self.player.current_virtual_table.build(self)
             ui.timer(0.02, lambda:self.rerender_view())
         else:
@@ -139,6 +136,6 @@ if __name__ == "__main__":
     async def main():
         view = TableView()
         with ui.card():
-            view.build()
+            await view.build()
     app.on_startup(main)
     ui.run(reload=platform.system() != 'Windows', native=False, title="Virtual Tabletop")
