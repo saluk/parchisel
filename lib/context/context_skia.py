@@ -135,9 +135,9 @@ class SkiaContext:
                     limit -= 1
                     section = sections[i]
                     next_x = x+section.width()
-                    if max_width and next_x > max_width:
+                    if max_width and next_x > max_width+x1:
                         wrapped += 1
-                        overage = next_x-max_width
+                        overage = next_x-(x1+max_width)
                         cut_off_percent = overage/section.width()
                         # if section is an icon, just move it to the next row
                         if isinstance(section, IconSection):
