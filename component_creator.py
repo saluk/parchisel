@@ -17,34 +17,9 @@ from lib.components.mainmenu import MainMenu
 from lib.components.project_manage import ProjectManagement
 from lib.components.project_outputs import ProjectOutputs
 from lib.components.project_data_sources import ProjectDataSources
+from lib.components.code_editor import CodeEditor
 from lib.template import Template
 from lib.files import global_cache
-
-class CodeContext:
-    def __init__(self):
-        self.template = None
-        self.new_filename = ""
-        self.ui_editor = None
-    def set_new_filename(self, fn):
-        self.new_filename = fn
-    async def update_code(self, code):
-        self.template.code = code
-        # TODO only save if things are rendering OK
-        # We could have a button to force save
-        self.template.save()
-        if await ov.project.dirty_outputs(for_templates=[self.template.name], for_outputs=ov.viewed_output):   # only redraw outputs that use this template
-            print("rerender images")
-            print(ov.image_element_list, ov.output_list)
-            await render_images(ov.image_element_list, ov.output_list)
-
-def create_template(template_name):
-    t = ov.project.add_template(template_name)
-    change_template(t.name)
-
-def change_template(template_name):
-    ov.cc.template = ov.project.templates[template_name]
-    ov.ui_template_editor.refresh(ov.cc.template)
-
 
 class OutputView:
     def __init__(self):
@@ -65,10 +40,8 @@ class OutputView:
     def refresh_project(self):
         self.refresh_outputs()
         self.ui_datasources.build.refresh()
-        self.ui_template_editor.refresh()
+        self.ui_template_editor.build.refresh()
 ov = OutputView()
-#ov.project = project
-
 
 #### UI CODE
 async def render_images(image_element_list, output_list):
@@ -186,6 +159,8 @@ async def render_project_outputs():
                     dragscroll(dragable_card, draggable_scroll, 3)
                     print("about to render selected project outputs")
                     await render_selected_project_outputs()
+
+ov.render_images = render_images
 ov.render_project_outputs = render_project_outputs
 ov.render_selected_project_outputs = render_selected_project_outputs
 
@@ -195,45 +170,18 @@ ov.new_data_path = ""
 ov.ui_outputs = ProjectOutputs(ov)
 ov.ui_project_manage = ProjectManagement(ov)
 
-@ui.refreshable
-def render_code_editor(template=None):
-    cc = CodeContext()
-    if ov.project and ov.project.templates and not template:
-        template = list(ov.project.templates.values())[0]
-    cc.template = template
-    ov.cc = cc
-    with ui.grid(columns="80px 550px"):
-        with ui.column():
-            ui.button('New', on_click=lambda:new_template_dialog.open() )
-            if not ov.project or not ov.project.templates:
-                return
-            cc.ui_template_list = ui.select(list(ov.project.templates.keys()), 
-                on_change=lambda e: change_template(e.value), 
-                value=template.name)
-            def queue_update(value):
-                if getattr(ov, "code_update_timer", None):
-                    ov.code_update_timer.deactivate()
-                ov.code_update_timer = ui.timer(0.5, lambda: cc.update_code(value), once=True)
+ov.ui_template_editor = CodeEditor(ov)
 
-        cc.ui_editor = ui.codemirror(
-            value=cc.template.code, language="Python", theme="abcdef",
-            on_change=lambda e: queue_update(e.value)
-        ).classes("w-550px")
-        cc.ui_editor.tailwind.height("52")
-ov.ui_template_editor = render_code_editor
-
-with ui.dialog() as new_template_dialog, ui.card():
-    ui.input(label="New template filename:",
-             on_change=lambda e: ov.cc.set_new_filename(e.value))
-    with ui.button_group():
-        ui.button('Cancel', on_click=new_template_dialog.close)
-        def create_cb():
-            create_template(ov.cc.new_filename)
-            new_template_dialog.close()
-        ui.button("Create", on_click=create_cb)
+async def initial_project_load():
+    project = LocalProject("test", "projects/test")
+    await project.load()
+    ov.project = project
+    #ov.refresh_project()
 
 @ui.page('/')
 async def main():
+    await initial_project_load()
+
     with ui.header().classes(replace='row items-center'):
         MainMenu(ov, ov.ui_project_manage).build()
         with ui.tabs() as tabs:
@@ -270,7 +218,7 @@ async def main():
             ui.button("Export Screentop", on_click=save_screentop)
             ui.label('Templates')
             with ui.card().tight():
-                ov.ui_template_editor()
+                ov.ui_template_editor.build()
             await render_project_outputs()
         with ui.tab_panel(sheet_view):
             ui.label('Google Sheets')
