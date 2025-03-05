@@ -2,6 +2,8 @@ from nicegui import ui, app
 import platform
 import uuid
 
+from pixicanvas import PixiCanvas
+
 # Model
 class Card:
     def __init__(self, x, y, w, h, owner = None):
@@ -24,11 +26,26 @@ class VirtualTable:
             """ for card in self.cards])
     # This is a ui that is generated independant for each player
     @ui.refreshable
-    def build(self, view):
+    async def build(self, view):
         print("building the interactive mode", view)
         player = view.player
         view.content = self.gen_content(player)
         with ui.card() as card:
+            print("Make Pixi Canvas")
+            view.canvas = PixiCanvas(400,400)
+            def set_new_state(state):
+                for scard in state:
+                    for card in self.cards:
+                        if scard['id'] == card.card_id:
+                            card.x = scard['pos'][0]
+                            card.y = scard['pos'][1]
+            view.canvas.on('newstate', lambda e: set_new_state(e.args))
+            ui.timer(0.1, lambda: view.canvas.run_method('setBunnyState', [
+                {"vtid": c.card_id, "x": c.x, "y": c.y}
+                for c in self.cards
+            ]), immediate=False)
+
+            #canvas.on('mouseup', lambda:canvas.run_method('moveBunny'))
             view.interactive = ui.interactive_image('https://picsum.photos/640/360',
                 content=view.content
             ).on('svg:pointerdown', lambda e: self.click_component(player, e))
@@ -70,6 +87,7 @@ class VirtualTable:
         self.players.append(player)
         card = Card(0, 0, 50, 50, player)
         self.cards.append(card)
+        print("Gave card to player")
 
 # Model - Make one global instance
 class Tables:
@@ -122,8 +140,12 @@ class TableView:
     async def build(self):
         print("building a table view")
         if self.player.current_virtual_table:
-            self.player.current_virtual_table.build(self)
+            await self.player.current_virtual_table.build(self)
             ui.timer(0.02, lambda:self.rerender_view())
+            async def exit_game():
+                self.player.current_virtual_table = None
+                self.build.refresh()
+            ui.button("Exit game").on_click(exit_game)
         else:
             print("New table")
             self.build_list()
@@ -139,6 +161,7 @@ class TableView:
 if __name__ in {"__main__", "__mp_main__"}:
     @ui.page('/')
     async def main():
+        ui.add_head_html('<script src="https://pixijs.download/release/pixi.js"></script>')
         view = TableView()
         with ui.card():
             await view.build()

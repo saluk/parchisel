@@ -21,6 +21,9 @@ from lib.components.code_editor import CodeEditor
 from lib.template import Template
 from lib.files import global_cache
 
+# TODO make a parchisel app that has component creator and virtual table as modes to select between
+from lib.virtualtable import virtual_table
+
 class OutputView:
     def __init__(self):
         self.columns = None
@@ -194,10 +197,9 @@ async def main():
 
     with ui.tab_panels(tabs, value=project_view).classes('w-full'):
         with ui.tab_panel(virtual_table_view):
-            from lib import virtual_table
             view = virtual_table.TableView()
             with ui.card():
-                view.build()
+                await view.build()
         with ui.tab_panel(project_view):
             with ui.card():
                 ov.ui_project_manage.build()
@@ -227,5 +229,5 @@ async def main():
 app.on_startup(main)
 
 # NOTE: On Windows reload must be disabled to make asyncio.create_subprocess_exec work (see https://github.com/zauberzeug/nicegui/issues/486)
-ui.run(reload=platform.system() != 'Windows', native=True, title="Parchisel Component Creator")
+ui.run(reload=platform.system() != 'Windows', native=True, title="Parchisel Component Creator", port=6812)
 #ui.run(reload=platform.system() != 'Windows', native=False, title="Parchisel Component Creator")
