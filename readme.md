@@ -80,22 +80,23 @@ https://openfontlicense.org/open-font-license-official-text/
 
 # nearterm projects
 
-# ongoing - when loading a project, validate outputs have correct data and template values
-# ongoing - ensure project data is saved when necessary
+ongoing - when loading a project, validate outputs have correct data and template values
+ongoing - ensure project data is saved when necessary
 
-# TODO - what is the template api?
-# TODO - more consideration on dirty the data
-# TODO - make output, and template paths relative to project
-# TODO - shorten data source name on output list editor
-# TODO - auto split output images if cards exceed max height (output could have sub images)
-# TODO - edit output rows/cols/width/height
-# TODO - refactor with more nicegui native bindings
-# TODO - more ui.notify for CRUD (maybe put into Project)
-# TODO - widgets to edit current line of template
-# TODO - screentop export: don't tie spans to data source, just give them an offset 
-# TODO - screentop export: (allow single back image somehow)
-# TODO - screentop export: (ensure output images are suitable for rows and columns)
-# TODO - tests
+TODO - what is the template api?
+TODO - more consideration on dirty the data
+TODO - make output, and template paths relative to project
+TODO - shorten data source name on output list editor
+TODO - auto split output images if cards exceed max height (output could have sub images)
+TODO - edit output rows/cols/width/height
+TODO - refactor with more nicegui native bindings
+TODO - more ui.notify for CRUD (maybe put into Project)
+TODO - widgets to edit current line of template
+TODO - rich text: html/bbcode or markdown support in text
+TODO - screentop export: don't tie spans to data source, just give them an offset 
+TODO - screentop export: (allow single back image somehow)
+TODO - screentop export: (ensure output images are suitable for rows and columns)
+TODO - tests
 
 # Longterm Ideas
 - Database backed project data for web hosted version

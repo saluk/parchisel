@@ -1,6 +1,33 @@
 # Virtual Table Notes
 
-Object/Update diagram
+## Feature todo list
+
+Basics:
+TODO - Define state data format and read the same state on python and pixi
+TODO - pickup card
+TODO - drop card
+TODO - collection of cards, can pickup and drop
+Collections: 
+TODO - absolute
+TODO - stack with top card
+TODO - stack with offset
+TODO - grid
+TODO - change collection type
+TODO - hand: special collection that's fixed to player ui
+Selection:
+TODO - select cards
+TODO - deselect cards
+TODO - lasso select
+TODO - select collections alongside cards
+TODO - filter selection by card tags
+Hidden:
+TODO - "hidden" information (can't see cards in a collection, can't see certain tags on a card)
+Annotations:
+TODO - chat, notes
+TODO - Add text field to card
+TODO - draw path on card
+
+## Object/Update diagram
 
 -Table-
 'A single game being played'
