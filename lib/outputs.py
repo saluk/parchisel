@@ -65,7 +65,8 @@ class Output:
             template = self.template_name
             if self.template_field:
                 template = card.get(self.template_field, template)
-            rows.append(template)
+            if template not in rows:
+                rows.append(template)
         return rows
 
     async def render(self, project):

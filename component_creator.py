@@ -81,6 +81,8 @@ async def render_selected_project_outputs():
                 zout.tailwind.font_size('xs')
                 ui.label(output.file_name).classes("m-3 font-bold")
                 ui.label(output.data_source_name).classes("m-3 font-italic")
+                for t in await output.templates_used(ov.project):
+                    ui.label("["+t+"]").classes("m-3")
             zoom = zoom_levels[len(zoom_levels)//2]
             im_el = ui.image("").classes(f'w-[{zoom}px]').style("cursor: zoom-in;")
             im_el.zoom = zoom
