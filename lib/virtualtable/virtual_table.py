@@ -2,7 +2,7 @@ from nicegui import ui, app
 import platform
 import uuid
 
-from pixicanvas import PixiCanvas
+from lib.virtualtable.pixicanvas import PixiCanvas
 
 # Model
 class Card:
@@ -138,6 +138,7 @@ class TableView:
 
     @ui.refreshable
     async def build(self):
+        ui.add_head_html('<script src="https://pixijs.download/release/pixi.js"></script>')
         print("building a table view")
         if self.player.current_virtual_table:
             await self.player.current_virtual_table.build(self)
@@ -161,7 +162,6 @@ class TableView:
 if __name__ in {"__main__", "__mp_main__"}:
     @ui.page('/')
     async def main():
-        ui.add_head_html('<script src="https://pixijs.download/release/pixi.js"></script>')
         view = TableView()
         with ui.card():
             await view.build()
