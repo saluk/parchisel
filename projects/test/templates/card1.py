@@ -19,4 +19,5 @@ name_x = 20
 name_y = 50
 card.draw_box(name_x, name_y, name_width, name_height, (200,200,200,225))
 card.draw_text(name_x+5,name_y+5,row["Name"]+" hello to you you beautiful person",name_width,name_height,30, 24)
-card.draw_text(300, 15, str(row.get("Power", "5"))+"/"+row.get("HP", "5"), 75, 50, font_size=30)
+card.draw_text(300, 15, str(row.get("Power", "5"))+"/"+row.get("HP", "5"), 75, 50, font_size=30, min_font_size=15)
+

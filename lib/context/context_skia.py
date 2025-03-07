@@ -29,6 +29,7 @@ class SkiaContext:
         self.surface = skia.Surface.MakeRasterN32Premul(sw, sh)
         self.canvas = self.surface.getCanvas()
     def clear(self, color):
+        """:clear(color)"""
         self.canvas.clear(skia.ColorSetARGB(color[3], color[0], color[1], color[2]))
     def draw_box(self, x, y, w, h, color):
         paint = skia.Paint(
@@ -44,6 +45,7 @@ class SkiaContext:
         # Both contexts must match in type
         context.surface.draw(self.canvas, x, y)
     def draw_image(self, x, y, image_file, width=None, height=None):
+        """:draw_image(x, y, image_file, width=None, height=None)"""
         image = skia.Image.open(f"{self.project.get_image_path()}/{image_file}")
         if width or height:
             if not width: width = image.bounds().width()
@@ -59,6 +61,7 @@ class SkiaContext:
         else:
             self.canvas.drawImage(image, x, y)
     def draw_text(self, x, y, text, max_width=None, max_height=None, font_size=60, min_font_size=None):
+        """:draw_text(self, x, y, text, max_width=None, max_height=None, font_size=60, min_font_size=None)"""
         typeface = self.fontmgr.matchFamilyStyle('Raleway', skia.FontStyle.Bold())
         size_range = [font_size]
         if min_font_size:
