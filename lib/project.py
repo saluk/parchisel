@@ -67,6 +67,15 @@ class Project:
         self.data_sources.append(data_source)
         await self.dirty_outputs()
         self.save()
+    async def create_data_source(self, fn):
+        fn = fn.strip()
+        if self.get_data_source(fn):
+            raise Exception("Datasource already linked")
+        if not fn:
+            raise Exception("No datasource entered")
+        f = File(fn, self.root_path)
+        f.write("")
+        return await self.add_data_source(fn)
 
     def add_template(self, template_name):
         t = Template(f"{self.get_template_path()}/{template_name}")

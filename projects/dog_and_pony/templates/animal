@@ -1,0 +1,12 @@
+dpi = 150
+card.resize(int(dpi*2.5), int(dpi*3.5))
+card.clear((220, 255, 255, 255))
+card.draw_box(0, 0, int(dpi*2.5), int(dpi*3.5), (0,0,0,255))
+card.draw_box(1, 1, int(dpi*2.5)-1, int(dpi*3.5)-1, (220,255,255,255))
+if row["image"]:
+    card.draw_image(95, 45, row["image"], int(dpi*2.5*0.50), int(dpi*3.5*0.50))
+if row["tricks"]:
+    card.draw_text(95, 325, "Tricks: "+row["tricks"])
+    card.draw_text(95, 385, "Style:  "+row["style"])
+if row["judging"]:
+    card.draw_text(45, 185, row["judging"], 320, 800, font_size=50)

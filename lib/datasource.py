@@ -21,17 +21,41 @@ class DataSource:
             n.dismiss()
         return content
     def assign_ids(self):
+        if "__id" not in self.fieldnames:
+            self.fieldnames.append("__id")
         card_id = 0
         for card in self.cards:
             card["__id"] = card_id
             card_id += 1
-        print(card)
     async def load_data(self):
         self.assign_ids()
     def save_data(self):
         pass
     def is_editable(self):
         return False
+    def create_blank_field(self):
+        fieldname = "blank_"+str(len(self.fieldnames))
+        self.fieldnames.append(fieldname)
+        for c in self.cards:
+            c[fieldname] = ""
+        self.assign_ids()
+    def create_blank_card(self):
+        d = {}
+        for fieldname in self.fieldnames:
+            d[fieldname] = ""
+        self.cards.append(d)
+        self.assign_ids()
+    def change_headers(self, newheaders):
+        field_names = [x.strip() for x in newheaders.split(",")]
+        assert len(field_names) == len(self.fieldnames)
+        for c in self.cards:
+            for i in range(len(self.fieldnames)):
+                old = self.fieldnames[i]
+                new = field_names[i]
+                v = c[old]
+                del c[old]
+                c[new] = v
+        self.fieldnames = field_names
 
 class CSVData(DataSource):
     type_label = "CSV File"
@@ -40,7 +64,9 @@ class CSVData(DataSource):
         reader = csv.DictReader((await self.read_file()).splitlines())
         for row in reader:
             self.cards.append(row)
-        self.fieldnames = self.cards[0].keys()
+        self.fieldnames = []
+        if self.cards:
+            self.field_names = self.cards[0].keys()
         await super().load_data()
     def save_data(self):
         file = File(self.source, self.project.root_path)

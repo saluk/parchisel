@@ -6,7 +6,7 @@ from lib.context import Context
 from lib.context import SkiaContext as Context
 
 class Output:
-    def __init__(self, data_source_name, file_name, rows=None, cols=None, width=1800, height=1800, 
+    def __init__(self, data_source_name, file_name, rows=None, cols=None, width=int(150*2.5*3), height=int(150*3.5*3), 
                 offset_x = 0, offset_y = 0, spacing_x = 0, spacing_y = 0, 
                 template_name: str = None, template_field: str = None, card_range:tuple = None,
                 component=None):

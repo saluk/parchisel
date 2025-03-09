@@ -178,7 +178,7 @@ ov.ui_project_manage = ProjectManagement(ov)
 ov.ui_template_editor = CodeEditor(ov)
 
 async def initial_project_load():
-    project = LocalProject("test", "projects/test")
+    project = LocalProject("test", "projects/dog_and_pony")
     await project.load()
     ov.project = project
     #ov.refresh_project()

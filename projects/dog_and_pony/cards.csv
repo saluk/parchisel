@@ -1,0 +1,20 @@
+__id,name,image,style,tricks,judging
+0,dog 1,dog1.png,4,3,
+1,dog 2,dog2.png,5,2,
+2,dog 3,dog3.png,3,4,
+3,dog 4,dog4.png,2,5,
+4,dog 5,dog5.png,3,3,
+5,dog 6,dog6.png,6,1,
+6,pony 1,pony1.png,1,6,
+7,pony 2,pony2.png,2,4,
+8,pony 3,pony3.png,3,3,
+9,pony 4,pony4.png,2,5,
+10,pony 5,pony5.png,4,2,
+11,pony 6,pony6.png,4,1,
+12,judge 1,,,,Best tricks
+13,judge 2,,,,Best style
+14,judge 3,,,,Best tricks with style 3+
+15,judge 4,,,,Best style with tricks 3+
+16,judge 5,,,,Worst tricks
+17,judge 6,,,,Worst style
+

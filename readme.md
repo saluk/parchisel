@@ -83,6 +83,8 @@ https://openfontlicense.org/open-font-license-official-text/
 ongoing - when loading a project, validate outputs have correct data and template values
 ongoing - ensure project data is saved when necessary
 
+TODO - output indexing should start at 1 for users
+TODO - when creating a new csv, need to edit the headers
 TODO - what is the template api?
 TODO - more consideration on dirty the data
 TODO - make output, and template paths relative to project
