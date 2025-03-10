@@ -83,6 +83,10 @@ https://openfontlicense.org/open-font-license-official-text/
 ongoing - when loading a project, validate outputs have correct data and template values
 ongoing - ensure project data is saved when necessary
 
+TODO - data view: show images in fields if it is an image
+TODO - csv files saved with extra spaces
+TODO - we don't need to save __id row in data source, it's internal use only
+TODO - "<" character in draw text strings
 TODO - output indexing should start at 1 for users
 TODO - when creating a new csv, need to edit the headers
 TODO - what is the template api?

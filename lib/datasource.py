@@ -56,6 +56,14 @@ class DataSource:
                 del c[old]
                 c[new] = v
         self.fieldnames = field_names
+    def change_header(self, old_name, new_name):
+        assert(old_name in self.fieldnames)
+        i = self.fieldnames.index(old_name.strip())
+        self.fieldnames[i] = new_name.strip()
+        for c in self.cards:
+            v = c[old_name]
+            del c[old_name]
+            c[new_name] = v
 
 class CSVData(DataSource):
     type_label = "CSV File"
@@ -64,13 +72,12 @@ class CSVData(DataSource):
         reader = csv.DictReader((await self.read_file()).splitlines())
         for row in reader:
             self.cards.append(row)
-        self.fieldnames = []
-        if self.cards:
-            self.field_names = self.cards[0].keys()
+        self.fieldnames = reader.fieldnames
         await super().load_data()
     def save_data(self):
         file = File(self.source, self.project.root_path)
         with open(file.abs_path, "w") as csvfile:
+            print(self.fieldnames)
             writer = csv.DictWriter(csvfile, fieldnames=self.fieldnames)
             writer.writeheader()
             for card in self.cards:
