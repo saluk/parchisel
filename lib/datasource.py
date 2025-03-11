@@ -1,4 +1,5 @@
 import csv
+import shutil
 
 from nicegui import ui
 
@@ -39,6 +40,7 @@ class DataSource:
         for c in self.cards:
             c[fieldname] = ""
         self.assign_ids()
+        print("created new field", self.fieldnames, id(self))
     def create_blank_card(self):
         d = {}
         for fieldname in self.fieldnames:
@@ -68,6 +70,7 @@ class DataSource:
 class CSVData(DataSource):
     type_label = "CSV File"
     async def load_data(self):
+        print("loading csv data")
         self.cards = []
         reader = csv.DictReader((await self.read_file()).splitlines())
         for row in reader:
@@ -76,12 +79,17 @@ class CSVData(DataSource):
         await super().load_data()
     def save_data(self):
         file = File(self.source, self.project.root_path)
-        with open(file.abs_path, "w") as csvfile:
-            print(self.fieldnames)
-            writer = csv.DictWriter(csvfile, fieldnames=self.fieldnames)
-            writer.writeheader()
-            for card in self.cards:
-                writer.writerow(card)
+        # Don't corrupt file if there is an error
+        try:
+            with open(file.abs_path+".temp", "w", newline="") as csvfile:
+                print("writing csv:", id(self), self.fieldnames)
+                writer = csv.DictWriter(csvfile, fieldnames=self.fieldnames)
+                writer.writeheader()
+                for card in self.cards:
+                    writer.writerow(card)
+        except:
+            raise
+        shutil.move(file.abs_path+".temp", file.abs_path)
     def is_editable(self):
         if File(self.source).is_url:
             return False
@@ -100,9 +108,10 @@ class PythonData(DataSource):
         await super().load_data()
 
 def get_class_for_source(source):
-    source = File(source).abs_path
+    file = File(source)
     print(source)
-    if source.endswith(".csv") or source.endswith("format=csv"):
+    # Currontly only supporting online files that convert to csv
+    if source.endswith(".csv") or file.is_url:
         return CSVData
     if source.endswith(".py"):
         return PythonData

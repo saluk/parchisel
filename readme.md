@@ -84,7 +84,6 @@ ongoing - when loading a project, validate outputs have correct data and templat
 ongoing - ensure project data is saved when necessary
 
 TODO - data view: show images in fields if it is an image
-TODO - csv files saved with extra spaces
 TODO - we don't need to save __id row in data source, it's internal use only
 TODO - "<" character in draw text strings
 TODO - output indexing should start at 1 for users
@@ -103,6 +102,7 @@ TODO - screentop export: don't tie spans to data source, just give them an offse
 TODO - screentop export: (allow single back image somehow)
 TODO - screentop export: (ensure output images are suitable for rows and columns)
 TODO - tests
+TODO - notion integration
 
 # Longterm Ideas
 - Database backed project data for web hosted version

@@ -224,9 +224,6 @@ async def main():
             with ui.card().tight():
                 ov.ui_template_editor.build()
             await render_project_outputs()
-        with ui.tab_panel(sheet_view):
-            ui.label('Google Sheets')
-            ui.html('<iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTlAOJDERD5VIlvgjitaBc1rTfkBy__jH80-FcRQzUblef_3M_S0xJY0SS0Tv5h-EB-VYNjFAFPyI8A/pubhtml?widget=true&amp;headers=false" width=800 height=800></iframe>').classes('w-full')
 
 app.on_startup(main)
 

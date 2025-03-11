@@ -9,13 +9,15 @@ class EditableTable:
         self.ds = ds
         self.project = project
         self.ov = ov
-    @ui.refreshable
+    @ui.refreshable_method
     def build(self):
+        print("refresh")
         ds = self.ds
         project = self.project
         ov = self.ov
         import random
-        ui.label(random.randint(0,100000))
+        v = random.randint(0,100000)
+        ui.label(v)
         def gen_cols(ds):
             return [
                 {"name": n, "label": n, "field": n, 
@@ -29,11 +31,13 @@ class EditableTable:
             if ds.is_editable():
                 async def add_field(ds=ds):
                     ds.create_blank_field()
+                    ds.save_data()
                     await project.dirty_outputs()
                     ov.refresh_outputs()
                     self.build.refresh()
                 async def add_card(ds=ds):
                     ds.create_blank_card()
+                    ds.save_data()
                     await project.dirty_outputs()
                     ov.refresh_outputs()
                     self.build.refresh()
@@ -64,24 +68,37 @@ class EditableTable:
                         :key="col.name"
                         :props="props"
                     >
-                        <q-input standout dense
-                            v-model="col.name"
-                            @blur="() => $parent.$emit('alter_header', col)"
-                            @validate:model-value="() => $parent.$emit('alter_header', col)"
-                            @keyup.enter="() => $parent.$emit('alter_header', col)"
-                        </b>
+                    <q-btn class="q-pa-xs q-ma-full" 
+                        style="height:15px"
+                        size="xs" padding="xs xs" 
+                        color="white" dense 
+                        text-color="black" label="x" />
+                    <q-input standout dense
+                        class="p-0"
+                        v-model="col.name"
+                        @blur="() => $parent.$emit('alter_header', col)"
+                        @validate:model-value="() => $parent.$emit('alter_header', col)"
+                        @keyup.enter="() => $parent.$emit('alter_header', col)"
                     </q-th>
                     </q-tr>
                 ''')
                 for col in gen_cols(ds):
                     table.add_slot(f'body-cell-{col['field']}', f'''
                         <q-td key="{col['field']}" :props="props">
-                            <q-input
-                                v-model="props.row.{col['field']}"
-                                @blur="() => $parent.$emit('alter_cell', props.row)"
-                                @validate:model-value="() => $parent.$emit('alter_cell', props.row)"
-                                @keyup.enter="() => $parent.$emit('alter_cell', props.row)"
-                            />
+                            <div class="row">
+                                <q-btn class="col-1 q-pa-xs q-ma-full" 
+                                    style="height:15px"
+                                    size="xs" padding="xs xs" 
+                                    color="white" dense 
+                                    text-color="black" label="x" />
+                                <q-input class="col"
+                                    padding="xs xs" 
+                                    v-model="props.row.{col['field']}"
+                                    @blur="() => $parent.$emit('alter_cell', props.row)"
+                                    @validate:model-value="() => $parent.$emit('alter_cell', props.row)"
+                                    @keyup.enter="() => $parent.$emit('alter_cell', props.row)"
+                                />
+                            </div>
                         </q-td>
                     ''')
                 table.on('alter_cell', alter_cell)
@@ -91,6 +108,7 @@ class EditableTable:
 class ProjectDataSources:
     def __init__(self, ov):
         self.view = ov
+        self.tables = []
     def refresh(self):
         self.build.refresh()
     @ui.refreshable
@@ -118,6 +136,7 @@ class ProjectDataSources:
             ov.new_data_path = ""
             ov.ui_datasources.refresh()
             ov.refresh_outputs()
+        self.tables = []
         for ds in project.data_sources:
             async def unlink_source(source=ds.source):
                 await project.remove_data_source(source)
@@ -140,10 +159,11 @@ class ProjectDataSources:
                 ui.button('Unlink', on_click=unlink_source)
                 with ui.expansion("view data").classes('col-span-3'):
                     file = File(ds.source)
-                    if file.google_sheet_edit:
-                        ui.html(f'<iframe src="{file.google_sheet_edit}" width=800 height=800></iframe>').classes('w-full')
+                    if file.edit_url:
+                        ui.html(f'<iframe src="{file.edit_url}" width=800 height=800></iframe>').classes('w-full')
                     else:
                         editable_table = EditableTable(ds, project, ov)
+                        self.tables.append(editable_table)
                         editable_table.build()
         ui.separator()
         with ui.grid(columns=3):

@@ -1,19 +1,21 @@
-__id,name,image,judging,fields
-0,dog 1,dog1.png,,black running
-1,dog 2,dog2.png,,white running fluffy
-2,dog 3,dog3.png,,spotted running
-3,dog 4,dog4.png,,black posing fluffy
-4,dog 5,dog5.png,,white posing
-5,dog 6,dog6.png,,spotted posing
-6,pony 1,pony1.png,,black running fluffy
-7,pony 2,pony2.png,,white running
-8,pony 3,pony3.png,,spotted running
-9,pony 4,pony4.png,,black posing
-10,pony 5,pony5.png,,white posing
-11,pony 6,pony6.png,,spotted posing fluffy
-12,judge 1,,Black,
-13,judge 2,,White,
-14,judge 3,,Spotted,
-15,judge 4,,Running,
-16,judge 5,,Posing,
-17,judge 6,,Fluffy,
+__id,name,image,judging,fields,blank_5
+0,dog 1,dog1.png,,black running,
+1,dog 2,dog2.png,,white running fluffy,
+2,dog 3,dog3.png,,spotted running,
+3,dog 4,dog4.png,,black posing fluffy,
+4,dog 5,dog5.png,,white posing,
+5,dog 6,dog6.png,,spotted posing,
+6,pony 1,pony1.png,,black running fluffy,
+7,pony 2,pony2.png,,white running,
+8,pony 3,pony3.png,,spotted running,
+9,pony 4,pony4.png,,black posing,
+10,pony 5,pony5.png,,white posing,
+11,pony 6,pony6.png,,spotted posing fluffy,
+12,judge 1,,Black,,
+13,judge 2,,White,,
+14,judge 3,,Spotted,,
+15,judge 4,,Running,,
+16,judge 5,,Posing,,
+17,judge 6,,Fluffy,,
+18,test,,,,
+19,,,,,
