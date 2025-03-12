@@ -1,5 +1,6 @@
 import csv
 import shutil
+from collections import defaultdict
 
 from nicegui import ui
 
@@ -66,6 +67,20 @@ class DataSource:
             if all([c[k]==dict[k] for k in dict]):
                 self.cards.remove(c)
                 return
+
+# Used for in-place data
+class TempDataSource(DataSource):
+    def __init__(self):
+        super().__init__("", None)
+        self.fieldnames = []
+        self.num_fields = 0
+        def next():
+            self.num_fields += 1
+            return f"field_{self.num_fields}"
+        self.cards = [defaultdict(next)]
+
+    async def read_file(self):
+        return ""
 
 class CSVData(DataSource):
     type_label = "CSV File"

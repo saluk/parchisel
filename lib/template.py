@@ -17,6 +17,8 @@ class Template:
     def reload_code(self):
         self.load()
         return self._code
+    def get_line(self, line_num):
+        return self.code.split("\n")[line_num]
     def load(self):
         with open(self.filename,"r") as f:
             self._code = f.read()

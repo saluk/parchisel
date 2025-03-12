@@ -1,4 +1,5 @@
 dpi = 150
+card.draw_box(0, 0, 200, 200, (0,0,0,255))
 card.resize(int(dpi*2.5), int(dpi*3.5))
 card.clear((220, 255, 255, 255))
 card.draw_box(0, 0, int(dpi*2.5), int(dpi*3.5), (0,0,0,255))

@@ -186,7 +186,7 @@ async def initial_project_load():
 
 @ui.page('/')
 async def main():
-    with ui.header().classes(replace='row items-center'):
+    with ui.header().classes(replace='row items-center') as header:
         MainMenu(ov, ov.ui_project_manage).build()
         with ui.tabs() as tabs:
             ov.toplevel = list(tabs.ancestors())[1]
@@ -196,7 +196,9 @@ async def main():
             virtual_table_view = ui.tab('Virtual Tables')
             tabs.on_value_change(ov.refresh_outputs)
 
-    with ui.tab_panels(tabs, value=project_view).classes('w-full'):
+    ov.header = header
+
+    with ui.tab_panels(tabs, value=project_view).classes('w-full') as tabs:
         with ui.tab_panel(virtual_table_view):
             view = virtual_table.TableView()
             with ui.card():
@@ -223,6 +225,7 @@ async def main():
             with ui.card().tight():
                 ov.ui_template_editor.build()
             await render_project_outputs()
+    ov.tabs = tabs
     ui.timer(0.1, initial_project_load, once=True)
 
 app.on_startup(main)

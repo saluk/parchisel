@@ -9,11 +9,17 @@ class Output:
     def __init__(self, data_source_name, file_name, rows=None, cols=None, width=int(150*2.5*3), height=int(150*3.5*3), 
                 offset_x = 0, offset_y = 0, spacing_x = 0, spacing_y = 0, 
                 template_name: str = None, template_field: str = None, card_range:tuple = None,
+                data_source=None,
+                template=None,
                 component=None):
         self.data_source_name = data_source_name
         self.file_name = file_name
         self.template_name = template_name
         self.template_field = template_field
+
+        # If we want to skip the lookup on the project
+        self._data_source = data_source
+        self._template = template
 
         self.component = component   # This should be a dict of {component_name, asset_side}
 
@@ -32,6 +38,8 @@ class Output:
         self.rendered_string = ""   # Clear to rerender
 
     def get_data_source(self, project):
+        if self._data_source:
+            return self._data_source
         return project.get_data_source(self.data_source_name)
 
     def get_card_range(self, project, total=False):
@@ -53,8 +61,10 @@ class Output:
         self.card_range = [min, max]
 
     async def templates_used(self, project):
+        if self._template:
+            return self._template.name
         rows = []
-        data_source = project.get_data_source(self.data_source_name)
+        data_source = self.get_data_source(project)
         if not data_source:
             return [self.template_name]
         try:
@@ -90,7 +100,7 @@ class Output:
 
         #draw cards
         try:
-            data_source = project.get_data_source(self.data_source_name)
+            data_source = self.get_data_source(project)
             assert(data_source)
             await data_source.load_data()
         except Exception:
@@ -99,6 +109,8 @@ class Output:
         main_template = None
         if self.template_name:
             main_template = project.templates[self.template_name]
+        if self._template:
+            main_template = self._template
         template_cache = []  #These templates have been reloaded already
         maxh = 0
         card_range = self.get_card_range(project)

@@ -58,7 +58,7 @@ class CodeEditor:
         if line_start < 0:
             line_start = 0
         cursor_in_line = cursor-line_start
-        return {"cursor": cursor, "line": cur_line, "cursor_in_line": cursor_in_line}        
+        return {"cursor": cursor, "line": cur_line, "line_number":get_line(cursor), "cursor_in_line": cursor_in_line}        
 
     async def insert_code(self, code):
         cursor = (await self.get_cursor())["cursor"]
@@ -77,7 +77,13 @@ class CodeEditor:
                             ).classes("m-3")
                             ui.label("card."+func.__doc__[1:])
 
-    def build_fancy_context(self, cursor):
+    async def build_fancy_context(self, cursor):
+        import lib.components.interactive_context as ic
+        interactive = ic.make_interactive(self.template, cursor["line_number"], self.view)
+        if interactive:
+            await interactive.build()
+            return
+
         import inspect
         for method_name in dir(lib.context.SkiaContext):
             if "card."+method_name in cursor["line"]:
@@ -101,7 +107,7 @@ class CodeEditor:
             if not cursor["line"].strip():
                 self.build_function_list()
             else:
-                self.build_fancy_context(cursor)
+                await self.build_fancy_context(cursor)
 
 
     @ui.refreshable

@@ -1,4 +1,5 @@
 import base64
+import os
 import skia
 
 # SKIA advantage
@@ -46,7 +47,10 @@ class SkiaContext:
         context.surface.draw(self.canvas, x, y)
     def draw_image(self, x, y, image_file, width=None, height=None):
         """:draw_image(x, y, image_file, width=None, height=None)"""
-        image = skia.Image.open(f"{self.project.get_image_path()}/{image_file}")
+        image_file = f"{self.project.get_image_path()}/{image_file}"
+        if not os.path.exists(image_file):
+            image_file = "lib/images/unknown_image.png"
+        image = skia.Image.open(image_file)
         if width or height:
             if not width: width = image.bounds().width()
             if not height: height = image.bounds().height()
