@@ -47,18 +47,7 @@ class DataSource:
             d[fieldname] = ""
         self.cards.append(d)
         self.assign_ids()
-    def change_headers(self, newheaders):
-        field_names = [x.strip() for x in newheaders.split(",")]
-        assert len(field_names) == len(self.fieldnames)
-        for c in self.cards:
-            for i in range(len(self.fieldnames)):
-                old = self.fieldnames[i]
-                new = field_names[i]
-                v = c[old]
-                del c[old]
-                c[new] = v
-        self.fieldnames = field_names
-    def change_header(self, old_name, new_name):
+    def rename_column(self, old_name, new_name):
         assert(old_name in self.fieldnames)
         i = self.fieldnames.index(old_name.strip())
         self.fieldnames[i] = new_name.strip()
@@ -66,6 +55,17 @@ class DataSource:
             v = c[old_name]
             del c[old_name]
             c[new_name] = v
+    def delete_column(self, old_name):
+        assert(old_name in self.fieldnames)
+        i = self.fieldnames.index(old_name.strip())
+        del self.fieldnames[i]
+        for c in self.cards:
+            del c[old_name]
+    def delete_card_matching(self, dict):
+        for c in self.cards:
+            if all([c[k]==dict[k] for k in dict]):
+                self.cards.remove(c)
+                return
 
 class CSVData(DataSource):
     type_label = "CSV File"
@@ -83,10 +83,11 @@ class CSVData(DataSource):
         try:
             with open(file.abs_path+".temp", "w", newline="") as csvfile:
                 print("writing csv:", id(self), self.fieldnames)
-                writer = csv.DictWriter(csvfile, fieldnames=self.fieldnames)
+                fieldnames = [n for n in self.fieldnames if not n.startswith("__")]
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
                 for card in self.cards:
-                    writer.writerow(card)
+                    writer.writerow({key:card[key] for key in card if not key.startswith("__")})
         except:
             raise
         shutil.move(file.abs_path+".temp", file.abs_path)

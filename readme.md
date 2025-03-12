@@ -86,7 +86,6 @@ ongoing - ensure project data is saved when necessary
 TODO - excel support
 TODO - for online spreadsheets or .xsl/.odt files we'll need to select the 'sheet' for a data source
 TODO - data view: show images in fields if it is an image
-TODO - we don't need to save __id row in data source, it's internal use only
 TODO - "<" character in draw text strings
 TODO - output indexing should start at 1 for users
 TODO - when creating a new csv, need to edit the headers

@@ -2,7 +2,7 @@ import os
 import random
 import json
 
-import lib.datasource as datasource
+import lib.file.datasource as datasource
 from lib.template import Template
 from lib.outputs import Output
 from lib.file import File

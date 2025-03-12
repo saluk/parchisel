@@ -9,7 +9,7 @@ from nicegui import ui, app
 from multiprocessing import freeze_support
 freeze_support()
 
-from lib.datasource import CSVData, PythonData
+from lib.file.datasource import CSVData, PythonData
 from lib.project import LocalProject
 from lib.outputs import Output
 
