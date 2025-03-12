@@ -117,6 +117,9 @@ class CodeEditor:
                     new_template_dialog.close()
                 ui.button("Create", on_click=create_cb)
 
+        if not self.view.project:
+            ui.label("No project loaded")
+            return
         if not self.template:
             if self.view.project.templates:
                 self.template = list(self.view.project.templates.values())[0]

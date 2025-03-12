@@ -5,7 +5,7 @@ import json
 import lib.datasource as datasource
 from lib.template import Template
 from lib.outputs import Output
-from lib.files import File
+from lib.file import File
 
 class Project:
     def __init__(self):
@@ -148,6 +148,8 @@ class LocalProject(Project):
         self.image_path = d["image_path"]
         self.data_sources = []
         for source in d["data_sources"]:
+            if not source:
+                continue
             source = File(source, self.root_path).rel_path(self.root_path)
             print(source, self.root_path)
             self.data_sources.append(

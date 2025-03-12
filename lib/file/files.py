@@ -6,11 +6,11 @@
 
 import os
 import aiohttp
-import re
 import time
 from hashlib import sha256
 
 from lib import exceptions
+from lib.file.online import ConvertOnlineLink
 
 CACHE_TIME = 30     # After 30 seconds try to fetch again
 
@@ -53,62 +53,6 @@ class Cache:
 
 global_cache = Cache()
 
-class ConvertOnlineLink:
-    def __init__(self, url):
-        self.url = url
-        self.found_data = None
-        self.found_service = None
-        self.services = []
-        for method in dir(self):
-            if method.startswith("get_") and method.endswith("_data"):
-                self.services.append(method.split("_")[1])
-        for service in self.services:
-            print('check service:', service)
-            service_data = getattr(self, f"get_{service}_data")()
-            print(service_data)
-            if service_data:
-                self.found_data = service_data
-                self.found_service = service
-                break
-
-    def get_edit_link(self):
-        if self.found_service:
-            return getattr(self, f"edit_link_{self.found_service}")()
-    def get_download_link(self):
-        if self.found_service:
-            return getattr(self, f"download_link_{self.found_service}")()
-
-    def get_googlesheet_data(self):
-        spreadsheet_ids = re.findall("docs\.google.com\/spreadsheets\/d\/(.*?)\/", self.url)
-        return spreadsheet_ids[0] if spreadsheet_ids else None
-    def edit_link_googlesheet(self):
-        return f"https://docs.google.com/spreadsheets/d/{self.found_data}/edit"
-    def download_link_googlesheet(self):
-        return f"https://docs.google.com/spreadsheets/d/{self.found_data}/export?format=csv"
-
-    def get_zohosheet_data(self):
-        spreadsheet_ids = re.findall("sheet\.zohopublic\.com\/sheet\/published\/(.*?)($|\?)", self.url)
-        return spreadsheet_ids[0][0] if spreadsheet_ids else None
-    # Note, zoho publish doesn't allow editing
-    def edit_link_zohosheet(self):
-        return f"https://sheet.zohopublic.com/sheet/published/{self.found_data}"
-    def download_link_zohosheet(self):
-        return f"https://sheet.zohopublic.com/sheet/published/{self.found_data}?download=csv&sheetname=cards"
-    
-    # For grist, copy the link to the csv export for the specific sheet
-    def get_grist_data(self):
-        # https://api.getgrist.com/o/docs/api/docs/j7uxf2UBTwd7kFvAogrLU1/download/csv?viewSection=6&tableId=Cardsv2&activeSortSpec=%5B%5D&filters=%5B%5D&linkingFilter=%7B%22filters%22%3A%7B%7D%2C%22operations%22%3A%7B%7D%7D
-        if "api.getgrist.com" in self.url:
-            spreadsheet_ids = re.findall("api\.getgrist\.com\/o\/docs\/api\/docs\/(.*?)($|\/)", self.url)
-        elif "docs.getgrist.com" in self.url:
-            raise Exception("Grist url must be a specific sheet's csv export link")
-        return spreadsheet_ids[0][0] if spreadsheet_ids else None
-    # Note, zoho publish doesn't allow editing
-    def edit_link_grist(self):
-        return f"https://docs.getgrist.com/{self.found_data}/cards?utm_id=share-doc"
-    def download_link_grist(self):
-        return self.url
-
 class File:
     TEXT="text"
     BYTES="bytes"
@@ -118,6 +62,7 @@ class File:
 
         self.abs_path = None
         self.is_url = False
+        self.is_api = False   # mark sources that are an api. source would be something like "google_api://{api_key}/{database_key}"
         self.edit_url = None
         # If path is a url, save as url string
         
@@ -125,7 +70,11 @@ class File:
             cv = ConvertOnlineLink(path)
             self.abs_path = cv.get_download_link()
             self.is_url = True
+            self.is_api = cv.is_api
             self.edit_url = cv.get_edit_link()
+        elif "://" in path:
+            self.is_api = True
+            self.abs_path = path
         elif self.path.startswith("/") or ":/" in self.path:
             self.abs_path = self.path.replace("\\","/")
         else:
@@ -137,7 +86,7 @@ class File:
                 self.abs_path = os.path.abspath(self.path).replace("\\", "/")
 
     def rel_path(self, root):
-        if self.is_url:
+        if self.is_url or self.is_api:
             return self.abs_path
         path = self.abs_path
         print(root+"/", path)

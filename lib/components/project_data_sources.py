@@ -2,7 +2,7 @@ import os
 from nicegui import ui
 
 from lib import exceptions
-from lib.files import File
+from lib.file import File
 
 class EditableTable:
     def __init__(self, ds, project, ov):
@@ -103,7 +103,8 @@ class EditableTable:
                     ''')
                 table.on('alter_cell', alter_cell)
                 table.on('alter_header', alter_header)
-        ui.button("+").on_click(add_card)
+        if ds.is_editable():
+            ui.button("+").on_click(add_card)
 
 class ProjectDataSources:
     def __init__(self, ov):
@@ -112,7 +113,7 @@ class ProjectDataSources:
     def refresh(self):
         self.build.refresh()
     @ui.refreshable
-    def build(self):
+    async def build(self):
         ov = self.view
         project = ov.project
         if not project:

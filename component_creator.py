@@ -19,7 +19,7 @@ from lib.components.project_outputs import ProjectOutputs
 from lib.components.project_data_sources import ProjectDataSources
 from lib.components.code_editor import CodeEditor
 from lib.template import Template
-from lib.files import global_cache
+from lib.file import global_cache
 
 # TODO make a parchisel app that has component creator and virtual table as modes to select between
 from lib.virtualtable import virtual_table
@@ -44,6 +44,7 @@ class OutputView:
         self.refresh_outputs()
         self.ui_datasources.build.refresh()
         self.ui_template_editor.build.refresh()
+        self.ui_project_manage.build.refresh()
 ov = OutputView()
 
 #### UI CODE
@@ -181,12 +182,10 @@ async def initial_project_load():
     project = LocalProject("test", "projects/dog_and_pony")
     await project.load()
     ov.project = project
-    #ov.refresh_project()
+    ov.refresh_project()
 
 @ui.page('/')
 async def main():
-    await initial_project_load()
-
     with ui.header().classes(replace='row items-center'):
         MainMenu(ov, ov.ui_project_manage).build()
         with ui.tabs() as tabs:
@@ -207,7 +206,7 @@ async def main():
                 ov.ui_project_manage.build()
             with ui.card():
                 ui.label("Data Sources")
-                ov.ui_datasources.build()
+                await ov.ui_datasources.build()
             with ui.card():
                 ui.label("Outputs")
                 await ov.ui_outputs.build()
@@ -224,6 +223,7 @@ async def main():
             with ui.card().tight():
                 ov.ui_template_editor.build()
             await render_project_outputs()
+    ui.timer(0.1, initial_project_load, once=True)
 
 app.on_startup(main)
 

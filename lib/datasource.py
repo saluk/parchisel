@@ -3,7 +3,7 @@ import shutil
 
 from nicegui import ui
 
-from lib.files import File
+from lib.file import File
 
 class DataSource:
     type_label = "Unknown Data Source"
@@ -107,10 +107,24 @@ class PythonData(DataSource):
                     self.fieldnames.append(field)
         await super().load_data()
 
+# TODO fill this out
+class APIData(DataSource):
+    type_label = "API Data Source"
+    # probably need an api key or some other auth data
+    # connect to api to read the rows into our object representation
+    async def load_data(self):
+        pass
+    # TODO waaaay later, we can use iframe editors for most things. but we could make a unified interface
+    # for services that have an api
+    async def save_data(self):
+        pass
+
 def get_class_for_source(source):
     file = File(source)
     print(source)
     # Currontly only supporting online files that convert to csv
+    if file.is_api:
+        return APIData
     if source.endswith(".csv") or file.is_url:
         return CSVData
     if source.endswith(".py"):
