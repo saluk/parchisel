@@ -11,3 +11,4 @@ if row["judging"]:
     card.draw_box(1, 1, int(dpi*2.5)-1, int(dpi*3.5)-1, (255,225,225,255))
     card.draw_text(15, 85, "<award.png>Award:", 320, 800, font_size=40)
     card.draw_text(45, 185, row["judging"]+" animals", 320, 800, font_size=50)
+card.draw_svg("drawing.svg")

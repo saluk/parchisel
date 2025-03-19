@@ -83,6 +83,8 @@ https://openfontlicense.org/open-font-license-official-text/
 ongoing - when loading a project, validate outputs have correct data and template values
 ongoing - ensure project data is saved when necessary
 
+TODO - cleanup svg rendering cache
+TODO - add svg string replacement
 TODO - excel support
 TODO - for online spreadsheets or .xsl/.odt files we'll need to select the 'sheet' for a data source
 TODO - data view: show images in fields if it is an image

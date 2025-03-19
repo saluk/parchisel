@@ -47,10 +47,13 @@ class SkiaContext:
         context.surface.draw(self.canvas, x, y)
     def draw_image(self, x, y, image_file, width=None, height=None):
         """:draw_image(x, y, image_file, width=None, height=None)"""
-        image_file = f"{self.project.get_image_path()}/{image_file}"
-        if not os.path.exists(image_file):
-            image_file = "lib/images/unknown_image.png"
-        image = skia.Image.open(image_file)
+        if isinstance(image_file, skia.Image):
+            image = image_file
+        else:
+            image_file = f"{self.project.get_image_path()}/{image_file}"
+            if not os.path.exists(image_file):
+                image_file = "lib/images/unknown_image.png"
+            image = skia.Image.open(image_file)
         if width or height:
             if not width: width = image.bounds().width()
             if not height: height = image.bounds().height()
@@ -194,6 +197,16 @@ class SkiaContext:
                 section.draw(self)
             self.canvas.restore()
             break
+    def draw_svg(self, svg_path, x=0, y=0, w=None, h=None):
+        temp_image_file = f"temp/{svg_path}.png"
+        svg_path = f"{self.project.get_image_path()}/{svg_path}"
+        if not os.path.exists(temp_image_file):
+            from svglib.svglib import svg2rlg
+            from reportlab.graphics import renderPM
+            drawing = svg2rlg(svg_path)
+            renderPM.drawToFile(drawing, temp_image_file, fmt="PNG")
+        img = skia.Image.open(temp_image_file)
+        self.draw_image(x, y, img, w, h)
     def b64encoded(self):
         self.surface.flushAndSubmit()
         image = self.surface.makeImageSnapshot()

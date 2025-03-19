@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+
+# TODO very bad, let's make cairo the same as cairocffi
+
+import cairo
+import sys
+sys.modules["cairocffi"] = cairo
+
 import os.path
 import platform
 import os
