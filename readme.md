@@ -107,6 +107,29 @@ TODO - screentop export: (ensure output images are suitable for rows and columns
 TODO - tests
 TODO - notion integration
 
+# Drawing revamp
+
+- TODO recreate ancient artifacts
+    - use percentages as coordinates
+    - relative coordinates inside a region
+    - shape primitives
+        - rect
+        - polygon
+        - curved corners
+        - line (just a border)
+    - fills
+        - image background
+        - fill border too
+        - fill origin (to have a pattern that spreads across the card in different shapes)
+    - text
+        - rotated
+        - get size -> inject size elsewhere
+        - rich text: change font on new line of text
+        - icons: display a little bigger than the font text, maybe configure the font size for the icons
+    - shaders
+        - tinting
+            - icons and fills
+
 # Longterm Ideas
 - Database backed project data for web hosted version
 - SVG templates, svgeditor to edit them

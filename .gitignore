@@ -5,3 +5,6 @@ build
 dist
 outputs
 cache
+projects/ancientartifacts_test/*
+projects/seti_test/*
+projects/radlands_test/*
