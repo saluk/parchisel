@@ -62,15 +62,15 @@ class Output:
 
     async def templates_used(self, project):
         if self._template:
-            return self._template.name
-        rows = []
+            return [self._template.name]
         data_source = self.get_data_source(project)
         if not data_source:
-            return [self.template_name]
+            return [self.template_name] if self.template_name else []
         try:
             await data_source.load_data()
         except Exception:
-            return rows
+            return []
+        rows = []
         for card in data_source.cards:
             template = self.template_name
             if self.template_field:
