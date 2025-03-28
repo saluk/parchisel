@@ -44,6 +44,7 @@ class ProjectManagement:
         new_project = LocalProject(file.rsplit("/", 1)[-1], file)
         await new_project.load()
         self.view.project = new_project
+        self.view.ui_template_editor.template = None
         self.view.refresh_project()
         self.build.refresh()
     async def save_project(self):
