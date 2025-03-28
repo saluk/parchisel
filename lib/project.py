@@ -157,6 +157,8 @@ class LocalProject(Project):
             )
         for key in d["templates"]:
             self.templates[key] = Template(d["templates"][key])
+        #make sure to load any local template files
+        self.load_templates()
         for key in d["outputs"]:
             self.outputs[key] = Output(**d["outputs"][key])
         await self.load_data()
