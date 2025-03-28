@@ -7,8 +7,9 @@ if row["image"]:
     card.draw_box(1, 1, int(dpi*2.5)-1, int(dpi*3.5)-1, (220,255,255,255))
     card.draw_image(45, 45, row["image"], int(dpi*2.5*0.75), int(dpi*3.5*0.75))
     card.draw_text(100, 460, row["fields"], 320, 800, font_size=20)
+    card.draw_box(100, 0, 300, 300, (100, 0, 0, 255), row["image"])
 if row["judging"]:
     card.draw_box(1, 1, int(dpi*2.5)-1, int(dpi*3.5)-1, (255,225,225,255))
     card.draw_text(15, 85, "<award.png>Award:", 320, 800, font_size=40)
     card.draw_text(45, 185, row["judging"]+" animals", 320, 800, font_size=50)
-card.draw_svg("drawing.svg")
+#card.draw_svg("drawing.svg")

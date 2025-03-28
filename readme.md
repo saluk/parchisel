@@ -110,6 +110,7 @@ TODO - notion integration
 # Drawing revamp
 
 - TODO recreate ancient artifacts
+    - layers
     - use percentages as coordinates
     - relative coordinates inside a region
     - shape primitives
@@ -118,7 +119,7 @@ TODO - notion integration
         - curved corners
         - line (just a border)
     - fills
-        - image background
+        - image background: image.makeShader
         - fill border too
         - fill origin (to have a pattern that spreads across the card in different shapes)
     - text

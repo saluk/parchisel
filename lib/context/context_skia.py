@@ -32,28 +32,35 @@ class SkiaContext:
     def clear(self, color):
         """:clear(color)"""
         self.canvas.clear(skia.ColorSetARGB(color[3], color[0], color[1], color[2]))
-    def draw_box(self, x, y, w, h, color):
+    def draw_box(self, x, y, w, h, color, image_file=None):
         paint = skia.Paint(
             Style=skia.Paint.kFill_Style,
             AntiAlias=True,
             StrokeWidth=4,
             Color=skia.ColorSetARGB(color[3], color[0], color[1], color[2])
         )
+        image = self.load_image(image_file)
         rect = skia.Rect.MakeXYWH(x, y, w, h)
+        if image:
+            shader = image.makeShader(skia.TileMode.kDecal)
+            paint.setShader(shader)
         self.canvas.drawRect(rect, paint)
     def draw_context(self, x, y, context):
         # Paint the contents of context into this context
         # Both contexts must match in type
         context.surface.draw(self.canvas, x, y)
+    def load_image(self, image_file):
+        if not image_file:
+            return None
+        if isinstance(image_file, skia.Image):
+            return image_file
+        image_file = f"{self.project.get_image_path()}/{image_file}"
+        if not os.path.exists(image_file):
+            image_file = "lib/images/unknown_image.png"
+        return skia.Image.open(image_file)
     def draw_image(self, x, y, image_file, width=None, height=None):
         """:draw_image(x, y, image_file, width=None, height=None)"""
-        if isinstance(image_file, skia.Image):
-            image = image_file
-        else:
-            image_file = f"{self.project.get_image_path()}/{image_file}"
-            if not os.path.exists(image_file):
-                image_file = "lib/images/unknown_image.png"
-            image = skia.Image.open(image_file)
+        image = self.load_image(image_file)
         if width or height:
             if not width: width = image.bounds().width()
             if not height: height = image.bounds().height()

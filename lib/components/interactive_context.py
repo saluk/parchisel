@@ -140,8 +140,10 @@ class DrawRectInteractiveOutput(InteractiveOutput):
         self.args["h"] += amt[1]
 
 def make_interactive(template, line_num, view):
+    # TODO I might be not implementing interactive outputs
+    return
     method, args = adapt_line(template, line_num)
     for clsn in list(globals().keys()):
         cls = eval(clsn)
-        if hasattr(cls,"method") and cls.method == method:
-            return cls(template, line_num, view)
+        #if hasattr(cls,"method") and cls.method == method:
+        #    return cls(template, line_num, view)
