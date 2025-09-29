@@ -84,20 +84,22 @@ class EditableTable:
                         :key="col.name"
                         :props="props"
                     >
-                    <q-btn class="q-pa-xs q-ma-full" 
-                        style="height:15px"
-                        size="xs" padding="xs xs" 
-                        color="white" dense 
-                        text-color="black" label="x" 
-                        @click="() => $parent.$emit('delete_column', col)"
-                    />
-                    <q-input standout dense
-                        class="p-0"
-                        v-model="col.name"
-                        @blur="() => $parent.$emit('alter_header', col)"
-                        @validate:model-value="() => $parent.$emit('alter_header', col)"
-                        @keyup.enter="() => $parent.$emit('alter_header', col)"
-                    />
+                    <q-td style="width:100px">
+                        <q-btn class="q-pa-xs q-ma-full" 
+                            style="height:15px"
+                            size="xs" padding="xs xs" 
+                            color="white" dense 
+                            text-color="black" label="x" 
+                            @click="() => $parent.$emit('delete_column', col)"
+                        />
+                        <q-input standout dense
+                            style="width:100px"
+                            v-model="col.name"
+                            @blur="() => $parent.$emit('alter_header', col)"
+                            @validate:model-value="() => $parent.$emit('alter_header', col)"
+                            @keyup.enter="() => $parent.$emit('alter_header', col)"
+                        />
+                    </q-td>
                     </q-th>
                     </q-tr>
                 ''')
