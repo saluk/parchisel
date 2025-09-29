@@ -75,6 +75,8 @@ class ExportComponents:
             data_source = project.get_data_source(output.data_source_name)
             card_range = output.get_card_range(project)
 
+            print(output, card_range, data_source)
+
             existing = False
             for span in spans:
                 if span.card_range == card_range and span.data_source == data_source:
@@ -82,31 +84,32 @@ class ExportComponents:
                     existing = True
 
             if not existing:
+                print("not existing")
                 span = ExportComponentSpan(data_source, card_range, {
                     asset_side: output
                 })
                 spans.append(span)
 
-        screen_top = {}
         for component_name in self.components:
+            screen_top = {}
             print(f"Component: {component_name}")
             card_index = 1
             spans = self.components[component_name]
             for span in spans:
                 span_index = 1
-                for card in span.data_source.cards:
+                for card in span.data_source.cards[span.card_range[0]:span.card_range[1]]:
                     d = {
                         "kind": "TILE",
                         "name": f"{component_name} - {card_index}",
                         "frontFillColor": "#ffffff",
                         "backFillColor": "#ffc8a1",
                         "strokeColor": "#000000",
-                        "frontAsset": span.output_map["front"].file_name,
+                        "frontAsset": span.output_map["front"].file_name if "front" in span.output_map else None,
                         "frontAssetIndex": span_index,
-                        "backAsset": span.output_map["back"].file_name,
+                        "backAsset": span.output_map["back"].file_name if "back" in span.output_map else None,
                         "backAssetIndex": span_index
                     }
                     screen_top[str(card_index)] = d
                     card_index += 1
                     span_index += 1
-        print(json.dumps(screen_top, indent=4))
+            print(json.dumps(screen_top, indent=4))
