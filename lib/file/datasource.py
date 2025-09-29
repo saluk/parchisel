@@ -89,7 +89,9 @@ class CSVData(DataSource):
         self.cards = []
         reader = csv.DictReader((await self.read_file()).splitlines())
         for row in reader:
-            self.cards.append(row)
+            if row:
+                print(row)
+                self.cards.append(row)
         self.fieldnames = reader.fieldnames or []
         await super().load_data()
     def save_data(self):
