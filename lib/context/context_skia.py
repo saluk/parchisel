@@ -74,7 +74,7 @@ class SkiaContext:
                 traceback.print_exception(exc)
         else:
             self.canvas.drawImage(image, x, y)
-    def draw_text(self, x, y, text, max_width=None, max_height=None, font_size=60, min_font_size=None):
+    def draw_text(self, x, y, text, max_width=None, max_height=None, font_size=60, min_font_size=None, color=(0,0,0,255)):
         """:draw_text(self, x, y, text, max_width=None, max_height=None, font_size=60, min_font_size=None)"""
         typeface = self.fontmgr.matchFamilyStyle('Raleway', skia.FontStyle.Bold())
         size_range = [font_size]
@@ -111,11 +111,16 @@ class SkiaContext:
                 def draw(self, ctx):
                     if not self.blob:
                         return
+                    paint = skia.Paint(
+                        AntiAlias=True, 
+                        Color=skia.ColorSetARGB(color[3], color[0], color[1], color[2])
+                    )
                     ctx.canvas.drawTextBlob(
                         self.blob, 
                         self.start_x, 
                         self.start_y, 
-                        skia.Paint(AntiAlias=True))
+                        paint
+                        )
             class IconSection:
                 def __init__(self, filename):
                     self.filename = filename
