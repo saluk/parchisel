@@ -83,6 +83,9 @@ https://openfontlicense.org/open-font-license-official-text/
 ongoing - when loading a project, validate outputs have correct data and template values
 ongoing - ensure project data is saved when necessary
 
+TODO - this breaks the server: card.draw_text(25, 225, "<center>something</center", 320, 800, font_size=40)
+TODO - templates are saved in project json with absolute file path
+TODO - blank lines in csv is resulting in card rendering errors
 TODO - cleanup svg rendering cache
 TODO - add svg string replacement
 TODO - excel support
