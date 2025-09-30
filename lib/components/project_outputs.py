@@ -54,6 +54,7 @@ class ProjectOutputs:
                 out.rendered_string = ""
                 project.remove_output(out)
                 ov.refresh_outputs()
+            
             with ui.grid(columns=grid).classes(f"w-full {bgcol[0]}"):
                 bgcol.reverse()
                 imp = ui.input("path", value=out.file_name)
@@ -73,6 +74,8 @@ class ProjectOutputs:
                 value = ""
                 if out.data_source_name in options:
                     value = out.data_source_name
+
+                # Data source selector AND data range selector
                 with ui.column():
                     ui.select([""] + [source.source for source in project.data_sources], value=value,
                         on_change=select_source)
@@ -90,6 +93,7 @@ class ProjectOutputs:
                             value={'min': card_range[0], 'max': card_range[1]}
                         ).props('label-always snap').on_value_change(lambda e, out=out: set_range(e, out))
 
+                # Template name
                 with ui.column():
                     def select_template(evt, out=out, project=project):
                         out.template_name = evt.value

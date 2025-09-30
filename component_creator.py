@@ -28,6 +28,8 @@ from lib.components.code_editor import CodeEditor
 from lib.template import Template
 from lib.file import global_cache
 
+from lib.file.profile import global_profile
+
 # TODO make a parchisel app that has component creator and virtual table as modes to select between
 from lib.virtualtable import virtual_table
 
@@ -186,10 +188,12 @@ ov.ui_project_manage = ProjectManagement(ov)
 ov.ui_template_editor = CodeEditor(ov)
 
 async def initial_project_load():
-    project = LocalProject("test", "projects/dog_and_pony")
-    await project.load()
-    ov.project = project
-    ov.refresh_project()
+    print(global_profile.profile)
+    if global_profile.profile['last_project']:
+        project = LocalProject(global_profile.profile['last_project'], global_profile.profile['last_project'])
+        await project.load()
+        ov.project = project
+        ov.refresh_project()
 
 @ui.page('/')
 async def main():

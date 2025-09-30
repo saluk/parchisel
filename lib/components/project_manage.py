@@ -9,6 +9,7 @@ except:
 
 from lib.exceptions import NotifyException
 from lib.project import LocalProject
+from lib.file.profile import global_profile
 
 # Show current project information if there is one
 # ProjectName, ProjectPath
@@ -47,6 +48,8 @@ class ProjectManagement:
         self.view.ui_template_editor.template = None
         self.view.refresh_project()
         self.build.refresh()
+        global_profile.profile['last_project'] = file
+        global_profile.write()
     async def save_project(self):
         if not self.view.project:
             return ui.notify("No project loaded")
