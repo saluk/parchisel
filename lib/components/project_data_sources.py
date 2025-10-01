@@ -11,7 +11,6 @@ class EditableTable:
         self.ov = ov
     @ui.refreshable_method
     def build(self):
-        print("refresh")
         ds = self.ds
         project = self.project
         ov = self.ov
@@ -183,13 +182,14 @@ class ProjectDataSources:
                 imp = ui.input("path", value=ds.source)
                 async def edit_source(imp=imp, ds=ds):
                     try:
-                        await project.rename_data_source(ds, imp.value)
+                        changed = await project.rename_data_source(ds, imp.value)
                     except Exception:
                         ui.notify(f"{imp.value} could not be loaded")
                         return
-                    ui.notify(f"Renamed")
-                    ov.ui_datasources.refresh()
-                    ov.refresh_outputs()
+                    if changed:
+                        ui.notify(f"Renamed")
+                        ov.ui_datasources.refresh()
+                        ov.refresh_outputs()
                 imp.on("keydown.enter", edit_source)
                 imp.on("blur", edit_source)
                 ui.label(ds.type_label)

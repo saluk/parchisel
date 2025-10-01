@@ -47,12 +47,15 @@ class Project:
             self.data_sources.remove(ds)
             await self.dirty_outputs()
         self.save()
-    async def rename_data_source(self, ds, source):
+    async def rename_data_source(self, ds:datasource.DataSource, source:str):
+        if ds.source == source:
+            return None
         i = self.data_sources.index(ds)
         new_ds = datasource.create_data_source(source, self)
         await new_ds.load_data()
         self.data_sources[i] = new_ds
         self.save()
+        return True
     async def add_data_source(self, fn):
         fn = fn.strip()
         if self.get_data_source(fn):
