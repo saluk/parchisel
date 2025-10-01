@@ -13,6 +13,7 @@ class DataSource:
         self.cards = []   # Simple dictionaries
         self.fieldnames = []
         self.project = project
+        self.repeat_field = 'count'
     @property
     def file(self):
         return File(self.source, self.project.root_path)
@@ -37,8 +38,16 @@ class DataSource:
         for card in self.cards:
             card["__id"] = card_id
             card_id += 1
+    def expand_repeated(self):
+        cards = []
+        card:dict = {}
+        for card in self.cards:
+            for count in range(int(card.get(self.repeat_field, 1))):
+                cards.append(card.copy())
+        self.cards[:] = cards
     async def load_data(self):
         self.assign_ids()
+        self.expand_repeated()
     def save_data(self):
         pass
     def is_editable(self):

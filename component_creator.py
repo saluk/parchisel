@@ -82,7 +82,7 @@ async def render_selected_project_outputs():
     ov.image_element_list = []
     ov.output_list = []
     for output_key in ov.viewed_output:
-        output = ov.project.outputs[output_key]
+        output:Output = ov.project.outputs[output_key]
         with ui.card():
             with ui.button_group():
                 zin:ui.button = ui.button("+")
@@ -92,6 +92,8 @@ async def render_selected_project_outputs():
                 ui.label(output.file_name).classes("m-3 font-bold")
                 ui.label(output.data_source_name).classes("m-3 font-italic")
                 for t in await output.templates_used(ov.project):
+                    if not t:
+                        ui.notification(f'Error: output file {output.file_name} is missing template')
                     ui.label("["+t+"]").classes("m-3")
             zoom = zoom_levels[len(zoom_levels)//2]
             im_el = ui.image("").classes(f'w-[{zoom}px]').style("cursor: zoom-in;")

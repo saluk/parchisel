@@ -40,7 +40,7 @@ class EditableTable:
                     await project.dirty_outputs()
                     ov.refresh_outputs()
                     self.build.refresh()
-                ui.button("+").classes("w-45").on_click(add_field)
+                ui.button("add field").classes("w-45").on_click(add_field)
                 async def alter_cell(e, ds=ds):
                     for card in ds.cards:
                         if e.args['__id'] == card['__id']:
@@ -104,6 +104,7 @@ class EditableTable:
                 ''')
                 cols = gen_cols(ds)
                 for col in cols:
+                    avail_fields = [col['field'] for col in cols if not 'hidden' in col['classes']]
                     table.add_slot(f'body-cell-{col['field']}', f'''
                         <q-td key="{col['field']}" :props="props">
                             <div class="row">
@@ -113,7 +114,7 @@ class EditableTable:
                                     color="white" dense 
                                     text-color="black" label="x"
                                     @click="() => $parent.$emit('delete_row', props.row)"
-                                    v-if="props.col.field=='{[col['field'] for col in cols if not 'hidden' in col['classes']][0]}'"
+                                    v-if="props.col.field=='{avail_fields[0] if avail_fields else ''}'"
                                 />
                                 <q-input class="col"
                                     v-model="props.row.{col['field']}"
@@ -139,7 +140,7 @@ class EditableTable:
                 #     'rowSelection': 'multiple',
                 # })
         if ds.is_editable():
-            ui.button("+").on_click(add_card)
+            ui.button("add row").on_click(add_card)
 
 class ProjectDataSources:
     def __init__(self, ov):

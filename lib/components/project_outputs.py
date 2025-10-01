@@ -102,7 +102,7 @@ class ProjectOutputs:
                             value={'min': card_range[0], 'max': card_range[1]}
                         ).props('label-always snap').on_value_change(lambda e, out=out: set_range(e, out))
 
-                # Template name
+                # Select template name or data field that drives the template name
                 with ui.column():
                     def select_template(evt, out=out, project=project):
                         out.template_name = evt.value
