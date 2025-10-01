@@ -83,9 +83,10 @@ https://openfontlicense.org/open-font-license-official-text/
 ongoing - when loading a project, validate outputs have correct data and template values
 ongoing - ensure project data is saved when necessary
 
+TODO - data source shortname configurable
+TODO - edit .py data files
 TODO - this breaks the server: card.draw_text(25, 225, "<center>something</center", 320, 800, font_size=40)
 TODO - templates are saved in project json with absolute file path
-TODO - blank lines in csv is resulting in card rendering errors
 TODO - cleanup svg rendering cache
 TODO - add svg string replacement
 TODO - excel support
@@ -97,7 +98,6 @@ TODO - when creating a new csv, need to edit the headers
 TODO - what is the template api?
 TODO - more consideration on dirty the data
 TODO - make output, and template paths relative to project
-TODO - shorten data source name on output list editor
 TODO - auto split output images if cards exceed max height (output could have sub images)
 TODO - edit output rows/cols/width/height
 TODO - refactor with more nicegui native bindings

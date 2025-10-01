@@ -13,12 +13,20 @@ class DataSource:
         self.cards = []   # Simple dictionaries
         self.fieldnames = []
         self.project = project
+    @property
+    def file(self):
+        return File(self.source, self.project.root_path)
+    
+    def short_name(self):
+        if self.file.is_url:
+            return self.file.link_data.found_data
+        return self.source[-40:]
+    
     async def read_file(self):
-        file = File(self.source, self.project.root_path)
         n = None
-        if file.is_url:
+        if self.file.is_url:
             n = ui.notification("Loading...", position="top-right", type="ongoing")
-        content = await file.read()
+        content = await self.file.read()
         if n:
             n.dismiss()
         return content

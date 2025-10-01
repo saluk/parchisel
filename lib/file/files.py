@@ -64,14 +64,15 @@ class File:
         self.is_url = False
         self.is_api = False   # mark sources that are an api. source would be something like "google_api://{api_key}/{database_key}"
         self.edit_url = None
+        self.link_data = None
         # If path is a url, save as url string
         
         if path.startswith("http://") or path.startswith("https://"):
-            cv = ConvertOnlineLink(path)
-            self.abs_path = cv.get_download_link()
+            self.link_data = ConvertOnlineLink(path)
+            self.abs_path = self.link_data.get_download_link()
             self.is_url = True
-            self.is_api = cv.is_api
-            self.edit_url = cv.get_edit_link()
+            self.is_api = self.link_data.is_api
+            self.edit_url = self.link_data.get_edit_link()
         elif "://" in path:
             self.is_api = True
             self.abs_path = path

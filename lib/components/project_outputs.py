@@ -77,7 +77,7 @@ class ProjectOutputs:
 
                 # Data source selector AND data range selector
                 with ui.column():
-                    ui.select([""] + [source.source for source in project.data_sources], value=value,
+                    ui.select({source.source:source.short_name() for source in project.data_sources}, value=value,
                         on_change=select_source)
                     total_range = out.get_card_range(project, True)
                     card_range = out.get_card_range(project)
