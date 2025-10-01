@@ -26,8 +26,8 @@ class Output:
         self.card_range = tuple(card_range) if card_range else None  # Set to a (start, end) tuple to only render those cards
 
         # TODO use all of these fields
-        self.rows = rows
-        self.cols = cols
+        self._rows = rows
+        self._cols = cols
         self.width = width
         self.height = height
         self.offset_x = offset_x
@@ -36,6 +36,15 @@ class Output:
         self.spacing_y = spacing_y
 
         self.rendered_string = ""   # Clear to rerender
+
+    def resize(self, width, height):
+        width = int(width)
+        height = int(height)
+        if self.width == width and self.height == height:
+            return None
+        self.width = width
+        self.height = height
+        return True
 
     def get_data_source(self, project):
         if self._data_source:

@@ -83,6 +83,7 @@ https://openfontlicense.org/open-font-license-official-text/
 ongoing - when loading a project, validate outputs have correct data and template values
 ongoing - ensure project data is saved when necessary
 
+TODO - edit output rows/cols
 TODO - refresh python data sources ('refresh all' button is a workaround)
 TODO - data source shortname configurable
 TODO - edit .py data files
@@ -100,7 +101,6 @@ TODO - what is the template api?
 TODO - more consideration on dirty the data
 TODO - make output, and template paths relative to project
 TODO - auto split output images if cards exceed max height (output could have sub images)
-TODO - edit output rows/cols/width/height
 TODO - refactor with more nicegui native bindings
 TODO - more ui.notify for CRUD (maybe put into Project)
 TODO - widgets to edit current line of template

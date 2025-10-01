@@ -49,7 +49,7 @@ class ProjectOutputs:
             ui.label("Name");ui.label("Data Source");ui.label("Template");ui.label("Component");ui.label("")
         bgcol = ["bg-lime-50", "bg-lime-100"]
         for out_key in project.outputs:
-            out = project.outputs[out_key]
+            out:Output = project.outputs[out_key]
             def unlink_output(out=out):
                 out.rendered_string = ""
                 project.remove_output(out)
@@ -57,12 +57,20 @@ class ProjectOutputs:
             
             with ui.grid(columns=grid).classes(f"w-full {bgcol[0]}"):
                 bgcol.reverse()
-                imp = ui.input("path", value=out.file_name)
-                def edit_name(inp=imp, out=out):
-                    project.rename_output(out, inp.value)
-                    ov.refresh_outputs()
-                imp.on('keydown.enter', edit_name)
-                imp.on('blur', edit_name)
+
+                with ui.column():
+                    imp = ui.input("path", value=out.file_name)
+                    def edit_name(inp=imp, out=out):
+                        if project.rename_output(out, inp.value):
+                            ov.refresh_outputs()
+                    imp.on('keydown.enter', edit_name)
+                    imp.on('blur', edit_name)
+                    imp = ui.input("w x h", value=f'{out.width} x {out.height}')
+                    def edit_size(inp=imp, out=out):
+                        if out.resize(*inp.value.split(" x ")):
+                            ov.refresh_outputs()
+                    imp.on('keydown.enter', edit_size)
+                    imp.on('blur', edit_size)
 
                 # TODO popout data source selection to choose both source and range
                 def select_source(evt, out=out, project=project):
@@ -71,8 +79,9 @@ class ProjectOutputs:
                     ov.refresh_outputs()
                     project.save()
                 options = [source.source for source in project.data_sources]
-                value = out.data_source_name
+
                 # Data source selector AND data range selector
+                value = out.data_source_name
                 with ui.column():
                     options = {source.source:source.short_name() for source in project.data_sources}
                     if not value in options.keys():

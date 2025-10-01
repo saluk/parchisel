@@ -107,10 +107,12 @@ class Project:
                 return
         raise Exception("Output not found")
     def rename_output(self, output, file_name):
-        del self.outputs[output.file_name]
-        output.file_name = file_name
-        self.outputs[output.file_name] = output
-        self.save()
+        if file_name != output.file_name:
+            del self.outputs[output.file_name]
+            output.file_name = file_name
+            self.outputs[output.file_name] = output
+            self.save()
+            return True
 
     async def save_outputs(self):
         raise NotImplementedError()
