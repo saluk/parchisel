@@ -83,6 +83,7 @@ https://openfontlicense.org/open-font-license-official-text/
 ongoing - when loading a project, validate outputs have correct data and template values
 ongoing - ensure project data is saved when necessary
 
+TODO - refresh python data sources ('refresh all' button is a workaround)
 TODO - data source shortname configurable
 TODO - edit .py data files
 TODO - this breaks the server: card.draw_text(25, 225, "<center>something</center", 320, 800, font_size=40)

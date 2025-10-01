@@ -71,13 +71,13 @@ class ProjectOutputs:
                     ov.refresh_outputs()
                     project.save()
                 options = [source.source for source in project.data_sources]
-                value = ""
-                if out.data_source_name in options:
-                    value = out.data_source_name
-
+                value = out.data_source_name
                 # Data source selector AND data range selector
                 with ui.column():
-                    ui.select({source.source:source.short_name() for source in project.data_sources}, value=value,
+                    options = {source.source:source.short_name() for source in project.data_sources}
+                    if not value in options.keys():
+                        options[value] = "BROKEN - "+value
+                    ui.select(options, value=value,
                         on_change=select_source)
                     total_range = out.get_card_range(project, True)
                     card_range = out.get_card_range(project)
