@@ -65,9 +65,15 @@ class ProjectOutputs:
                             ov.refresh_outputs()
                     imp.on('keydown.enter', edit_name)
                     imp.on('blur', edit_name)
-                    imp = ui.input("w x h", value=f'{out.width} x {out.height}')
+                    imp = ui.input('"w x h" or "(cols)"', value=f'{out.width} x {out.height}')
                     def edit_size(inp=imp, out=out):
-                        if out.resize(*inp.value.split(" x ")):
+                        w=h=cols=None
+                        if 'x' in inp.value:
+                            w, h = inp.value.split(" x ")
+                        elif '(' in inp.value and ')' in inp.value:
+                            cols = inp.value.strip()[1:-1]
+                        if out.resize(w,h,cols):
+                            project.save()
                             ov.refresh_outputs()
                     imp.on('keydown.enter', edit_size)
                     imp.on('blur', edit_size)

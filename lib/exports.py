@@ -1,5 +1,7 @@
 import json
 
+from lib.project import Project
+
 # Exports are like outputs but for text
 # Screentop Example:
 # {
@@ -57,7 +59,7 @@ class ExportComponentSpan:
         self.card_range = card_range
         self.output_map = output_map  # front output, back output etc
 class ExportComponents:
-    def __init__(self, project):
+    def __init__(self, project:Project):
         self.project = project
         self.components = {}
 
@@ -92,7 +94,6 @@ class ExportComponents:
 
         for component_name in self.components:
             screen_top = {}
-            print(f"Component: {component_name}")
             card_index = 1
             spans = self.components[component_name]
             for span in spans:
@@ -112,4 +113,4 @@ class ExportComponents:
                     screen_top[str(card_index)] = d
                     card_index += 1
                     span_index += 1
-            print(json.dumps(screen_top, indent=4))
+            project.save_component(component_name, screen_top)

@@ -124,6 +124,10 @@ class Project:
     def load(self):
         """ Load project data """
         raise NotImplementedError()
+    
+    def save_component(self, data):
+        """Saves data to the components export folder"""
+        raise NotImplementedError
 
 class LocalProject(Project):
     def __init__(self, name, root_path):
@@ -133,6 +137,7 @@ class LocalProject(Project):
         self.template_path = "templates"     # absolute or relative path to where to read/write templates
         self.data_path = "data"              # absolute or relative path for csv data
         self.image_path = "images"           # absolute or relative path for image files
+        self.component_path = "components"   # absolute or relative path for exported component files
         super().__init__()
     def create(self):
         """Call to actually create the files"""
@@ -143,6 +148,7 @@ class LocalProject(Project):
         os.mkdir(self.rel_path(self.template_path))
         os.mkdir(self.rel_path(self.data_path))
         os.mkdir(self.rel_path(self.image_path))
+        os.mkdir(self.rel_path(self.component_path))
         self.save()
     async def load(self):
         with open(f"{self.root_path}/prchsl_cc_proj.json") as f:
@@ -151,6 +157,10 @@ class LocalProject(Project):
         self.template_path = d["template_path"]
         self.data_path = d["data_path"]
         self.image_path = d["image_path"]
+        self.component_path = d.get("component_path", self.component_path)
+        for path in [self.output_path, self.template_path, self.data_path, self.image_path, self.component_path]:
+            if not os.path.exists(self.rel_path(path)):
+                os.mkdir(self.rel_path(path))
         self.data_sources = []
         for source in d["data_sources"]:
             if not source:
@@ -173,6 +183,7 @@ class LocalProject(Project):
         d["template_path"] = self.template_path
         d["data_path"] = self.data_path
         d["image_path"] = self.image_path
+        d["component_path"] = self.component_path
         d["data_sources"] = []
         for source in self.data_sources:
             d["data_sources"].append(File(source.source, self.root_path).rel_path(self.root_path))
@@ -188,11 +199,17 @@ class LocalProject(Project):
                 "template_name": o.template_name,
                 "template_field": o.template_field,
                 "card_range": o.card_range,
-                "component": o.component
+                "component": o.component,
+                "width": o.width,
+                "height": o.height,
+                "cols": o.cols
             }
         txt = json.dumps(d)
         with open(f"{self.root_path}/prchsl_cc_proj.json", "w") as f:
             f.write(txt)
+    def save_component(self, component_name, data):
+        with open(f"{self.root_path}/components/{component_name}.json", "w") as f:
+            f.write(json.dumps(data, indent=4))
     def rel_path(self, path):
         if not path.startswith("/") and not ":" in path:
             return self.root_path + "/" + path

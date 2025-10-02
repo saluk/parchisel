@@ -26,8 +26,8 @@ class Output:
         self.card_range = tuple(card_range) if card_range else None  # Set to a (start, end) tuple to only render those cards
 
         # TODO use all of these fields
-        self._rows = rows
-        self._cols = cols
+        self.rows = rows
+        self.cols = cols
         self.width = width
         self.height = height
         self.offset_x = offset_x
@@ -37,13 +37,15 @@ class Output:
 
         self.rendered_string = ""   # Clear to rerender
 
-    def resize(self, width, height):
-        width = int(width)
-        height = int(height)
-        if self.width == width and self.height == height:
+    def resize(self, width=None, height=None, cols=None):
+        width = int(width) if width else 1
+        height = int(height) if height else 1
+        cols = int(cols) if cols else None
+        if self.width == width and self.height == height and cols == self.cols:
             return None
         self.width = width
         self.height = height
+        self.cols = cols
         return True
 
     def get_data_source(self, project):
@@ -104,6 +106,7 @@ class Output:
         #    colors.reverse()
 
         # Start drawing
+        col = 0
         x=self.offset_x
         y=self.offset_y
 
@@ -156,14 +159,29 @@ class Output:
                     card_context.draw_text(0, 0, f"Template")
                     card_context.draw_text(0, 45, f"Error")
 
+            # Resize output if we are using cols to determine how many cards to place in a row
+            if self.cols:
+
+                change = False
+                if card_context.width + x > self.width:
+                    self.width = x+card_context.width
+                    change = True
+                if card_context.height + y > self.height:
+                    self.height = y+card_context.height
+                    change = True
+                if change:
+                    print("RESIZE OUTPUT TO", self.width, self.height)
+                    self.context.resize(self.width, self.height, "RGB")
+
             self.context.draw_context(x, y, card_context)
             if card_context.height > maxh:
                 maxh = card_context.height
             x += card_context.width+self.spacing_x
-            if x+card_context.width > self.width:
+            if x+card_context.width > self.width or (self.cols and col>=self.cols):
                 x = self.offset_x
                 y += maxh+self.spacing_y
                 maxh = 0
+                col = 0
             #return
         end_time = time.time()
         render_time = end_time-start_time
