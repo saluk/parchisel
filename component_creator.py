@@ -20,11 +20,11 @@ from lib.file.datasource import CSVData, PythonData
 from lib.project import LocalProject
 from lib.outputs import Output
 
-from lib.components.mainmenu import MainMenu
-from lib.components.project_manage import ProjectManagement
-from lib.components.project_outputs import ProjectOutputs
-from lib.components.project_data_sources import ProjectDataSources
-from lib.components.code_editor import CodeEditor
+from lib.webelements.mainmenu import MainMenu
+from lib.webelements.project_manage import ProjectManagement
+from lib.webelements.project_outputs import ProjectOutputs
+from lib.webelements.project_data_sources import ProjectDataSources
+from lib.webelements.code_editor import CodeEditor
 from lib.template import Template
 from lib.file import global_cache
 

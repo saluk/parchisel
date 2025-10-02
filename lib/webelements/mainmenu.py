@@ -1,6 +1,6 @@
 from nicegui import ui
 
-from lib.components.project_manage import ProjectManagement
+from lib.webelements.project_manage import ProjectManagement
 
 class MainMenu:
     def __init__(self, view, project_manager:ProjectManagement):

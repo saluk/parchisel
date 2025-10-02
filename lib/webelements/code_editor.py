@@ -78,7 +78,7 @@ class CodeEditor:
                             ui.label("card."+func.__doc__[1:])
 
     async def build_fancy_context(self, cursor):
-        import lib.components.interactive_context as ic
+        import lib.webelements.interactive_context as ic
         interactive = ic.make_interactive(self.template, cursor["line_number"], self.view)
         if interactive:
             await interactive.build()
