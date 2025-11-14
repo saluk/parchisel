@@ -83,6 +83,8 @@ https://openfontlicense.org/open-font-license-official-text/
 ongoing - when loading a project, validate outputs have correct data and template values
 ongoing - ensure project data is saved when necessary
 
+TODO - component workflow: build components, auto configure outputs for digital/pnp
+TODO - command pattern for undo/redo
 TODO - edit output rows/cols
 TODO - refresh python data sources ('refresh all' button is a workaround)
 TODO - data source shortname configurable
