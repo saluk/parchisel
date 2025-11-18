@@ -12,6 +12,7 @@ class Project:
         self.data_sources = []
         self.templates = {}
         self.outputs = {}
+        self.viewed_output = []
     async def load_data(self):
         [await d.load_data() for d in self.data_sources]
     def load_templates(self):
@@ -176,6 +177,7 @@ class LocalProject(Project):
         self.load_templates()
         for key in d["outputs"]:
             self.outputs[key] = Output(**d["outputs"][key])
+        self.viewed_output = d.get("viewed_output",[])
         await self.load_data()
     def save(self):
         d = {}
@@ -204,6 +206,7 @@ class LocalProject(Project):
                 "height": o.height,
                 "cols": o.cols
             }
+        d["viewed_output"] = self.viewed_output
         txt = json.dumps(d)
         with open(f"{self.root_path}/prchsl_cc_proj.json", "w") as f:
             f.write(txt)

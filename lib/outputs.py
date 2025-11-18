@@ -153,9 +153,10 @@ class Output:
                     # TODO do the exec in the template
                     exec(template.code, {"card":card_context, "row":card})
                 except Exception as exc:
+                    print("Exception in executing template:")
                     import traceback
                     traceback.print_exc()
-                    ui.notify(str(exc))
+                    ui.notify(str(traceback.format_exc()))
                     card_context.draw_text(0, 0, f"Template")
                     card_context.draw_text(0, 45, f"Error")
 
@@ -173,7 +174,13 @@ class Output:
                     print("RESIZE OUTPUT TO", self.width, self.height)
                     self.context.resize(self.width, self.height, "RGB")
 
-            self.context.draw_context(x, y, card_context)
+            try:
+                self.context.draw_context(x, y, card_context)
+            except Exception as exc:
+                print("Exception drawing card context to image:")
+                import traceback
+                traceback.print_exc()
+                ui.notify(str(traceback.format_exc()))
             if card_context.height > maxh:
                 maxh = card_context.height
             x += card_context.width+self.spacing_x

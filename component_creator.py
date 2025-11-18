@@ -36,7 +36,6 @@ from lib.virtualtable import virtual_table
 class OutputView:
     def __init__(self):
         self.columns = None
-        self.viewed_output = []
 
         self.project = None
         self.progress = None
@@ -44,8 +43,11 @@ class OutputView:
         #       project data modifications to refresh the correct parts of the view
 
     def refresh_outputs(self):
-        if self.viewed_output:
-            self.viewed_output = [key for key in self.viewed_output if key in self.project.outputs]
+        if not self.project:
+            return
+        # TODO - we could have several project views configured, say we want a print and play view and a screentop view
+        if self.project.viewed_output:
+            self.project.viewed_output = [key for key in self.project.viewed_output if key in self.project.outputs]
         self.ui_outputs.refresh()
         self.render_project_outputs.refresh()
     
@@ -61,7 +63,7 @@ async def render_images(image_element_list, output_list):
     for i in range(len(image_element_list)):
         ov.progress.message = f"Building image for: {output_list[i].file_name}"
         try:
-            print("updating output image")
+            print("updating output image", output_list[i].data_source_name)
             image_element_list[i].set_source(await output_list[i].b64encoded(ov.project))
         except Exception as e:
             ui.notify(repr(e))
@@ -72,7 +74,11 @@ zoom_levels = range(200, 1200, 200)
 async def render_selected_project_outputs():
     print("render selected")
     if ov.progress:
-        ov.progress.dismiss()
+        try:
+            ov.progress.dismiss()
+        except:
+            import traceback
+            traceback.print_exc()
     ov.progress = ui.notification(f"Building output images", 
         position="top-right", 
         type="ongoing",
@@ -81,7 +87,7 @@ async def render_selected_project_outputs():
     # TODO move this to the output view class
     ov.image_element_list = []
     ov.output_list = []
-    for output_key in ov.viewed_output:
+    for output_key in ov.project.viewed_output:
         output:Output = ov.project.outputs[output_key]
         with ui.card():
             with ui.button_group():
@@ -137,8 +143,6 @@ async def render_project_outputs():
     if not ov.project:
         ui.label("No project")
         return
-    if not ov.viewed_output and ov.project.outputs:
-        ov.viewed_output = [list(ov.project.outputs.keys())[0]]
     with ui.row().classes("w-full"):
         with ui.grid(columns="200px auto"):
             with ui.card().classes("w-[500px]").tight() as dragable_card:
@@ -155,14 +159,15 @@ async def render_project_outputs():
                         ui.button("None", on_click=f_none)
                     for output_key in ov.project.outputs.keys():
                         output = ov.project.outputs[output_key]
-                        c = ui.checkbox(output.file_name, value=output_key in ov.viewed_output)
+                        c = ui.checkbox(output.file_name, value=output_key in ov.project.viewed_output)
                         checks.append((output_key,c))
                     def set_check():
                         viewed_output = []
                         for output_key, check in checks:
                             if check.value:
                                 viewed_output.append(output_key)
-                        ov.viewed_output = viewed_output
+                        ov.project.viewed_output = viewed_output
+                        ov.project.save()
                         ov.render_selected_project_outputs.refresh()
                     [c[1].on_value_change(set_check) for c in checks]
                 async def refresh_all():
@@ -246,4 +251,4 @@ app.on_startup(main)
 
 # NOTE: On Windows reload must be disabled to make asyncio.create_subprocess_exec work (see https://github.com/zauberzeug/nicegui/issues/486)
 ui.run(reload=platform.system() != 'Windows', native=True, title="Parchisel Component Creator", port=6812)
-#ui.run(reload=platform.system() != 'Windows', native=False, title="Parchisel Component Creator")
+#ui.run(reload=platform.system() != 'Windows', native=False, title="Parchisel Component Creator", port=6812)
