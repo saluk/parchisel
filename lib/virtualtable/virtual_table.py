@@ -20,16 +20,11 @@ class VirtualTable:
         self.table_id = str(uuid.uuid4())
         self.players = []
         self.cards = []
-    def gen_content(self, player):
-        return "".join([f"""
-            <rect id="{card.card_id}" x="{card.x}" y="{card.y}" width="{card.w}" height="{card.h}" fill="{"red" if card.owner == player else "green"}" stroke="red" pointer-events="all" cursor="pointer" />
-            """ for card in self.cards])
     # This is a ui that is generated independant for each player
     @ui.refreshable
     async def build(self, view):
         print("building the interactive mode", view)
         player = view.player
-        view.content = self.gen_content(player)
         with ui.card() as card:
             print("Make Pixi Canvas")
             view.canvas = PixiCanvas(400,400)
@@ -44,39 +39,6 @@ class VirtualTable:
                 {"vtid": c.card_id, "x": c.x, "y": c.y}
                 for c in self.cards
             ]), immediate=False)
-
-            #canvas.on('mouseup', lambda:canvas.run_method('moveBunny'))
-            view.interactive = ui.interactive_image('https://picsum.photos/640/360',
-                content=view.content
-            ).on('svg:pointerdown', lambda e: self.click_component(player, e))
-            card.on('mouseup', lambda e: self.click_component_up(player))
-            card.on('mousemove', lambda e: self.move_component(view, e))
-        # TODO - clickdown should set ownership of object to current user
-        # TODO clickup should undo ownership
-        # TODO mouse drag
-    def click_component(self, player, e):
-        card_id = e.args['element_id']
-        for card in self.cards:
-            if card_id == card.card_id and card.owner == player:
-                player.dragging = card
-                player.dragging_point = e.args['image_x'], e.args['image_y']
-                return
-    def click_component_up(self, player):
-        player.dragging = None
-    def move_component(self, view, e):
-        player = view.player
-        if not player.dragging:
-            return
-        #point = e.args['image_x'], e.args['image_y']
-        #amt = point[0]-player.dragging_point[0], point[1]-player.dragging_point[1]
-        amt = e.args['movementX'], e.args['movementY']
-        player.dragging.x += amt[0]
-        player.dragging.y += amt[1]
-        #player.dragging_point = point
-        view.content = self.gen_content(player)
-        view.interactive.content = view.content
-        view.interactive.update()
-        #self.build.refresh()
     async def set_view(self, table_view):
         if table_view.player not in self.players:
             self.join(table_view.player)
@@ -103,8 +65,8 @@ class Tables:
         await t.set_view(table_view)
         # TODO this only refreshes the view for one player
         # If someone else is joined already they wont see the list update
-        for player in players:
-            player.table_view.build.refresh()
+        #for player in players:
+        #    player.table_view.build.refresh()
 
 tables = Tables()
 
@@ -128,21 +90,12 @@ class TableView:
     def __init__(self):
         self.player = Player()
         self.player.table_view = self
-        self.content = ""
-        self.interactive_content = None
-
-    def rerender_view(self):
-        self.content = self.player.current_virtual_table.gen_content(self.player)
-        self.interactive.content = self.content
-        self.interactive.update()
-
     @ui.refreshable
     async def build(self):
         ui.add_head_html('<script src="https://pixijs.download/release/pixi.js"></script>')
         print("building a table view")
         if self.player.current_virtual_table:
             await self.player.current_virtual_table.build(self)
-            ui.timer(0.02, lambda:self.rerender_view())
             async def exit_game():
                 self.player.current_virtual_table = None
                 self.build.refresh()

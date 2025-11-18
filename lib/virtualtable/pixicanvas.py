@@ -1,9 +1,6 @@
-from nicegui import ui
+from lib.virtualtable.tabledisplay import TableDisplay
 
-class PixiCanvas(ui.element,
+class PixiCanvas(TableDisplay,
     component='pixicanvas.js',
     dependencies=['dist/pixi.js']):
-    def __init__(self, width, height) -> None:
-        super().__init__()
-        self._props['width'] = width
-        self._props['height'] = height
+    pass

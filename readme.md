@@ -83,6 +83,8 @@ https://openfontlicense.org/open-font-license-official-text/
 ongoing - when loading a project, validate outputs have correct data and template values
 ongoing - ensure project data is saved when necessary
 
+TODO - bug - python data source returning tuple for color works when you set it but breaks the project
+TODO - bug: if you change data so there are less cards than an output has configured, it gives an index error rather than fixing itself
 TODO - component workflow: build components, auto configure outputs for digital/pnp
 TODO - command pattern for undo/redo
 TODO - edit output rows/cols

@@ -241,6 +241,7 @@ async def main():
     ov.tabs = tabs
     ui.timer(0.1, initial_project_load, once=True)
 
+app.add_static_files('/images', 'lib/images')
 app.on_startup(main)
 
 # NOTE: On Windows reload must be disabled to make asyncio.create_subprocess_exec work (see https://github.com/zauberzeug/nicegui/issues/486)
