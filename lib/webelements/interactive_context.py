@@ -4,7 +4,7 @@ from nicegui import ui, ElementFilter
 
 from lib.outputs import Output
 from lib.context import SkiaContext
-from lib.file.datasource import TempDataSource
+from lib.data.datasource import TempDataSource
 
 def make_inspectable_func(f):
     import inspect

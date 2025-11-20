@@ -10,7 +10,7 @@ import time
 from hashlib import sha256
 
 from lib import exceptions
-from lib.file.online import ConvertOnlineLink
+from lib.data.online import ConvertOnlineLink
 
 CACHE_TIME = 30     # After 30 seconds try to fetch again
 

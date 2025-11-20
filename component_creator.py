@@ -16,7 +16,7 @@ from nicegui import ui, app
 from multiprocessing import freeze_support
 freeze_support()
 
-from lib.file.datasource import CSVData, PythonData
+from lib.data.datasource import CSVData, PythonData
 from lib.project import LocalProject
 from lib.outputs import Output
 
@@ -26,9 +26,9 @@ from lib.webelements.project_outputs import ProjectOutputs
 from lib.webelements.project_data_sources import ProjectDataSources
 from lib.webelements.code_editor import CodeEditor
 from lib.template import Template
-from lib.file import global_cache
+from lib.data import global_cache
 
-from lib.file.profile import global_profile
+from lib.data.profile import global_profile
 
 # TODO make a parchisel app that has component creator and virtual table as modes to select between
 from lib.virtualtable import virtual_table

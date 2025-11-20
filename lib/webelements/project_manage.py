@@ -9,7 +9,7 @@ except:
 
 from lib.exceptions import NotifyException
 from lib.project import LocalProject
-from lib.file.profile import global_profile
+from lib.data.profile import global_profile
 
 # Show current project information if there is one
 # ProjectName, ProjectPath

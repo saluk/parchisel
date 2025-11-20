@@ -1,12 +1,17 @@
 import base64
 import os
 import skia
+from lib.data.colors import Color
 
 # SKIA advantage
 #   - full featured and modern
 # disadvantage
 #   - documentation weirdness between python binding and c++
 
+def get_skia_color(color):
+    """ Convert a color of some format into a skia argb color"""
+    color = Color(color).rgba256()
+    return skia.ColorSetARGB(color[3], color[0], color[1], color[2])
 
 class SkiaContext:
     step = 0
@@ -31,13 +36,13 @@ class SkiaContext:
         self.canvas = self.surface.getCanvas()
     def clear(self, color):
         """:clear(color)"""
-        self.canvas.clear(skia.ColorSetARGB(color[3], color[0], color[1], color[2]))
+        self.canvas.clear(get_skia_color(color))
     def draw_box(self, x, y, w, h, color, image_file=None):
         paint = skia.Paint(
             Style=skia.Paint.kFill_Style,
             AntiAlias=True,
             StrokeWidth=4,
-            Color=skia.ColorSetARGB(color[3], color[0], color[1], color[2])
+            Color=get_skia_color(color)
         )
         image = self.load_image(image_file)
         rect = skia.Rect.MakeXYWH(x, y, w, h)
@@ -113,7 +118,7 @@ class SkiaContext:
                         return
                     paint = skia.Paint(
                         AntiAlias=True, 
-                        Color=skia.ColorSetARGB(color[3], color[0], color[1], color[2])
+                        Color=get_skia_color(color)
                     )
                     ctx.canvas.drawTextBlob(
                         self.blob, 

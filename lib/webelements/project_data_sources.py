@@ -2,7 +2,7 @@ import os
 from nicegui import ui
 
 from lib import exceptions
-from lib.file import File
+from lib.data import File
 
 class EditableTable:
     def __init__(self, ds, project, ov):

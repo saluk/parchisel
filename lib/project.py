@@ -2,10 +2,10 @@ import os
 import random
 import json
 
-import lib.file.datasource as datasource
+import lib.data.datasource as datasource
 from lib.template import Template
 from lib.outputs import Output
-from lib.file import File
+from lib.data import File
 
 class Project:
     def __init__(self):

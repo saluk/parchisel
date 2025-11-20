@@ -4,7 +4,16 @@ from collections import defaultdict
 
 from nicegui import ui
 
-from lib.file import File
+from lib.data import File
+
+class SanitizedCardException(Exception):
+    pass
+
+def sanitized_card(data:dict):
+    for key in data:
+        if(type(data[key]) not in [str, int, float]):
+            raise SanitizedCardException(f"Type of {key}: {data[key]} is not [str, int, or float]")
+    return data
 
 class DataSource:
     type_label = "Unknown Data Source"
@@ -45,9 +54,18 @@ class DataSource:
             for count in range(int(card.get(self.repeat_field, 1))):
                 cards.append(card.copy())
         self.cards[:] = cards
+    def sanitize_cards(self):
+        try:
+            self.cards[:] = [sanitized_card(card) for card in self.cards]
+        except SanitizedCardException:
+            print(f"Invalid data source {self.source}")
+            import traceback
+            traceback.print_exc()
+            self.cards = []
     async def load_data(self):
         self.assign_ids()
         self.expand_repeated()
+        self.sanitize_cards()
     def save_data(self):
         pass
     def is_editable(self):
