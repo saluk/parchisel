@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Current File",
+            "name": "Component Creator",
             "type": "debugpy",
             "request": "launch",
             "program": "${cwd}/component_creator.py",
