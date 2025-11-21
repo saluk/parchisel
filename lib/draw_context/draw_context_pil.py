@@ -15,7 +15,7 @@ def image_draw_init_force_blend(self, *args, **kwargs):
     self.draw = Image.core.draw(self.im, 1)
 ImageDraw.__init__ = image_draw_init_force_blend
 
-class Context:
+class DrawContextPil:
     step = 0
     def __init__(self, surface_width, surface_height, mode="RGBA"):
         self.resize(surface_width, surface_height, mode)
@@ -32,8 +32,8 @@ class Context:
         self.draw.rectangle((0,0,self.image.size[0],self.image.size[1]), color)
     def log(self, image):
         return
-        image.save(f"step{Context.step}.png")
-        Context.step += 1
+        image.save(f"step{DrawContextPil.step}.png")
+        DrawContextPil.step += 1
     def draw_box(self, x, y, w, h, color):
         self.draw.rectangle((x, y, x+w, y+h), color)
     def draw_context(self, x, y, context):

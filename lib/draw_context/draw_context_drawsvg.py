@@ -1,4 +1,4 @@
-from lib.context import Context
+from lib.draw_context import DrawContextPil
 
 import drawsvg
 
@@ -16,7 +16,7 @@ def drawsvg_color(color):
             return f"rgb({",".join(str(int(x*100))+"%" for x in color)})"
         else:
             return f"rgb({",".join(x+"%" for x in color)})"
-class DrawSVGContext(Context):
+class DrawContextSVG(DrawContextPil):
     def __init__(self, surface_width, surface_height, mode="RGBA"):
         self.resize(surface_width, surface_height, mode)
     @property

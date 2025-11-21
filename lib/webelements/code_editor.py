@@ -3,7 +3,7 @@ from nicegui import ui
 from lib.javascript_util import element_run_javascript
 
 # needed to inspect our drawing commands
-import lib.context
+import lib.draw_context
 from lib import util
 
 class CodeEditor:
@@ -68,8 +68,8 @@ class CodeEditor:
     def build_function_list(self):
         with ui.scroll_area():
             with ui.list():
-                for method_name in dir(lib.context.SkiaContext):
-                    func = getattr(lib.context.SkiaContext, method_name)
+                for method_name in dir(lib.draw_context.DrawContextSkia):
+                    func = getattr(lib.draw_context.DrawContextSkia, method_name)
                     if func.__doc__ and func.__doc__[0] == ":":
                         with ui.item():
                             ui.button("<").on_click(
@@ -85,9 +85,9 @@ class CodeEditor:
             return
 
         import inspect
-        for method_name in dir(lib.context.SkiaContext):
+        for method_name in dir(lib.draw_context.DrawContextSkia):
             if "card."+method_name in cursor["line"]:
-                func = getattr(lib.context.SkiaContext, method_name)
+                func = getattr(lib.draw_context.DrawContextSkia, method_name)
                 sig = inspect.signature(func)
                 params = [str(param) for param in sig.parameters.values()][1:]
                 #Figure out which parameter cursor is over

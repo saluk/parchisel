@@ -2,8 +2,7 @@ import time
 
 from nicegui import ui
 
-from lib.context import Context
-from lib.context import SkiaContext as Context
+from lib.draw_context import DrawContextSkia as DrawContext
 
 class Output:
     def __init__(self, data_source_name, file_name, rows=None, cols=None, width=int(150*2.5*3), height=int(150*3.5*3), 
@@ -92,7 +91,7 @@ class Output:
 
     async def render(self, project):
         print(f"RENDERING: {self.data_source_name} as {self.file_name}")
-        self.context = Context(self.width, self.height, project, "RGB")
+        self.context = DrawContext(self.width, self.height, project, "RGB")
         start_time = time.time()
         self.context.clear((0,0,0,0))
 
@@ -130,7 +129,7 @@ class Output:
             return
         for card_index in range(*card_range):
             card = data_source.cards[card_index]
-            card_context = Context(640, 480, project, "RGB")
+            card_context = DrawContext(640, 480, project, "RGB")
             card_context.clear((0, 0, 0, 0))
 
             template = main_template

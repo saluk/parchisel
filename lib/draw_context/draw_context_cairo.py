@@ -15,7 +15,7 @@ def cairo_color(color):
             color = tuple([float(x)/255.0 for x in color])
             return color
     return (1.0, 0, 1.0, 1.0)
-class CairoContext:
+class DrawContextCairo:
     def __init__(self, surface_width, surface_height, mode="RGBA"):
         self.resize(surface_width, surface_height, mode)
     @property

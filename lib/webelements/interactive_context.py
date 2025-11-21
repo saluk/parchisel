@@ -3,7 +3,7 @@ from collections import defaultdict
 from nicegui import ui, ElementFilter
 
 from lib.outputs import Output
-from lib.context import SkiaContext
+from lib.draw_context import DrawContextSkia
 from lib.data.datasource import TempDataSource
 
 def make_inspectable_func(f):
@@ -58,7 +58,7 @@ def adapt_line(template, line_number):
     # We usually do card.draw_box
     method = func.split(".")[1]
     parens = line[first_paren:]
-    ifunc = make_inspectable_func(getattr(SkiaContext, method))
+    ifunc = make_inspectable_func(getattr(DrawContextSkia, method))
     row = defaultdict(lambda x:"stub")
     glob = {
         "row": row,

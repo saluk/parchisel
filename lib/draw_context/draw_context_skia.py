@@ -13,7 +13,7 @@ def get_skia_color(color):
     color = Color(color).rgba256()
     return skia.ColorSetARGB(color[3], color[0], color[1], color[2])
 
-class SkiaContext:
+class DrawContextSkia:
     step = 0
     fontmgr = skia.FontMgr.New_Custom_Directory(".")
     def __init__(self, surface_width, surface_height, project, mode="RGBA"):
