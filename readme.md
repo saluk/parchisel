@@ -83,7 +83,7 @@ https://openfontlicense.org/open-font-license-official-text/
 ongoing - when loading a project, validate outputs have correct data and template values
 ongoing - ensure project data is saved when necessary
 
-TODO - move render project outputs to its own file
+TODO - rearrange OutputView which has some global handles and some output view specific ones into a GlobalViewer containing uis, where output view is one ui
 TODO - python editor for data files
 TODO - bug: if you change data so there are less cards than an output has configured, it gives an index error rather than fixing itself
 TODO - component workflow: build components, auto configure outputs for digital/pnp
