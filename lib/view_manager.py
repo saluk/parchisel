@@ -1,7 +1,7 @@
 from lib.webelements.project_data_sources import ProjectDataSources
 from lib.webelements.project_outputs import ProjectOutputs
 from lib.webelements.code_editor import CodeEditor
-from lib.render_cards.rendered_card_preview import RenderedCardPreview
+from lib.webelements.render_cards.rendered_card_preview import RenderedCardPreview
 from lib.webelements.project_manage import ProjectManagement
 
 class ViewManager:
