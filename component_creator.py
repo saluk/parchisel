@@ -32,7 +32,8 @@ async def initial_project_load():
     if global_profile.profile['last_project']:
         project = LocalProject(global_profile.profile['last_project'], global_profile.profile['last_project'])
         await project.load()
-        view_manager.set_project(project)
+        # we don't need to refresh when we are building from the initial load
+        view_manager.set_project(project, refresh=False)
 
 @ui.page('/')
 async def main():
@@ -82,5 +83,5 @@ app.add_static_files('/images', 'lib/images')
 app.on_startup(main)
 
 # NOTE: On Windows reload must be disabled to make asyncio.create_subprocess_exec work (see https://github.com/zauberzeug/nicegui/issues/486)
-ui.run(reload=platform.system() != 'Windows', native=True, title="Parchisel Component Creator", port=6812)
-#ui.run(reload=platform.system() != 'Windows', native=False, title="Parchisel Component Creator", port=6812)
+#ui.run(reload=platform.system() != 'Windows', native=True, title="Parchisel Component Creator", port=6812)
+ui.run(reload=platform.system() != 'Windows', native=False, title="Parchisel Component Creator", port=6812, show=False)

@@ -21,9 +21,10 @@ class ViewManager:
 
         self.ui_rendered_card_preview = RenderedCardPreview(self)
     
-    def set_project(self, project):
+    def set_project(self, project, refresh=True):
         self.project = project
-        self.refresh_project()
+        if(refresh):
+            self.refresh_project()
 
     def refresh_project(self):
         self.ui_rendered_card_preview.build.refresh()
