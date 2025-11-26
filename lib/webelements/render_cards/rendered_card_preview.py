@@ -17,8 +17,13 @@ class RenderedCardPreview:
     def project(self):
         return self.view.project
 
-    async def render_images(self, image_element_list, output_list):
+    async def render_images(self, image_element_list=None, output_list=None):
+        if not image_element_list:
+            image_element_list = self.image_element_list
+        if not output_list:
+            output_list = self.output_list
         for i in range(len(image_element_list)):
+            print("enable view progress")
             self.view.progress.message = f"Building image for: {output_list[i].file_name}"
             try:
                 print("updating output image", output_list[i].data_source_name)
@@ -26,6 +31,7 @@ class RenderedCardPreview:
             except Exception as e:
                 ui.notify(repr(e))
                 continue
+        print("dismiss view progress")
         self.view.progress.dismiss()
 
     @ui.refreshable
@@ -104,7 +110,7 @@ class RenderedCardPreview:
         )
         self.image_element_list = []
         self.output_list = []
-        with ui.grid(columns=2).classes('w-fit'):
+        with ui.element("div").classes("fit row wrap justify-start items-start content-start"):
             for output_key in self.project.viewed_output:
                 output:Output = self.project.outputs[output_key]
                 with ui.card().tight().classes("w-fit"):
@@ -118,7 +124,7 @@ class RenderedCardPreview:
                     im_el = ui.image("").classes(f'w-[{self.zoom}px]')
                     self.image_element_list.append(im_el)
                     self.output_list.append(output)
-        ui.timer(0.1, lambda:self.render_images(self.image_element_list, self.output_list), once=True)
+        ui.timer(0, lambda:self.render_images(self.image_element_list, self.output_list), once=True)
 
     def dragscroll(self, el, scroll_area:ui.scroll_area, speed=1):
         if not hasattr(el, "is_scrolling"):
