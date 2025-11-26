@@ -83,7 +83,6 @@ https://openfontlicense.org/open-font-license-official-text/
 ongoing - when loading a project, validate outputs have correct data and template values
 ongoing - ensure project data is saved when necessary
 
-TODO - rearrange OutputView which has some global handles and some output view specific ones into a GlobalViewer containing uis, where output view is one ui
 TODO - python editor for data files
 TODO - bug: if you change data so there are less cards than an output has configured, it gives an index error rather than fixing itself
 TODO - component workflow: build components, auto configure outputs for digital/pnp
@@ -92,6 +91,8 @@ TODO - edit output rows/cols
 TODO - refresh python data sources ('refresh all' button is a workaround)
 TODO - data source shortname configurable
 TODO - edit .py data files
+TODO - better filters for output preview: show output related to editor template, show outputs for a specified component, show outputs for a specified data source
+TODO - render images to disk cache and load those for faster project load
 TODO - this breaks the server: card.draw_text(25, 225, "<center>something</center", 320, 800, font_size=40)
 TODO - templates are saved in project json with absolute file path
 TODO - cleanup svg rendering cache
