@@ -1,8 +1,6 @@
 class Template:
     def __init__(self, filename):
-        print(filename)
         self.name = filename.rsplit("/")[-1] if "/" in filename else filename
-        print(self.name)
         self.filename = filename
         self._code = None
     @property

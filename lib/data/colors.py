@@ -103,8 +103,11 @@ strings = [
 "#10FF8Fb0",
 "(100, 200, 220)"
 ]
-for string in strings:
-    try:
-        print(repr(string), Color(string))
-    except:
-        traceback.print_exc()
+
+# Hacky test
+if __name__ == "__main__":
+    for string in strings:
+        try:
+            print(repr(string), Color(string))
+        except:
+            traceback.print_exc()

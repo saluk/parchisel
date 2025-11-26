@@ -18,9 +18,11 @@ class CodeEditor:
         # TODO only save if things are rendering OK
         # We could have a button to force save
         self.template.save()
+        print("template saved")
         # TODO make this a helper function on the view
         if await self.view.project.dirty_outputs(for_templates=[self.template.name], for_outputs=self.view.project.viewed_output):   # only redraw outputs that use this template
-            await self.view.render_images(self.view.image_element_list, self.view.output_list)
+            await self.view.ui_rendered_card_preview.render_images()
+            print("re-rendered images")
 
     def create_template(self, template_name):
         t = self.view.project.add_template(template_name)

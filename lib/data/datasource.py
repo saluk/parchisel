@@ -76,7 +76,6 @@ class DataSource:
         for c in self.cards:
             c[fieldname] = ""
         self.assign_ids()
-        print("created new field", self.fieldnames, id(self))
     def create_blank_card(self):
         d = {}
         for fieldname in self.fieldnames:
@@ -120,12 +119,10 @@ class TempDataSource(DataSource):
 class CSVData(DataSource):
     type_label = "CSV File"
     async def load_data(self):
-        print("loading csv data")
         self.cards = []
         reader = csv.DictReader((await self.read_file()).splitlines())
         for row in reader:
             if row:
-                print(row)
                 self.cards.append(row)
         self.fieldnames = reader.fieldnames or []
         await super().load_data()
@@ -134,7 +131,6 @@ class CSVData(DataSource):
         # Don't corrupt file if there is an error
         try:
             with open(file.abs_path+".temp", "w", newline="") as csvfile:
-                print("writing csv:", id(self), self.fieldnames)
                 fieldnames = [n for n in self.fieldnames if not n.startswith("__")]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
@@ -174,7 +170,6 @@ class APIData(DataSource):
 
 def get_class_for_source(source):
     file = File(source)
-    print(source)
     # Currontly only supporting online files that convert to csv
     if file.is_api:
         return APIData
