@@ -1,6 +1,6 @@
 import time
 
-from nicegui import ui
+from nicegui import ui, run
 
 from lib.draw_context import DrawContextSkia as DrawContext
 
@@ -91,9 +91,32 @@ class Output:
 
     async def render(self, project):
         print(f"RENDERING: {self.data_source_name} as {self.file_name}")
-        self.context = DrawContext(self.width, self.height, project, "RGB")
+        # Pass parameters so function can be run in separate process
+        error = None
+        try:
+            data_source = self.get_data_source(project)
+            assert(data_source)
+            await data_source.load_data()
+            card_data = data_source.cards
+        except Exception:
+            card_data = None
+            error = f"No data source found: {self.data_source_name}"
+        main_template = None
+        if self.template_name:
+            main_template = project.templates[self.template_name]
+        if self._template:
+            main_template = self._template
+        card_range = self.get_card_range(project)
+        if not card_range:
+            error = "Card range error: {self.data_source_name}, {card_range}"
+            card_range = []
+        self.context = self.render_io(self.width, self.height, self.offset_x, self.offset_y, self.cols, self.spacing_x, self.spacing_y, project, card_data, card_range, main_template, self.template_field, error)
+        #self.context = await run.io_bound(self.render_io,self.width, self.height, self.offset_x, self.offset_y, self.cols, self.spacing_x, self.spacing_y, project, card_data, card_range, main_template, self.template_field, error)
+
+    def render_io(self, width, height, offset_x, offset_y, cols, spacing_x, spacing_y, project, card_data, card_range, main_template, template_field, error):
+        context = DrawContext(width, height, project, "RGB")
         start_time = time.time()
-        self.context.clear((0,0,0,0))
+        context.clear((0,0,0,0))
 
         # Checkerboard pattern
         #check_size = 25
@@ -106,42 +129,30 @@ class Output:
 
         # Start drawing
         col = 0
-        x=self.offset_x
-        y=self.offset_y
+        x=offset_x
+        y=offset_y
 
         #draw cards
-        try:
-            data_source = self.get_data_source(project)
-            assert(data_source)
-            await data_source.load_data()
-        except Exception:
-            self.context.draw_text(0, 0, f"No data source found: {self.data_source_name}")
-            return
-        main_template = None
-        if self.template_name:
-            main_template = project.templates[self.template_name]
-        if self._template:
-            main_template = self._template
+        if error:
+            context.draw_text(0, 0, error)
+            return context
         template_cache = []  #These templates have been reloaded already
         maxh = 0
-        card_range = self.get_card_range(project)
-        if not card_range:
-            return
         for card_index in range(*card_range):
-            card = data_source.cards[card_index]
+            card = card_data[card_index]
             card_context = DrawContext(640, 480, project, "RGB")
             card_context.clear((0, 0, 0, 0))
 
             template = main_template
             # Get template from row
-            if self.template_field:
+            if template_field:
                 try:
-                    template = project.templates[card[self.template_field]]
+                    template = project.templates[card[template_field]]
                 except Exception:
                     card_context.draw_text(0, 0, f"No data source found:")
-                    card_context.draw_text(0, 45, f"{card[self.template_field]}")
+                    card_context.draw_text(0, 45, f"{card[template_field]}")
                     card_context.draw_text(0, 90, f"from")
-                    card_context.draw_text(0, 125, f"{self.template_field}")
+                    card_context.draw_text(0, 125, f"{template_field}")
 
             if template:
                 if template not in template_cache:
@@ -155,43 +166,44 @@ class Output:
                     print("Exception in executing template:")
                     import traceback
                     traceback.print_exc()
-                    ui.notify(str(traceback.format_exc()))
+                    #ui.notify(str(traceback.format_exc()))
                     card_context.draw_text(0, 0, f"Template")
                     card_context.draw_text(0, 45, f"Error")
 
             # Resize output if we are using cols to determine how many cards to place in a row
-            if self.cols:
+            if cols:
 
                 change = False
-                if card_context.width + x > self.width:
-                    self.width = x+card_context.width
+                if card_context.width + x > width:
+                    width = x+card_context.width
                     change = True
-                if card_context.height + y > self.height:
-                    self.height = y+card_context.height
+                if card_context.height + y > height:
+                    height = y+card_context.height
                     change = True
                 if change:
-                    print("RESIZE OUTPUT TO", self.width, self.height)
-                    self.context.resize(self.width, self.height, "RGB")
+                    print("RESIZE OUTPUT TO", width, height)
+                    context.resize(width, height, "RGB")
 
             try:
-                self.context.draw_context(x, y, card_context)
+                context.draw_context(x, y, card_context)
             except Exception as exc:
                 print("Exception drawing card context to image:")
                 import traceback
                 traceback.print_exc()
-                ui.notify(str(traceback.format_exc()))
+                #ui.notify(str(traceback.format_exc()))
             if card_context.height > maxh:
                 maxh = card_context.height
-            x += card_context.width+self.spacing_x
-            if x+card_context.width > self.width or (self.cols and col>=self.cols):
-                x = self.offset_x
-                y += maxh+self.spacing_y
+            x += card_context.width+spacing_x
+            if x+card_context.width > width or (cols and col>=cols):
+                x = offset_x
+                y += maxh+spacing_y
                 maxh = 0
                 col = 0
             #return
         end_time = time.time()
         render_time = end_time-start_time
-        print("Render time:", self.file_name, render_time)
+        #print("Render time:", self.file_name, render_time)
+        return context
 
     def save(self, folder):
         fn = self.file_name
