@@ -23,7 +23,6 @@ class RenderedCardPreview:
         if not output_list:
             output_list = self.output_list
         for i in range(len(image_element_list)):
-            print("enable view progress")
             self.view.progress.message = f"Building image for: {output_list[i].file_name}"
             try:
                 print("updating output image", output_list[i].data_source_name)
@@ -31,7 +30,6 @@ class RenderedCardPreview:
             except Exception as e:
                 ui.notify(repr(e))
                 continue
-        print("dismiss view progress")
         self.view.progress.dismiss()
 
     @ui.refreshable
@@ -124,7 +122,7 @@ class RenderedCardPreview:
                     im_el = ui.image("").classes(f'w-[{self.zoom}px]')
                     self.image_element_list.append(im_el)
                     self.output_list.append(output)
-        ui.timer(0, lambda:self.render_images(self.image_element_list, self.output_list), once=True)
+        ui.timer(0.01, lambda:self.render_images(self.image_element_list, self.output_list), once=True)
 
     def dragscroll(self, el, scroll_area:ui.scroll_area, speed=1):
         if not hasattr(el, "is_scrolling"):
