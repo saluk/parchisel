@@ -43,39 +43,42 @@ async def main():
             view_manager.toplevel = list(tabs.ancestors())[1]
             project_view = ui.tab("Project")
             template_view = ui.tab('Templates')
-            sheet_view = ui.tab('Google Sheets')
             virtual_table_view = ui.tab('Virtual Tables')
+            graph_view = ui.tab('Game State Graph')
             tabs.on_value_change(view_manager.refresh_outputs)
 
-    view_manager.header = header
+    tabs.on("click", lambda tab: print(tab))
 
+    view_manager.header = header
     with ui.tab_panels(tabs, value=project_view).classes('w-full') as tabs:
-        with ui.tab_panel(virtual_table_view):
-            view = virtual_table.TableView()
-            with ui.card():
-                await view.build()
-        with ui.tab_panel(project_view):
-            with ui.card():
-                view_manager.ui_project_manage.build()
-            with ui.card():
-                ui.label("Data Sources")
-                await view_manager.ui_datasources.build()
-            with ui.card():
-                ui.label("Outputs")
-                await view_manager.ui_outputs.build()
-        with ui.tab_panel(template_view):
-            async def save_output_btn():
-                await view_manager.project.save_outputs()
-                ui.notify("Saved!")
-            ui.button("Save All Project Images", on_click=save_output_btn)
-            def save_screentop():
-                from lib.exports import ExportComponents
-                ExportComponents(view_manager.project)
-            ui.button("Export Screentop", on_click=save_screentop)
-            ui.label('Templates')
-            with ui.card().tight():
-                view_manager.ui_template_editor.build()
-            await view_manager.ui_rendered_card_preview.build()
+        # with ui.tab_panel(virtual_table_view):
+        #     view = virtual_table.TableView()
+        #     with ui.card():
+        #         await view.build()
+        # with ui.tab_panel(project_view):
+        #     with ui.card():
+        #         view_manager.ui_project_manage.build()
+        #     with ui.card():
+        #         ui.label("Data Sources")
+        #         await view_manager.ui_datasources.build()
+        #     with ui.card():
+        #         ui.label("Outputs")
+        #         await view_manager.ui_outputs.build()
+        # with ui.tab_panel(template_view):
+        #     async def save_output_btn():
+        #         await view_manager.project.save_outputs()
+        #         ui.notify("Saved!")
+        #     ui.button("Save All Project Images", on_click=save_output_btn)
+        #     def save_screentop():
+        #         from lib.exports import ExportComponents
+        #         ExportComponents(view_manager.project)
+        #     ui.button("Export Screentop", on_click=save_screentop)
+        #     ui.label('Templates')
+        #     with ui.card().tight():
+        #         view_manager.ui_template_editor.build()
+        #     await view_manager.ui_rendered_card_preview.build()
+        with ui.tab_panel(graph_view):
+            await view_manager.ui_game_state_graph.build()
     view_manager.tabs = tabs
     ui.timer(0.1, initial_project_load, once=True)
 

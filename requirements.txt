@@ -9,3 +9,8 @@ aiohttp==3.11.12
 platformdirs==4.3.6
 aiofiles==24.1.0
 colour==0.1.5
+
+# For gamestategraph
+networkx
+matplotlib
+grave
