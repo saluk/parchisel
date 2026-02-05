@@ -96,6 +96,10 @@ class Node:
 			if isinstance(node_name, str) and '.' in node_name and node.fullname().endswith(node_name):
 				return node
 		return None
+	def get_index(self):
+		if not self.parent:
+			return 0
+		return self.parent.children.index(self)
 	def reparent(self, parent):
 		""" Moves a node from its current parent to the parent with the given name """
 		self.parent.children.remove(self)
@@ -249,7 +253,11 @@ def print_state(node):
 			    next.insert(0, (child,indent+1))
 
 def get_ui_tree(state:Node):
-	return {"compress":state.compress,"uid":state.uid, "fullname": state.fullname(), "name": state.name, "children":[get_ui_tree(child) for child in state.children]}
+	d = {"compress":state.compress,"uid":state.uid, "fullname": state.fullname(), "name": state.name, "children":[get_ui_tree(child) for child in state.children]}
+	if state.is_root and isinstance(state, GameStateTree):
+		d["tickable"] = False
+		d["selectable"] = False
+	return d
 
 colors = ["green","red","blue"]
 action_numbers = [1,1,3,3,5,5,7,7,9]

@@ -1,12 +1,40 @@
 # Operations are a low level, ui-centric, manipulation of a tree
 from . import gamestategraph
 from nicegui import ui
+from enum import Enum
+from typing import Literal
+
+class OperationArgType(Enum):
+    TYPE_STRING = "type string"
+    TYPE_DECIMAL = "type decimal"
+    TYPE_INTEGER = "type integer"
+    TYPE_BOOLEAN = "type boolean"
+
+class OperationArgInputType(Enum):
+    INPUT = "input"
+    CHECK = "check"
 
 class OperationArg:
-    def __init__(self, name:str, default:str):
+    def __init__(self, name:str, default:str, datatype:OperationArgType=OperationArgType.TYPE_STRING):
         self.name = name
         self.default = default
-        self.value = None
+        self.value = default
+        self.datatype:OperationArgType = datatype
+    def input_type(self):
+        if self.datatype in [OperationArgType.TYPE_BOOLEAN]:
+            return OperationArgInputType.CHECK
+        return OperationArgInputType.INPUT
+    def validate(self, value):
+        if self.datatype == OperationArgType.TYPE_DECIMAL:
+            try:
+                f = float(value)
+            except:
+                return "Must be a number"
+        if self.datatype == OperationArgType.TYPE_INTEGER:
+            try:
+                f = int(value)
+            except:
+                return "Must be an integer"
 
 class OperationBase:
     OPERATE_SINGLE = 'Apply to individual nodes'
@@ -14,7 +42,7 @@ class OperationBase:
     OPERATE_MANY_ONE = 'Apply from many nodes to one node'
     OPERATE_ONE_MANY = 'Apply from one node to many'
     operate_type = OPERATE_SINGLE
-    args = []
+    args:list[OperationArg] = []
     def name(self):
         return "BASE"
     def apply(self, nodes_selected:list[gamestategraph.Node]):
@@ -44,11 +72,39 @@ class OperationBase:
 class OperationAddNode(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE
     def __init__(self):
-        self.args = [OperationArg("node_name", "Node")]
+        self.args = [OperationArg("node_name", "Node"), OperationArg("times", 1, OperationArgType.TYPE_DECIMAL), OperationArg("increment_names", False, OperationArgType.TYPE_BOOLEAN)]
+        old_validate = self.args[1].validate
+        def validate_times(value):
+            old = old_validate(value)
+            if old:
+                return old
+            if int(value) < 1:
+                return "Must be >= 1"
+        self.args[1].validate = validate_times
     def name(self):
         return "Add child node"
-    def apply_one(self, node:gamestategraph.Node, node_name:str):
-        node.add_children([gamestategraph.Node(node_name)])
+    def apply_one(self, node:gamestategraph.Node, node_name:str, num_times:int, increment:bool):
+        start = ""
+        if increment:
+            start = 1
+            def get_digit_suffix(name:str):
+                num_digits = 0
+                for c in reversed(name):
+                    if c.isdigit():
+                        num_digits += 1
+                    else:
+                        break
+                if num_digits>0:
+                    return int(name[-num_digits:])
+                return -1
+            sorted_names = sorted([child.name for child in node.children], key=lambda v: get_digit_suffix(v))
+            for child_name in sorted_names:
+                if child_name == node_name+str(start):
+                    start += 1
+        for t in range(int(num_times)):
+            node.add_children([gamestategraph.Node(node_name+str(start))])
+            if increment:
+                start += 1
 
 class OperationAddNextGameState(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE

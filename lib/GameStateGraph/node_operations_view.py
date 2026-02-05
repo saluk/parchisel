@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 from nicegui.elements.dialog import Dialog
-from . import gamestategraph
-from . import operations
+from lib.GameStateGraph import gamestategraph
+from lib.GameStateGraph import operations
 from nicegui import ui, html
 
 class NodeOperationsView:
@@ -56,7 +56,11 @@ class NodeOperationsView:
         with ui.dialog() as dialog, ui.card():
             ui.label(operation.name())
             for arg in operation.args:
-                ui.input().bind_value(arg, "value")
+                if arg.input_type() == operations.OperationArgInputType.INPUT:
+                    ui.input(arg.name,validation=arg.validate).bind_value(arg, "value")
+                elif arg.input_type() == operations.OperationArgInputType.CHECK:
+                    print(arg.default)
+                    ui.checkbox(arg.name).bind_value(arg, "value")
             ui.button("Confirm", on_click=confirm)
             ui.button('Close', on_click=dialog.close)
         self.operations_dialog: Dialog = dialog

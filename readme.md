@@ -76,7 +76,9 @@ This tool was built on top of some great technology:
 Includes fonts from Google Font:
 https://openfontlicense.org/open-font-license-official-text/
 
-
+# GameStateGraph thing
+TODO - move keyboard from SingleStateUI to be a member of GameStateGraphUI so that it works for all components
+TODO - hold ctrl for "select" to equal "tick". otherwise, "select" unticks and ticks single
 
 # nearterm projects
 

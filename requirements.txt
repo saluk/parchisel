@@ -1,4 +1,4 @@
-nicegui==2.24.2
+nicegui==3.6.1
 pywebview==5.4
 pycairo==1.28.0
 cairocffi==1.7.1

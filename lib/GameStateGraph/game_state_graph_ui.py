@@ -1,5 +1,6 @@
 from nicegui import ui, html
 
+
 from . import gamestategraph
 from .state_tree_view import AllStatesTree, SingleStateTree
 
@@ -16,10 +17,11 @@ class GameStateGraphUI:
         gamestategraph.print_state(self.game_states.children[0].children[0].current_state)
 
         # interfaces
-        self.all_states_tree = AllStatesTree(self.game_states)
-        self.all_states_tree.on_select_target = self
+        self.all_states_tree = AllStatesTree(self.view, self.game_states)
+        self.all_states_tree.select_node = lambda node: self.on_all_states_select(node)
         self.single_state_tree = None
         self.selected_node_inspector = None
+
     def new_graph(self):
         self.game_states.delete_children()
         self.game_states.add_children([gamestategraph.GameState([], gamestategraph.Node("root",is_root=True))])
@@ -27,7 +29,7 @@ class GameStateGraphUI:
     def refresh(self):
         self.build.refresh()
     def on_all_states_select(self, node:gamestategraph.Node):
-        self.single_state_tree = SingleStateTree(node.current_state)
+        self.single_state_tree = SingleStateTree(self.view, node.current_state, node.name)
         print("refresh after clicking to select a gamestate node")
         self.refresh()
     @ui.refreshable

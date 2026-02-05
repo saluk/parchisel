@@ -3,7 +3,7 @@ from lib.webelements.project_outputs import ProjectOutputs
 from lib.webelements.code_editor import CodeEditor
 from lib.webelements.render_cards.rendered_card_preview import RenderedCardPreview
 from lib.webelements.project_manage import ProjectManagement
-from lib.GameStateGraph.game_state_graph import GameStateGraphUI
+from lib.GameStateGraph.game_state_graph_ui import GameStateGraphUI
 
 class ViewManager:
     def __init__(self):
@@ -23,6 +23,8 @@ class ViewManager:
         self.ui_rendered_card_preview = RenderedCardPreview(self)
         
         self.ui_game_state_graph = GameStateGraphUI(self)
+
+        self.key_state = {}
     
     def set_project(self, project, refresh=True):
         self.project = project

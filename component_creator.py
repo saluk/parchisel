@@ -10,6 +10,7 @@ import platform
 import os
 
 from nicegui import ui, app
+from nicegui.events import KeyEventArguments
 
 from multiprocessing import freeze_support
 freeze_support()
@@ -37,6 +38,14 @@ async def initial_project_load():
 
 @ui.page('/')
 async def main():
+    def handle_keys(e:KeyEventArguments):
+        if e.key not in view_manager.key_state:
+            view_manager.key_state[e.key] = {'keydown':e.action.keydown, 'keyup':e.action.keyup}
+        else:
+            if view_manager.key_state[e.key]['keydown'] != e.action.keydown:
+                view_manager.key_state[e.key] = {'keydown':e.action.keydown, 'keyup':e.action.keyup}
+                #ui.notify(repr(e.key)+":"+repr(view_manager.key_state[e.key]))
+    view_manager.keyboard = ui.keyboard().on_key(handle_keys)
     with ui.header().classes(replace='row items-center') as header:
         MainMenu(view_manager, view_manager.ui_project_manage).build()
         with ui.tabs() as tabs:
@@ -87,4 +96,4 @@ app.on_startup(main)
 
 # NOTE: On Windows reload must be disabled to make asyncio.create_subprocess_exec work (see https://github.com/zauberzeug/nicegui/issues/486)
 #ui.run(reload=platform.system() != 'Windows', native=True, title="Parchisel Component Creator", port=6812)
-ui.run(reload=platform.system() != 'Windows', native=False, title="Parchisel Component Creator", port=6812, show=False)
+ui.run(reload=True, native=False, title="Parchisel Component Creator", port=6812, show=False)
