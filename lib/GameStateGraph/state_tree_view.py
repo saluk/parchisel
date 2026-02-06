@@ -76,6 +76,8 @@ class SelectRangeButton:
         return True
 
 class StateTreeViewBase:
+    width = "64"
+    height = "48"
     allowed_operations: list[operations.OperationBase] = []
     def __init__(self, view, state, label="") -> None:
         self.view = view
@@ -146,32 +148,33 @@ class StateTreeViewBase:
                     ui.button("Select None", on_click=self.select_none)
                     await self.select_range_button.build()
             with ui.row():
-                with ui.card():
-                    self.treeElement: Tree = ui.tree(
-                        [gamestategraph.get_ui_tree(self.state)], 
-                        label_key='name',
-                        node_key='uid',
-                        children_key='children',
-                        tick_strategy='strict',
-                        on_select=self.select_node_callback,
-                        on_tick=self.tick_node_callback,
-                    )
-                    self.treeElement.add_slot('default-header', 
-                        '''
-                        <q-tooltip :props="props">
-                            Fullname: {{ props.node.fullname }} <br>
-                            ID:{{ props.node.uid }}
-                        </q-tooltip>
-                        <span :props="props">
-                        {{ props.node.name }} 
-                        </span>'''
-                    )
-                    for n in self.treeElement.nodes():
-                        keys = []
-                        if not n["compress"]:
-                            keys.append(n["uid"])
-                        self.treeElement.expand(keys)
-                    self.treeElement.on('click', lambda e:print(e))
+                with ui.card() as treeCard:
+                    with ui.scroll_area().classes(f'w-{self.width} h-{self.height} border'):
+                        self.treeElement: Tree = ui.tree(
+                            [gamestategraph.get_ui_tree(self.state)], 
+                            label_key='name',
+                            node_key='uid',
+                            children_key='children',
+                            tick_strategy='strict',
+                            on_select=self.select_node_callback,
+                            on_tick=self.tick_node_callback,
+                        )
+                        self.treeElement.add_slot('default-header', 
+                            '''
+                            <q-tooltip :props="props">
+                                Fullname: {{ props.node.fullname }} <br>
+                                ID:{{ props.node.uid }}
+                            </q-tooltip>
+                            <span :props="props">
+                            {{ props.node.name }} 
+                            </span>'''
+                        )
+                        for n in self.treeElement.nodes():
+                            keys = []
+                            if not n["compress"]:
+                                keys.append(n["uid"])
+                            self.treeElement.expand(keys)
+                        self.treeElement.on('click', lambda e:print(e))
                 if self.node_selected:
                     self.treeElement.select(self.node_selected.uid)
                 if self.nodes_ticked:
@@ -187,9 +190,13 @@ class StateTreeView(StateTreeViewBase):
         self.node_operations_view.refresh()
 
 class AllStatesTree(StateTreeView):
+    width = "64"
+    height = "48"
     allowed_operations = [operations.OperationAddNextGameState(), operations.OperationAddBranchingGameState(), operations.OperationDeleteNode()]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 class SingleStateTree(StateTreeView):
+    width = "94"
+    height = "128"
     allowed_operations = [operations.OperationAddNode(),operations.OperationDeleteNode()]
