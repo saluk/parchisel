@@ -26,18 +26,19 @@ from lib.data.profile import global_profile
 # TODO make a parchisel app that has component creator and virtual table as modes to select between
 from lib.virtualtable import virtual_table
 
-view_manager = ViewManager()
-
-async def initial_project_load():
-    print(global_profile.profile)
-    if global_profile.profile['last_project']:
-        project = LocalProject(global_profile.profile['last_project'], global_profile.profile['last_project'])
-        await project.load()
-        # we don't need to refresh when we are building from the initial load
-        view_manager.set_project(project, refresh=False)
-
 @ui.page('/')
 async def main():
+
+    view_manager = ViewManager()
+
+    async def initial_project_load():
+        print(global_profile.profile)
+        if global_profile.profile['last_project']:
+            project = LocalProject(global_profile.profile['last_project'], global_profile.profile['last_project'])
+            await project.load()
+            # we don't need to refresh when we are building from the initial load
+            view_manager.set_project(project, refresh=False)
+
     def handle_keys(e:KeyEventArguments):
         if e.key not in view_manager.key_state:
             view_manager.key_state[e.key] = {'keydown':e.action.keydown, 'keyup':e.action.keyup}
