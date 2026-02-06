@@ -266,8 +266,8 @@ def get_ui_tree(state:Node):
 		d["tickable"] = False
 		d["selectable"] = False
 	# Within a given state, only tick
-	if not isinstance(state, GameState):
-		d["selectable"] = False
+	# if not isinstance(state, GameState):
+	# 	d["selectable"] = False
 	return d
 
 colors = ["green","red","blue"]
