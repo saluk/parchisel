@@ -2,9 +2,9 @@
 
 # TODO very bad, let's make cairo the same as cairocffi
 
-import cairo
-import sys
-sys.modules["cairocffi"] = cairo
+#import cairo
+#import sys
+#sys.modules["cairocffi"] = cairo
 
 import platform
 import os
