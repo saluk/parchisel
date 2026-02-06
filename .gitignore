@@ -12,3 +12,6 @@ projects/radlands_test/*
 projects/dog_and_pony/*
 projects/splitloot/*
 temp/*
+
+# nicegui server files
+.nicegui/*

@@ -67,17 +67,17 @@ class Node:
 	def _annotate_subtree(self):
 		if not self.is_root:
 			raise Exception("Only the root should call annotate_subtree")
-		print("- call annotate from "+self.fullname()+" -")
+		#print("- call annotate from "+self.fullname()+" -")
 		self.name_cache[:] = {}
 		for node in self.walk():
-			print("-- walking node", node.fullname(),"--")
+			#print("-- walking node", node.fullname(),"--")
 			self.name_cache[node.fullname()] = node
 			if node == self:
 				continue
 			node.root = self
 			node.is_root = False
 			if node.uid == None:
-				print("--- setting uid", self.root.attributes)
+				#print("--- setting uid", self.root.attributes)
 				node.uid = self.root.attributes["last_id"]+1
 				self.root.attributes["last_id"]+=1
 	def walk(self):
@@ -308,24 +308,25 @@ initial_state = Node("zones", is_root=True).add_children(
 	]
 )
 
-game_state = GameStateTree()
-state1a = GameState([], initial_state)
-print("* add child 1a")
-game_state.add_children([state1a])
-print("* add branch experiment")
-state1b = state1a.add_branch("experiment")
-print("* add child 2a")
-state2a = state1a.add_next()
-print("* add child 3a")
-state3a = state2a.add_next()
-print("* add child 2b")
-state2b:GameState = state1b.add_next()
-state2b.add_action(Action("move", "action_deck.red.9", "player1.hand"))
-print_state(game_state)
-print_state(state2a.current_state)
-print_state(state2b.current_state)
+if __name__ == "__main__":
+	game_state = GameStateTree()
+	state1a = GameState([], initial_state)
+	print("* add child 1a")
+	game_state.add_children([state1a])
+	print("* add branch experiment")
+	state1b = state1a.add_branch("experiment")
+	print("* add child 2a")
+	state2a = state1a.add_next()
+	print("* add child 3a")
+	state3a = state2a.add_next()
+	print("* add child 2b")
+	state2b:GameState = state1b.add_next()
+	state2b.add_action(Action("move", "action_deck.red.9", "player1.hand"))
+	print_state(game_state)
+	print_state(state2a.current_state)
+	print_state(state2b.current_state)
 
-#print_state(states[0])
-#print(states[0])
-#new_state = move('Lock-green.2', 'heist1.row', states[0])
-#print_state(new_state)
+	#print_state(states[0])
+	#print(states[0])
+	#new_state = move('Lock-green.2', 'heist1.row', states[0])
+	#print_state(new_state)

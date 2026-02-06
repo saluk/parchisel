@@ -49,18 +49,15 @@ async def main():
     view_manager.keyboard = ui.keyboard().on_key(handle_keys)
     with ui.header().classes(replace='row items-center') as header:
         MainMenu(view_manager, view_manager.ui_project_manage).build()
-        with ui.tabs() as tabs:
-            view_manager.toplevel = list(tabs.ancestors())[1]
+        with ui.tabs() as tab_buttons:
+            view_manager.toplevel = list(tab_buttons.ancestors())[1]
             project_view = ui.tab("Project")
             template_view = ui.tab('Templates')
             virtual_table_view = ui.tab('Virtual Tables')
             graph_view = ui.tab('Game State Graph')
-            tabs.on_value_change(view_manager.refresh_outputs)
-
-    tabs.on("click", lambda tab: print(tab))
 
     view_manager.header = header
-    with ui.tab_panels(tabs, value=project_view).classes('w-full') as tabs:
+    with ui.tab_panels(tab_buttons, value=project_view).classes('w-full') as tab_views:
         # with ui.tab_panel(virtual_table_view):
         #     view = virtual_table.TableView()
         #     with ui.card():
@@ -89,7 +86,17 @@ async def main():
         #     await view_manager.ui_rendered_card_preview.build()
         with ui.tab_panel(graph_view):
             await view_manager.ui_game_state_graph.build()
-    view_manager.tabs = tabs
+    view_manager.tabs = tab_views
+
+    # Note, storage.general is only good for the desktop app as we would want each user storage
+    # to be independant. This needs a database.
+    print("Last Tab=", app.storage.user.get('last_tab', "Project"))
+    tab_buttons.set_value(app.storage.user.get('last_tab', "Project"))
+    def save_tab(e):
+        print(f"saving tab: {e}")
+        app.storage.user['last_tab'] = e.value
+    tab_buttons.on_value_change(save_tab)
+
     ui.timer(0.1, initial_project_load, once=True)
 
 app.add_static_files('/images', 'lib/images')
@@ -97,4 +104,4 @@ app.on_startup(main)
 
 # NOTE: On Windows reload must be disabled to make asyncio.create_subprocess_exec work (see https://github.com/zauberzeug/nicegui/issues/486)
 #ui.run(reload=platform.system() != 'Windows', native=True, title="Parchisel Component Creator", port=6812)
-ui.run(reload=True, native=False, title="Parchisel Component Creator", port=6812, show=False)
+ui.run(reload=True, native=False, title="Parchisel Component Creator", port=6812, show=False, storage_secret="secretxyz")
