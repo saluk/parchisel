@@ -75,6 +75,7 @@ class Node:
 			if node == self:
 				continue
 			node.root = self
+			node.is_root = False
 			if node.uid == None:
 				print("--- setting uid", self.root.attributes)
 				node.uid = self.root.attributes["last_id"]+1
@@ -253,9 +254,19 @@ def print_state(node):
 			    next.insert(0, (child,indent+1))
 
 def get_ui_tree(state:Node):
-	d = {"compress":state.compress,"uid":state.uid, "fullname": state.fullname(), "name": state.name, "children":[get_ui_tree(child) for child in state.children]}
+	d = {
+		"compress":state.compress,
+		"uid":state.uid, 
+		"fullname": state.fullname(), 
+		"name": state.name, 
+		"children":[get_ui_tree(child) for child in state.children]
+	}
+	# Within the state explorer, don't interact with root
 	if state.is_root and isinstance(state, GameStateTree):
 		d["tickable"] = False
+		d["selectable"] = False
+	# Within a given state, only tick
+	if not isinstance(state, GameState):
 		d["selectable"] = False
 	return d
 

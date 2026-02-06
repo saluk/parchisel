@@ -35,6 +35,11 @@ class OperationArg:
                 f = int(value)
             except:
                 return "Must be an integer"
+            
+class InvalidNodeError:
+    def __init__(self, nodes, message):
+        self.nodes = nodes
+        self.message = message
 
 class OperationBase:
     OPERATE_SINGLE = 'Apply to individual nodes'
@@ -45,6 +50,8 @@ class OperationBase:
     args:list[OperationArg] = []
     def name(self):
         return "BASE"
+    def invalid_nodes(self, nodes_selected):
+        return None
     def apply(self, nodes_selected:list[gamestategraph.Node]):
         ui.notify(f"apply action {self.name()} to {repr(nodes_selected)}")
         args = [arg.value for arg in self.args]
@@ -105,6 +112,18 @@ class OperationAddNode(OperationBase):
             node.add_children([gamestategraph.Node(node_name+str(start))])
             if increment:
                 start += 1
+
+class OperationDeleteNode(OperationBase):
+    operate_type = OperationBase.OPERATE_SINGLE
+    def name(self):
+        return "Delete Nodes"
+    def invalid_nodes(self, nodes_selected):
+        invalid = [node for node in nodes_selected if node.is_root]
+        if invalid:
+            return InvalidNodeError(invalid, f"Cannot delete a root node {[node.uid for node in invalid]}")
+    def apply_one(self, node:gamestategraph.Node):
+        node.parent.children.remove(node)
+        node.parent = None
 
 class OperationAddNextGameState(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE

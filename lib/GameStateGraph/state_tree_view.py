@@ -97,6 +97,10 @@ class StateTreeViewBase:
         self.nodes_ticked = []
     def refresh(self) -> None:
         print("refresh stateTreeViewBase:", self.state.name)
+        # If some nodes were deleted, we might need to update our selection
+        if self.node_selected and not self.node_selected.parent:
+            self.node_selected = None
+        self.nodes_ticked[:] = [node for node in self.nodes_ticked if node and (node.parent or node.is_root)]
         self.build.refresh()
     async def select_none(self) -> None:
         self.treeElement.untick(None)
@@ -126,11 +130,10 @@ class StateTreeViewBase:
         self.nodes_ticked = []
         for uid in e.value:
             self.nodes_ticked.append(self.state.find_node(uid))
-        if self.nodes_ticked:
-            if await self.select_range_button.clicked_node(self.nodes_ticked[-1], self):
-                self.tick_node(self.nodes_ticked)
-                return
+        if self.nodes_ticked and await self.select_range_button.clicked_node(self.nodes_ticked[-1], self):
             self.tick_node(self.nodes_ticked)
+            return
+        self.tick_node(self.nodes_ticked)
     def tick_node(self, nodes:list[gamestategraph.Node]) -> None:
         pass
     @ui.refreshable
@@ -153,9 +156,17 @@ class StateTreeViewBase:
                         on_select=self.select_node_callback,
                         on_tick=self.tick_node_callback,
                     )
-        #             self.treeElement.add_slot('default-body', '''
-        #     <span :props="props">ID: "{{ props.node.uid }}"</span>
-        # ''')
+                    self.treeElement.add_slot('default-header', 
+                        '''
+                        <q-tooltip :props="props">
+                            Fullname: {{ props.node.fullname }} <br>
+                            ID:{{ props.node.uid }}
+                        </q-tooltip>
+                        <span :props="props">
+                        <span style="font-size:small"><{{ props.node.uid }}></span>
+                        {{ props.node.name }} 
+                        </span>'''
+                    )
                     for n in self.treeElement.nodes():
                         keys = []
                         if not n["compress"]:
@@ -177,9 +188,9 @@ class StateTreeView(StateTreeViewBase):
         self.node_operations_view.refresh()
 
 class AllStatesTree(StateTreeView):
-    allowed_operations = [operations.OperationAddNextGameState(), operations.OperationAddBranchingGameState()]
+    allowed_operations = [operations.OperationAddNextGameState(), operations.OperationAddBranchingGameState(), operations.OperationDeleteNode()]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 class SingleStateTree(StateTreeView):
-    allowed_operations = [operations.OperationAddNode()]
+    allowed_operations = [operations.OperationAddNode(),operations.OperationDeleteNode()]

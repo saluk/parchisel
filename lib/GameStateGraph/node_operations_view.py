@@ -76,7 +76,11 @@ class NodeOperationsView:
                 print(self.allowed_operations)
                 for operation in self.allowed_operations:
                     print("build op",operation.name())
-                    ui.button(operation.name(), on_click=lambda op=operation: self.on_click_operation(op))
+                    button = ui.button(operation.name(), on_click=lambda op=operation: self.on_click_operation(op))
+                    invalid = operation.invalid_nodes(self.ticked_nodes)
+                    if invalid:
+                        button.disable()
+                        button.tooltip(invalid.message)
             with html.section():
                 html.span("Selected: ")
                 html.strong(self.nodes_string(self.ticked_nodes)) 
