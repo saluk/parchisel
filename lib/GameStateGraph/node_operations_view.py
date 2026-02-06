@@ -67,20 +67,22 @@ class NodeOperationsView:
         self.operations_dialog.open()
     @ui.refreshable
     async def build(self) -> None:
-        with ui.card():
-            ui.label("Operations")
-            if not self.ticked_nodes:
-                ui.label("No nodes selected")
-                return
-            with ui.row():
-                print(self.allowed_operations)
-                for operation in self.allowed_operations:
-                    print("build op",operation.name())
-                    button = ui.button(operation.name(), on_click=lambda op=operation: self.on_click_operation(op))
-                    invalid = operation.invalid_nodes(self.ticked_nodes)
-                    if invalid:
-                        button.disable()
-                        button.tooltip(invalid.message)
-            with html.section():
-                html.span("Selected: ")
-                html.strong(self.nodes_string(self.ticked_nodes)) 
+        with ui.context_menu() as self.root_widget:
+            with ui.card():
+                ui.label("Operations")
+                if not self.ticked_nodes:
+                    ui.label("No nodes selected")
+                    return
+                with ui.row():
+                    print(self.allowed_operations)
+                    for operation in self.allowed_operations:
+                        print("build op",operation.name())
+                        button = ui.button(operation.name(), on_click=lambda op=operation: self.on_click_operation(op))
+                        invalid = operation.invalid_nodes(self.ticked_nodes)
+                        if invalid:
+                            button.disable()
+                            button.tooltip(invalid.message)
+                with html.section():
+                    html.span("Selected: ")
+                    html.strong(self.nodes_string(self.ticked_nodes))
+        #self.root_widget.open()
