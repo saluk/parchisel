@@ -69,20 +69,26 @@ class NodeOperationsView:
     async def build(self) -> None:
         with ui.context_menu() as self.root_widget:
             with ui.card():
-                ui.label("Operations")
-                if not self.ticked_nodes:
-                    ui.label("No nodes selected")
-                    return
                 with ui.row():
-                    print(self.allowed_operations)
-                    for operation in self.allowed_operations:
-                        print("build op",operation.name())
-                        button = ui.button(operation.name(), on_click=lambda op=operation: self.on_click_operation(op))
-                        invalid = operation.invalid_nodes(self.ticked_nodes)
-                        if invalid:
-                            button.disable()
-                            button.tooltip(invalid.message)
-                with html.section():
-                    html.span("Selected: ")
-                    html.strong(self.nodes_string(self.ticked_nodes))
+                    ui.button("Select None", on_click=self.parent.select_none)
+                    await self.parent.select_range_button.build()
+                ui.separator()
+                with ui.row():
+                    with html.section():
+                        html.span("Selected: ")
+                        html.strong(self.nodes_string(self.ticked_nodes))
+                with ui.row():
+                    ui.label("Operations")
+                    if not self.ticked_nodes:
+                        ui.label("No nodes selected")
+                        return
+                    with ui.row():
+                        print(self.allowed_operations)
+                        for operation in self.allowed_operations:
+                            print("build op",operation.name())
+                            button = ui.button(operation.name(), on_click=lambda op=operation: self.on_click_operation(op))
+                            invalid = operation.invalid_nodes(self.ticked_nodes)
+                            if invalid:
+                                button.disable()
+                                button.tooltip(invalid.message)
         #self.root_widget.open()
