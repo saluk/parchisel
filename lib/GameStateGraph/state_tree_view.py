@@ -163,7 +163,6 @@ class StateTreeViewBase:
                             ID:{{ props.node.uid }}
                         </q-tooltip>
                         <span :props="props">
-                        <span style="font-size:small"><{{ props.node.uid }}></span>
                         {{ props.node.name }} 
                         </span>'''
                     )
