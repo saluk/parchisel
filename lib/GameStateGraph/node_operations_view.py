@@ -91,4 +91,3 @@ class NodeOperationsView:
                             if invalid:
                                 button.disable()
                                 button.tooltip(invalid.message)
-        #self.root_widget.open()

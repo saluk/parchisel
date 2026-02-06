@@ -168,7 +168,6 @@ class StateTreeViewBase:
                     if not n["compress"]:
                         keys.append(n["uid"])
                     self.treeElement.expand(keys)
-                self.treeElement.on('click', lambda e:print(e))
             if self.node_selected:
                 self.treeElement.select(self.node_selected.uid)
             if self.nodes_ticked:
