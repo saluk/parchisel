@@ -23,7 +23,7 @@ class Profile:
                 data = json.loads(f.read())
         
         for k in self.profile:
-            if k in data and type(data[k]) == type(self.profile[k]) or self.profile[k] == None or data[k] == None:
+            if k in data and (type(data[k]) == type(self.profile[k]) or self.profile[k] == None or data[k] == None):
                 self.profile[k] = data[k]
     def write(self):
         print("writing profile", self.profile_path)
