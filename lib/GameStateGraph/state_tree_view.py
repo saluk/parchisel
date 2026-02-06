@@ -33,13 +33,12 @@ class SelectRangeButton:
     @ui.refreshable
     async def build(self):
         button = ui.button(self.get_label(), on_click=self.click)
-        if not self.enabled():
-            button.disable()
         self.button = button
+        self.update()
         return
     def update(self):
         self.button.text = self.get_label()
-        if self.enabled:
+        if self.enabled():
             self.button.enable()
         else:
             self.button.disable()
@@ -120,49 +119,54 @@ class StateTreeViewBase:
             if node.uid not in e.value:
                 unticked = node
                 self.nodes_ticked.remove(node)
-                await self.select_range_button.clicked_node(unticked, self, untick=True)
-                return
+                if self.select_range_button.active:
+                    await self.select_range_button.clicked_node(unticked, self, untick=True)
+                    self.tick_node(self.nodes_ticked)
+                    return
         self.nodes_ticked = []
         for uid in e.value:
             self.nodes_ticked.append(self.state.find_node(uid))
-        if await self.select_range_button.clicked_node(self.nodes_ticked[-1], self):
-            return
-        self.tick_node(self.nodes_ticked)
+        if self.nodes_ticked:
+            if await self.select_range_button.clicked_node(self.nodes_ticked[-1], self):
+                self.tick_node(self.nodes_ticked)
+                return
+            self.tick_node(self.nodes_ticked)
     def tick_node(self, nodes:list[gamestategraph.Node]) -> None:
         pass
     @ui.refreshable
     async def build(self) -> None:
         print("Building statetreeview")
         ui.label(self.label)
-        with ui.row():
+        with ui.card():
             with ui.card():
                 with ui.row():
                     ui.button("Select None", on_click=self.select_none)
                     await self.select_range_button.build()
-                self.treeElement: Tree = ui.tree(
-                    [gamestategraph.get_ui_tree(self.state)], 
-                    label_key='name',
-                    node_key='uid',
-                    children_key='children',
-                    tick_strategy='strict',
-                    on_select=self.select_node_callback,
-                    on_tick=self.tick_node_callback,
-                )
-                self.treeElement.add_slot('default-body', '''
-        <span :props="props">ID: "{{ props.node.uid }}"</span>
-    ''')
-                for n in self.treeElement.nodes():
-                    keys = []
-                    if not n["compress"]:
-                        keys.append(n["uid"])
-                    self.treeElement.expand(keys)
-                self.treeElement.on('click', lambda e:print(e))
-            if self.node_selected:
-                self.treeElement.select(self.node_selected.uid)
-            if self.nodes_ticked:
-                self.treeElement.tick([n.uid for n in self.nodes_ticked])
-            self.node_operations_view: NodeOperationsView = NodeOperationsView(self.nodes_ticked, self.state, self.allowed_operations, self)
-            with ui.card():
+            with ui.row():
+                with ui.card():
+                    self.treeElement: Tree = ui.tree(
+                        [gamestategraph.get_ui_tree(self.state)], 
+                        label_key='name',
+                        node_key='uid',
+                        children_key='children',
+                        tick_strategy='strict',
+                        on_select=self.select_node_callback,
+                        on_tick=self.tick_node_callback,
+                    )
+        #             self.treeElement.add_slot('default-body', '''
+        #     <span :props="props">ID: "{{ props.node.uid }}"</span>
+        # ''')
+                    for n in self.treeElement.nodes():
+                        keys = []
+                        if not n["compress"]:
+                            keys.append(n["uid"])
+                        self.treeElement.expand(keys)
+                    self.treeElement.on('click', lambda e:print(e))
+                if self.node_selected:
+                    self.treeElement.select(self.node_selected.uid)
+                if self.nodes_ticked:
+                    self.treeElement.tick([n.uid for n in self.nodes_ticked])
+                self.node_operations_view: NodeOperationsView = NodeOperationsView(self.nodes_ticked, self.state, self.allowed_operations, self)
                 await self.node_operations_view.build()
 
 class StateTreeView(StateTreeViewBase):
