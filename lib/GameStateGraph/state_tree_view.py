@@ -79,7 +79,7 @@ class StateTreeViewBase:
     width = "64"
     height = "48"
     allowed_operations: list[operations.OperationBase] = []
-    def __init__(self, view, state, label="") -> None:
+    def __init__(self, view, state=None, label="") -> None:
         self.view = view
         self.label = label
         self.state:gamestategraph.Node = state
@@ -109,14 +109,14 @@ class StateTreeViewBase:
         self.treeElement.deselect()
         self.nodes_ticked = []
         self.tick_node([])
-    def select_node_callback(self, e) -> None:
+    async def select_node_callback(self, e) -> None:
         print(e)
         if e.value != None:
             node: gamestategraph.Node | None = self.state.find_node(e.value)
             self.node_selected = node
         if self.node_selected:
-            self.select_node(self.node_selected)
-    def select_node(self, node:gamestategraph.Node) -> None:
+            await self.select_node(self.node_selected)
+    async def select_node(self, node:gamestategraph.Node) -> None:
         pass
     async def tick_node_callback(self, e) -> None:
         print(e)
@@ -140,10 +140,13 @@ class StateTreeViewBase:
         pass
     @ui.refreshable
     async def build(self) -> None:
+        if not self.state:
+            ui.label("No state selected")
+            return
         print("Building statetreeview")
         with ui.card():
             ui.markdown(self.label).classes("text-lg")
-            with ui.scroll_area().classes(f'w-{self.width} h-{self.height} border'):
+            with ui.scroll_area().classes(f'w-{self.width} h-{self.height} border') as scroll_area:
                 self.treeElement: Tree = ui.tree(
                     [gamestategraph.get_ui_tree(self.state)], 
                     label_key='name',
@@ -172,6 +175,14 @@ class StateTreeViewBase:
                 self.treeElement.select(self.node_selected.uid)
             if self.nodes_ticked:
                 self.treeElement.tick([n.uid for n in self.nodes_ticked])
+
+            def remember_scroll(e):
+                self.scroll_position = [e.horizontal_position, e.vertical_position]
+            scroll_area.on_scroll(remember_scroll)
+            if getattr(self, "scroll_position", None):
+                scroll_area.scroll_to(pixels=self.scroll_position[0], axis='horizontal')
+                scroll_area.scroll_to(pixels=self.scroll_position[1], axis='vertical')
+
             self.node_operations_view: NodeOperationsView = NodeOperationsView(self.nodes_ticked, self.state, self.allowed_operations, self)
             await self.node_operations_view.build()
 

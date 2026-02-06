@@ -19,7 +19,7 @@ class GameStateGraphUI:
         # interfaces
         self.all_states_tree = AllStatesTree(self.view, self.game_states, "Decision Tree")
         self.all_states_tree.select_node = lambda node: self.on_all_states_select(node)
-        self.single_state_tree = None
+        self.single_state_tree = SingleStateTree(self.view)
         self.selected_node_inspector = None
 
     def new_graph(self):
@@ -28,10 +28,10 @@ class GameStateGraphUI:
         self.refresh()
     def refresh(self):
         self.build.refresh()
-    def on_all_states_select(self, node:gamestategraph.Node):
-        self.single_state_tree = SingleStateTree(self.view, node.current_state, f"Decision Node: **{node.name}**")
-        print("refresh after clicking to select a gamestate node")
-        self.refresh()
+    async def on_all_states_select(self, node:gamestategraph.Node):
+        self.single_state_tree.state = node.current_state
+        self.single_state_tree.label = f"Decision Node: **{node.name}**"
+        await self.single_state_tree.build.refresh()
     @ui.refreshable
     async def build(self):
         print("building gamestategraph")
@@ -41,8 +41,5 @@ class GameStateGraphUI:
         ui.button("New Graph", on_click=self.new_graph)
         with ui.row():
             await self.all_states_tree.build()
-            if(self.single_state_tree):
-                await self.single_state_tree.build()
-            else:
-                ui.label('no state selected')
+            await self.single_state_tree.build()
         return
