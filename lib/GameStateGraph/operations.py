@@ -56,14 +56,14 @@ class OperationBase:
     OPERATE_ONE_MANY = 'Apply from one node to many'
     OPERATE_ONLY_ONE = 'Apply to only the last ticked node'
     operate_type = OPERATE_SINGLE
-    args:list[OperationArg] = []
+    args:dict = {}
     def name(self):
         return "BASE"
     def invalid_nodes(self, nodes_selected):
         return None
     def apply(self, nodes_selected:list[gamestategraph.Node]):
         ui.notify(f"apply action {self.name()} to {repr(nodes_selected)}")
-        args = [arg.value for arg in self.args]
+        args = [arg.value for arg in self.args.values()]
         select_hint = None
         if self.operate_type == self.OPERATE_ONLY_ONE:
             select_hint = self.apply_one(nodes_selected[-1])
@@ -111,19 +111,25 @@ class OperationTypeOnlyOne(OperationBase):
 
 class OperationAddNode(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE
+    args = {}
     def __init__(self):
-        self.args = [OperationArg("node_name", "Node"), OperationArg("times", 1, OperationArgType.TYPE_DECIMAL), OperationArg("increment_names", False, OperationArgType.TYPE_BOOLEAN)]
-        old_validate = self.args[1].validate
+        [self.args.setdefault(o.name, o) for o in [
+            OperationArg("node_name", "Node"), 
+            OperationArg("times", 1, OperationArgType.TYPE_DECIMAL), 
+            OperationArg("increment_names", False, OperationArgType.TYPE_BOOLEAN), 
+            OperationArg("select_new_nodes", False, OperationArgType.TYPE_BOOLEAN)
+        ]]
+        old_validate = self.args["times"].validate
         def validate_times(value):
             old = old_validate(value)
             if old:
                 return old
             if int(value) < 1:
                 return "Must be >= 1"
-        self.args[1].validate = validate_times
+        self.args["times"].validate = validate_times
     def name(self):
         return "Add child node"
-    def apply_one(self, node:gamestategraph.Node, node_name:str, num_times:int, increment:bool):
+    def apply_one(self, node:gamestategraph.Node, node_name:str, num_times:int, increment:bool, select_new_nodes:bool):
         start = ""
         if increment:
             start = 1
@@ -147,7 +153,8 @@ class OperationAddNode(OperationBase):
             if increment:
                 start += 1
         node.add_children(children)
-        return SelectionHint(children, children[0], True)
+        if select_new_nodes:
+            return SelectionHint(children, children[0], True)
 
 class OperationDeleteNode(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE

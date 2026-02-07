@@ -52,7 +52,7 @@ class NodeOperationsView:
             self.operations_dialog.close()
         with ui.dialog() as dialog, ui.card():
             ui.label(operation.name())
-            for arg in operation.args:
+            for arg in operation.args.values():
                 if arg.input_type() == operations.OperationArgInputType.INPUT:
                     ui.input(arg.name,validation=arg.validate).bind_value(arg, "value")
                 elif arg.input_type() == operations.OperationArgInputType.CHECK:
