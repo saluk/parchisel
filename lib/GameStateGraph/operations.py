@@ -37,15 +37,24 @@ class OperationArg:
                 return "Must be an integer"
             
 class InvalidNodeError:
+    """ Not an exception - meant to be returned """
     def __init__(self, nodes, message):
         self.nodes = nodes
         self.message = message
+
+class SelectionHint:
+    """ Which nodes should be selected or ticked after an operation """
+    def __init__(self, new_nodes_ticked:list[gamestategraph.Node], new_node_selected:gamestategraph.Node, erase_ticked:bool):
+        self.new_nodes_ticked = new_nodes_ticked
+        self.new_node_selected = new_node_selected
+        self.erase_ticked = erase_ticked
 
 class OperationBase:
     OPERATE_SINGLE = 'Apply to individual nodes'
     OPERATE_MANY = 'Apply to many nodes'
     OPERATE_MANY_ONE = 'Apply from many nodes to one node'
     OPERATE_ONE_MANY = 'Apply from one node to many'
+    OPERATE_ONLY_ONE = 'Apply to only the last ticked node'
     operate_type = OPERATE_SINGLE
     args:list[OperationArg] = []
     def name(self):
@@ -55,18 +64,34 @@ class OperationBase:
     def apply(self, nodes_selected:list[gamestategraph.Node]):
         ui.notify(f"apply action {self.name()} to {repr(nodes_selected)}")
         args = [arg.value for arg in self.args]
-        if self.operate_type == self.OPERATE_SINGLE:
-            for node in nodes_selected:
-                self.apply_one(node, *args)
+        select_hint = None
+        if self.operate_type == self.OPERATE_ONLY_ONE:
+            select_hint = self.apply_one(nodes_selected[-1])
+        elif self.operate_type == self.OPERATE_SINGLE:
+            #Operate in order of ticked
+            nodes_ticked = []
+            node_selected = []
+            erase_ticked = None
+            for node in reversed(nodes_selected):
+                select_hint_one = self.apply_one(node, *args)
+                if select_hint_one:
+                    nodes_ticked.extend(select_hint_one.new_nodes_ticked)
+                    if not node_selected:
+                        node_selected = select_hint_one.new_node_selected
+                    if erase_ticked == None:
+                        erase_ticked = select_hint_one.erase_ticked
+            if select_hint_one:
+                select_hint = SelectionHint(nodes_ticked, node_selected, erase_ticked)
         elif self.operate_type == self.OPERATE_MANY:
-            self.apply_many(nodes_selected, *args)
+            select_hint = self.apply_many(nodes_selected, *args)
         elif self.operate_type == self.OPERATE_MANY_ONE:
-            self.apply_many_one(self, nodes_selected[:-1], nodes_selected[-1], *args)
+            select_hint = self.apply_many_one(self, nodes_selected[:-1], nodes_selected[-1], *args)
         elif self.operate_type == self.OPERATE_ONE_MANY:
-            self.apply_one_many(self, nodes_selected[0], nodes_selected[1:], *args)
+            select_hint = self.apply_one_many(self, nodes_selected[0], nodes_selected[1:], *args)
         else:
             raise Exception("Invalid operation type")
         nodes_selected[0].update_tree()
+        return select_hint
     def apply_one(self, node:gamestategraph.Node):
         pass
     def apply_many(self, nodes:list[gamestategraph.Node]):
@@ -75,6 +100,14 @@ class OperationBase:
         pass
     def apply_one_many(self, from_node:gamestategraph.Node, to_nodes:list[gamestategraph.Node]):
         pass
+
+class OperationTypeOnlyOne(OperationBase):
+    operate_type = OperationBase.OPERATE_ONLY_ONE
+    def invalid_nodes(self, nodes_selected):
+        if len(nodes_selected)<1:
+            return InvalidNodeError(nodes_selected, "Needs a node selected")
+        if len(nodes_selected)>1:
+            return InvalidNodeError(nodes_selected, "Only applies to a single node")
 
 class OperationAddNode(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE
@@ -108,10 +141,13 @@ class OperationAddNode(OperationBase):
             for child_name in sorted_names:
                 if child_name == node_name+str(start):
                     start += 1
+        children = []
         for t in range(int(num_times)):
-            node.add_children([gamestategraph.Node(node_name+str(start))])
+            children.append(gamestategraph.Node(node_name+str(start)))
             if increment:
                 start += 1
+        node.add_children(children)
+        return SelectionHint(children, children[0], True)
 
 class OperationDeleteNode(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE
@@ -125,18 +161,18 @@ class OperationDeleteNode(OperationBase):
         node.parent.children.remove(node)
         node.parent = None
 
-class OperationAddNextGameState(OperationBase):
-    operate_type = OperationBase.OPERATE_SINGLE
+class OperationAddNextGameState(OperationTypeOnlyOne):
     def name(self):
         return "Copy -> Next Action"
     def apply_one(self, node:gamestategraph.GameState):
         print("add next state")
-        node.add_next()
+        next = node.add_next()
+        return SelectionHint([next], next, True)
 
-class OperationAddBranchingGameState(OperationBase):
-    operate_type = OperationBase.OPERATE_SINGLE
+class OperationAddBranchingGameState(OperationTypeOnlyOne):
     def name(self):
         return "Copy -> Branching Action"
     def apply_one(self, node:gamestategraph.GameState):
         print("add branching state")
-        node.add_branch()
+        next = node.add_branch()
+        return SelectionHint([next], next, True)

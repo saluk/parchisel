@@ -38,21 +38,18 @@ class NodeOperationsView:
             s += ",..."
         s+="}"
         return s
-    def on_click_operation(self, operation:operations.OperationBase):
+    async def on_click_operation(self, operation:operations.OperationBase):
         if operation.args:
             self.show_dialog(operation)
         else:
             print("apply operation on its own")
-            operation.apply(self.ticked_nodes)
-            self.parent.refresh()
+            await self.parent.after_operation(operation.apply(self.ticked_nodes))
     def show_dialog(self, operation:operations.OperationBase):
         if self.operations_dialog:
             self.operations_dialog.clear()
         async def confirm() -> None:
-            operation.apply(self.ticked_nodes)
-            self.state.update_tree()
+            await self.parent.after_operation(operation.apply(self.ticked_nodes))
             self.operations_dialog.close()
-            self.parent.refresh()
         with ui.dialog() as dialog, ui.card():
             ui.label(operation.name())
             for arg in operation.args:

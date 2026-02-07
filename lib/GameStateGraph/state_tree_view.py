@@ -173,8 +173,11 @@ class StateTreeViewBase:
                     self.treeElement.expand(keys)
             if self.node_selected:
                 self.treeElement.select(self.node_selected.uid)
+                await self.select_node(self.node_selected)
             if self.nodes_ticked:
+                self.treeElement.untick(None)
                 self.treeElement.tick([n.uid for n in self.nodes_ticked])
+                self.tick_node(self.nodes_ticked)
 
             def remember_scroll(e):
                 self.scroll_position = [e.horizontal_position, e.vertical_position]
@@ -192,6 +195,16 @@ class StateTreeView(StateTreeViewBase):
     def tick_node(self, nodes:list[gamestategraph.Node]) -> None:
         self.node_operations_view.ticked_nodes = nodes
         self.node_operations_view.refresh()
+    async def after_operation(self, select_hint:operations.SelectionHint):
+        self.state.update_tree()
+        if select_hint:
+            if select_hint.erase_ticked:
+                self.nodes_ticked = []
+            if select_hint.new_node_selected:
+                self.node_selected = select_hint.new_node_selected
+            if select_hint.new_nodes_ticked:
+                self.nodes_ticked[:] = select_hint.new_nodes_ticked
+        self.refresh()
 
 class AllStatesTree(StateTreeView):
     width = "64"
