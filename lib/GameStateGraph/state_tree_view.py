@@ -78,7 +78,7 @@ class SelectRangeButton:
 class StateTreeViewBase:
     width = "64"
     height = "48"
-    allowed_operations: list[operations.OperationBase] = []
+    allowed_operations: list[operations.OperationBase.__class__] = []
     def __init__(self, view, state=None, label="") -> None:
         self.view = view
         self.label = label
@@ -209,11 +209,11 @@ class StateTreeView(StateTreeViewBase):
 class AllStatesTree(StateTreeView):
     width = "64"
     height = "48"
-    allowed_operations = [operations.OperationAddNextGameState(), operations.OperationAddBranchingGameState(), operations.OperationDeleteNode()]
+    allowed_operations = [operations.OperationAddNextGameState, operations.OperationAddBranchingGameState, operations.OperationDeleteNode]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 class SingleStateTree(StateTreeView):
     width = "94"
     height = "128"
-    allowed_operations = [operations.OperationAddNode(),operations.OperationDeleteNode()]
+    allowed_operations = [operations.OperationAddNode,operations.OperationDeleteNode]

@@ -149,30 +149,46 @@ class Node:
 			copied.update_tree()
 			self.recursive_update = True
 		return copied
+	def to_dict(self):
+		d = {}
+		d["name"] = self.name
+		d["children"] = [child.to_dict() for child in self.children]
+		d["compress"] = self.compress
+		d["is_root"] = self.is_root
+		d["attributes"] = self.attributes
+		return d
+	@staticmethod
+	def from_dict(d):
+		n = Node(d["name"], [Node.from_dict(child_d) for child_d in d["children"]], d["compress"], d["is_root"])
+		n.attributes = d["attributes"]
+		if n.is_root:
+			n.update_tree()
+		return n
 	
 class Action:
-	def __init__(self, action:str, source:str|Node=None, target:str|Node=None):
-		self.action:str = action
-		self.source:str|Node = source
-		self.target:str|Node = target
-	def action_move(self, tree:Node, source_node:Node, target_node:Node):
-		source_node.reparent(target_node)
-	def perform(self, tree:Node):
-		source_node = tree.find_node(self.source) if isinstance(self.source, str) else self.source
-		target_node = tree.find_node(self.target) if isinstance(self.target, str) else self.target
-		getattr(self, "action_"+self.action)(tree, source_node, target_node)
-	def __repr__(self):
-		return f'{self.action}:{self.source}->{self.target}'
+	def __init__(self, owner:str, action_object:object, state:Node):
+		self.owner:str = owner
+		self.action_object:object = action_object
+		self.state:Node = state
+	def __str__(self):
+		return f'{self.owner or "(system)"} performed {str(self.action_object)}'
+	def copy(self):
+		return Action(self.owner, self.action_object, self.state.copy())
 	
 class GameState(Node):
 	""" A GameState contains the actual state (to keep tree roots separate) as well as a stack
 	of actions that was performed on the parent game state to get to this state"""
-	def __init__(self, action_stack, initial_state, action_level=1):
+	def __init__(self, initial_state, action_level=1):
 		super().__init__()
-		self.current_state:GameState = initial_state
-		self.action_stack = action_stack
-		self.attributes["action_stack"] = action_stack
+		self.attributes["action_stack"] = []
+		self.add_action(Action(None, "init", initial_state))
 		self.action_level = action_level
+	@property
+	def current_state(self):
+		return self.action_stack[-1].state
+	@property
+	def action_stack(self):
+		return self.attributes["action_stack"]
 	@property
 	def name(self):
 		return "state"+str(self.action_level)
@@ -180,16 +196,8 @@ class GameState(Node):
 	def name(self, value):
 		pass
 	def add_action(self, action:Action):
+		action.state.attributes["game_state_owner"] = self
 		self.action_stack.append(action)
-		action.perform(self.current_state)
-	def recalculate(self):
-		""" Recalculate the state as a transformation from the parent state with the move stack applied"""
-		if self.parent is not GameState:
-			return
-		state = self.parent.current_state.copy()
-		for action in self.attributes["action_stack"]:
-			action.perform(state)
-		self.current_state = state
 	def add_branch(self, branch_name:str=None):
 		""" Make a new sibling clone of this state as an alternate move """
 		state = self.copy()
@@ -197,6 +205,7 @@ class GameState(Node):
 		print(id(self.attributes), id(state.attributes))
 		if branch_name:
 			state.attributes["branch_name"] = branch_name
+		state.attributes["game_state_owner"] = self
 		self.parent.add_children([state])
 		return state
 	def add_next(self):
@@ -204,13 +213,12 @@ class GameState(Node):
 		state = self.copy()
 		state.delete_children()
 		state.action_level += 1
+		state.attributes["game_state_owner"] = self
 		self.add_children([state])
 		return state
 	def copy(self):
 		state = super().copy()
-		state.action_stack = copy.copy(state.action_stack)
-		state.attributes["action_stack"] = state.action_stack
-		state.current_state = state.current_state.copy()
+		state.action_stack[:] = [action.copy() for action in self.action_stack]
 		return state
 	
 class GameStateTree(Node):
@@ -270,45 +278,46 @@ def get_ui_tree(state:Node):
 	# 	d["selectable"] = False
 	return d
 
-colors = ["green","red","blue"]
-action_numbers = [1,1,3,3,5,5,7,7,9]
-lock_numbers = [2, 3, 4, 6, 8, 10]
-loot_types = "ABC111222333"*4
 
-
-initial_state = Node("zones", is_root=True).add_children(
-	[
-		Node("action_deck",
-		[
-			Node(color+"."+str(number))
-			for (color,number) in shuffled(prod(colors,action_numbers))
-		], compress=True
-		),
-		Node("lock_deck",[
-			Node("Lock-"+color+"."+str(number)) 
-			for (color, number) in shuffled(prod(colors,lock_numbers))
-		], compress=True),
-		Node("loot_deck",[
-			Node(t) for t in  shuffled(loot_types)
-		], compress=True)
-	] + 
-	[
-		Node("heist"+str(i+1),
-			[
-				Node("players"), Node("row", compress=True)
-			]
-		) for i in range(2)
-	] +
-	[
-		Node("player"+str(i+1),
-			[
-				Node("hand",compress=True)
-			]
-		) for i in range(5)
-	]
-)
 
 if __name__ == "__main__":
+	colors = ["green","red","blue"]
+	action_numbers = [1,1,3,3,5,5,7,7,9]
+	lock_numbers = [2, 3, 4, 6, 8, 10]
+	loot_types = "ABC111222333"*4
+
+
+	initial_state = Node("zones", is_root=True).add_children(
+		[
+			Node("action_deck",
+			[
+				Node(color+"."+str(number))
+				for (color,number) in shuffled(prod(colors,action_numbers))
+			], compress=True
+			),
+			Node("lock_deck",[
+				Node("Lock-"+color+"."+str(number)) 
+				for (color, number) in shuffled(prod(colors,lock_numbers))
+			], compress=True),
+			Node("loot_deck",[
+				Node(t) for t in  shuffled(loot_types)
+			], compress=True)
+		] + 
+		[
+			Node("heist"+str(i+1),
+				[
+					Node("players"), Node("row", compress=True)
+				]
+			) for i in range(2)
+		] +
+		[
+			Node("player"+str(i+1),
+				[
+					Node("hand",compress=True)
+				]
+			) for i in range(5)
+		]
+	)
 	game_state = GameStateTree()
 	state1a = GameState([], initial_state)
 	print("* add child 1a")

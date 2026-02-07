@@ -8,7 +8,7 @@ class GameStateGraphUI:
     def __init__(self, ov):
         self.view = ov
         self.game_states = gamestategraph.GameStateTree()
-        self.game_states.add_children([gamestategraph.GameState([], gamestategraph.Node("something",[gamestategraph.Node("something_child")],is_root=True))])
+        self.game_states.add_children([gamestategraph.GameState(gamestategraph.Node("something",[gamestategraph.Node("something_child")],is_root=True))])
         self.game_states.children[0].add_next()
         self.game_states.children[0].children[0].current_state.name = "something2"
         self.game_states.update_tree()
@@ -24,7 +24,7 @@ class GameStateGraphUI:
 
     def new_graph(self):
         self.game_states.delete_children()
-        self.game_states.add_children([gamestategraph.GameState([], gamestategraph.Node("root",is_root=True))])
+        self.game_states.add_children([gamestategraph.GameState(gamestategraph.Node("root",is_root=True))])
         self.refresh()
     def refresh(self):
         self.build.refresh()

@@ -38,26 +38,28 @@ class NodeOperationsView:
             s += ",..."
         s+="}"
         return s
-    async def on_click_operation(self, operation:operations.OperationBase):
-        if operation.args:
-            self.show_dialog(operation)
+    async def on_click_operation(self, operation:operations.OperationBase.__class__):
+        self.current_operation = operation()
+        if self.current_operation.args:
+            self.show_dialog()
         else:
             print("apply operation on its own")
-            await self.parent.after_operation(operation.apply(self.ticked_nodes))
-    def show_dialog(self, operation:operations.OperationBase):
+            await self.parent.after_operation(self.current_operation.apply(self.ticked_nodes))
+    def show_dialog(self):
+        operation = self.current_operation
         if self.operations_dialog:
             self.operations_dialog.clear()
         async def confirm() -> None:
             await self.parent.after_operation(operation.apply(self.ticked_nodes))
             self.operations_dialog.close()
         with ui.dialog() as dialog, ui.card():
-            ui.label(operation.name())
+            ui.label(operation.name)
             for arg in operation.args.values():
                 if arg.input_type() == operations.OperationArgInputType.INPUT:
-                    ui.input(arg.name,validation=arg.validate).bind_value(arg, "value")
+                    ui.input(arg.name,validation=arg.validate).bind_value(operation, "arg_"+arg.name)
                 elif arg.input_type() == operations.OperationArgInputType.CHECK:
                     print(arg.default)
-                    ui.checkbox(arg.name).bind_value(arg, "value")
+                    ui.checkbox(arg.name).bind_value(operation, "arg_"+arg.name)
             ui.button("Confirm", on_click=confirm)
             ui.button('Close', on_click=dialog.close)
         self.operations_dialog: Dialog = dialog
@@ -82,9 +84,8 @@ class NodeOperationsView:
                     with ui.row():
                         print(self.allowed_operations)
                         for operation in self.allowed_operations:
-                            print("build op",operation.name())
-                            button = ui.button(operation.name(), on_click=lambda op=operation: self.on_click_operation(op))
-                            invalid = operation.invalid_nodes(self.ticked_nodes)
+                            button = ui.button(operation.name, on_click=lambda op=operation: self.on_click_operation(op))
+                            invalid = operation().invalid_nodes(self.ticked_nodes)
                             if invalid:
                                 button.disable()
                                 button.tooltip(invalid.message)

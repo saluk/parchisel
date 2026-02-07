@@ -77,8 +77,51 @@ Includes fonts from Google Font:
 https://openfontlicense.org/open-font-license-official-text/
 
 # GameStateGraph thing
-TODO - move keyboard from SingleStateUI to be a member of GameStateGraphUI so that it works for all components
-TODO - hold ctrl for "select" to equal "tick". otherwise, "select" unticks and ticks single
+ Working on operations at the moment
+ Some explanation of the system so far
+ - Decision Tree contains Game States
+ - Each Game State can be manipulated by the user by performing operations
+ Goals
+ - the user should be able to undo those operations, in case they made a mistake or change their minds about things
+ - it would be nice if you could change the initial game state and have future game states update accordingly
+    - add a new object, it's there from then on
+    - increase an attribute value, it's updated from then on
+Solution
+ - Being able to replay the operations from a given initial state would more or less accomplish both goals
+Concrete actions user takes and ramifications
+ - User changes an initial state:
+    - each state after that is regenerated
+        - start from the parent state
+        - apply the operations that were saved
+        - regenerate children
+ - User performs on operation on the current state
+    - Attempt to apply the operation
+    - if it is successful, save the operation to the stack
+ - User wants to remove an action from anywhere in the stack
+    - action is removed
+    - state is regenerated from its parent state to the last action
+ - object types
+    - Action: contains an Operation and some Arguments. Applying the action applies the Operation
+        to the current state
+ - next steps
+    - For the next few steps, test from python only as a model with no ui
+    - Rewrite Operation to only define how the operation works without the application
+    - Action can apply its Operation and Arguments to a Node
+    - Arguments include which nodes the operation should apply to, but also may include ui hints
+        Regeneration will ignore ui hints
+    - Create an ActionStack class
+    - Node can regenerate itself from its parent (first state can have its initial state be empty)
+        - if an action fails during regeneration, stop
+    - Simulate applying operations, branching the decision tree, and applying more operations
+    - Simulate disable/remove an action to regenerate
+    - Simulate performing actions in earlier GameState to regenerate the Tree
+    - Hook up UI:
+        - Setting and reading UI hints
+        - Apply the action and if successful add to the stack
+        - Show ActionStack
+        - disable or delete an ActionStack item to regenerate
+        - performing actions on Decision State that has children:
+            button to regenerate children
 
 # nearterm projects
 

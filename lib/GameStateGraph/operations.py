@@ -1,14 +1,20 @@
-# Operations are a low level, ui-centric, manipulation of a tree
+# Operations:
+# Define a transformation they can make on a tree
+# They have a type
+# They can contain arguments controlling that operation
+# They can be applied and unapplied
+
+
+
 from . import gamestategraph
-from nicegui import ui
 from enum import Enum
-from typing import Literal
 
 class OperationArgType(Enum):
     TYPE_STRING = "type string"
     TYPE_DECIMAL = "type decimal"
     TYPE_INTEGER = "type integer"
     TYPE_BOOLEAN = "type boolean"
+    TYPE_UID_LIST = "type uid list"
 
 class OperationArgInputType(Enum):
     INPUT = "input"
@@ -18,9 +24,11 @@ class OperationArg:
     def __init__(self, name:str, default:str, datatype:OperationArgType=OperationArgType.TYPE_STRING):
         self.name = name
         self.default = default
-        self.value = default
         self.datatype:OperationArgType = datatype
     def input_type(self):
+        # Handled by which nodes are selected
+        if self.datatype == OperationArgType.TYPE_UID_LIST:
+            return None
         if self.datatype in [OperationArgType.TYPE_BOOLEAN]:
             return OperationArgInputType.CHECK
         return OperationArgInputType.INPUT
@@ -57,13 +65,30 @@ class OperationBase:
     OPERATE_ONLY_ONE = 'Apply to only the last ticked node'
     operate_type = OPERATE_SINGLE
     args:dict = {}
-    def name(self):
-        return "BASE"
+    name="base"
+    def __init__(self):
+        for arg in self.args.values():
+            setattr(self, "arg_"+arg.name, arg.default)
+        self.node_uids_selected:list[str] = []
+    def get_nodes(self, root_node:gamestategraph.Node):
+        return [root_node.find_node(uid) for uid in self.node_uids_selected]
+    def __str__(self):
+        s = f"{self.name}:"
+        if self.nodes_selected:
+            s += f" Targets - [{", ".join([node.name for node in self.nodes_selected])}]"
+        if self.nodes_resulting:
+            s += f" Outcomes - [{", ".join([node.name for node in self.nodes_resulting])}]"
+        return s
     def invalid_nodes(self, nodes_selected):
         return None
-    def apply(self, nodes_selected:list[gamestategraph.Node]):
-        ui.notify(f"apply action {self.name()} to {repr(nodes_selected)}")
-        args = [arg.value for arg in self.args.values()]
+    def apply(self, root_node:gamestategraph.Node):
+
+        # Steps:
+        # - Apply action
+        # - If action applied successfully push Action(current_state) onto the action list
+        nodes_selected = self.get_nodes(root_node)
+
+        args = [getattr(self, "arg_"+arg.name) for arg in self.args.values()]
         select_hint = None
         if self.operate_type == self.OPERATE_ONLY_ONE:
             select_hint = self.apply_one(nodes_selected[-1])
@@ -90,6 +115,11 @@ class OperationBase:
             select_hint = self.apply_one_many(self, nodes_selected[0], nodes_selected[1:], *args)
         else:
             raise Exception("Invalid operation type")
+        
+        gamestate:gamestategraph.GameState = nodes_selected[0].root.attributes.get("game_state_owner", None)
+        if gamestate:
+            gamestate.add_action(gamestategraph.Action("test", self, gamestate.current_state))
+
         nodes_selected[0].update_tree()
         return select_hint
     def apply_one(self, node:gamestategraph.Node):
@@ -112,6 +142,7 @@ class OperationTypeOnlyOne(OperationBase):
 class OperationAddNode(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE
     args = {}
+    name="add"
     def __init__(self):
         [self.args.setdefault(o.name, o) for o in [
             OperationArg("node_name", "Node"), 
@@ -127,8 +158,7 @@ class OperationAddNode(OperationBase):
             if int(value) < 1:
                 return "Must be >= 1"
         self.args["times"].validate = validate_times
-    def name(self):
-        return "Add child node"
+        super().__init__()
     def apply_one(self, node:gamestategraph.Node, node_name:str, num_times:int, increment:bool, select_new_nodes:bool):
         start = ""
         if increment:
@@ -152,14 +182,14 @@ class OperationAddNode(OperationBase):
             children.append(gamestategraph.Node(node_name+str(start)))
             if increment:
                 start += 1
+        self.nodes_resulting = children
         node.add_children(children)
         if select_new_nodes:
             return SelectionHint(children, children[0], True)
 
 class OperationDeleteNode(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE
-    def name(self):
-        return "Delete Nodes"
+    name="delete"
     def invalid_nodes(self, nodes_selected):
         invalid = [node for node in nodes_selected if node.is_root]
         if invalid:
@@ -169,16 +199,14 @@ class OperationDeleteNode(OperationBase):
         node.parent = None
 
 class OperationAddNextGameState(OperationTypeOnlyOne):
-    def name(self):
-        return "Copy -> Next Action"
+    name="next"
     def apply_one(self, node:gamestategraph.GameState):
         print("add next state")
         next = node.add_next()
         return SelectionHint([next], next, True)
 
 class OperationAddBranchingGameState(OperationTypeOnlyOne):
-    def name(self):
-        return "Copy -> Branching Action"
+    name="branch"
     def apply_one(self, node:gamestategraph.GameState):
         print("add branching state")
         next = node.add_branch()
