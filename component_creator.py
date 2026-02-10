@@ -39,14 +39,6 @@ async def main():
             # we don't need to refresh when we are building from the initial load
             view_manager.set_project(project, refresh=False)
 
-    def handle_keys(e:KeyEventArguments):
-        if e.key not in view_manager.key_state:
-            view_manager.key_state[e.key] = {'keydown':e.action.keydown, 'keyup':e.action.keyup}
-        else:
-            if view_manager.key_state[e.key]['keydown'] != e.action.keydown:
-                view_manager.key_state[e.key] = {'keydown':e.action.keydown, 'keyup':e.action.keyup}
-                #ui.notify(repr(e.key)+":"+repr(view_manager.key_state[e.key]))
-    view_manager.keyboard = ui.keyboard().on_key(handle_keys)
     with ui.header().classes(replace='row items-center') as header:
         MainMenu(view_manager, view_manager.ui_project_manage).build()
         with ui.tabs() as tab_buttons:

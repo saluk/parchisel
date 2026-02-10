@@ -5,6 +5,7 @@ from lib.webelements.render_cards.rendered_card_preview import RenderedCardPrevi
 from lib.webelements.project_manage import ProjectManagement
 from lib.GameStateGraph.game_state_graph_ui import GameStateGraphUI
 
+
 class ViewManager:
     def __init__(self):
         self.columns = None
@@ -21,14 +22,12 @@ class ViewManager:
         self.ui_template_editor = CodeEditor(self)
 
         self.ui_rendered_card_preview = RenderedCardPreview(self)
-        
+
         self.ui_game_state_graph = GameStateGraphUI(self)
 
-        self.key_state = {}
-    
     def set_project(self, project, refresh=True):
         self.project = project
-        if(refresh):
+        if refresh:
             self.refresh_project()
 
     def refresh_project(self):
@@ -42,6 +41,8 @@ class ViewManager:
             return
         # TODO - we could have several project views configured, say we want a print and play view and a screentop view
         if self.project.viewed_output:
-            self.project.viewed_output = [key for key in self.project.viewed_output if key in self.project.outputs]
+            self.project.viewed_output = [
+                key for key in self.project.viewed_output if key in self.project.outputs
+            ]
         self.ui_outputs.refresh()
         self.ui_rendered_card_preview.build.refresh()
