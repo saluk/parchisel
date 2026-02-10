@@ -192,10 +192,9 @@ class StateTreeViewBase:
         pass
 
     async def apply_operation(self, operation):
-        print(f"APPLYING OPERATION TO: {self.state.name}")
+        print(f"APPLYING OPERATION {repr(operation)} TO: {self.state.name}")
         operation_result = self.state.apply_operation(operation)
-        if operation_result:
-            return await self.after_operation(operation_result)
+        return await self.after_operation(operation_result)
 
     async def after_operation(self, operation_result):
         pass
@@ -205,7 +204,7 @@ class StateTreeViewBase:
         if not self.state:
             ui.label("No state selected")
             return
-        print("Building statetreeview")
+        print("Building statetreeview", self.state.name)
         with ui.card():
             with ui.dialog() as debug_popup, ui.card():
                 ui.button("Close", on_click=debug_popup.close)
