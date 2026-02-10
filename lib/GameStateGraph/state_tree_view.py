@@ -2,18 +2,36 @@ from __future__ import annotations
 
 from nicegui.elements.tree import Tree
 from nicegui.elements.button import Button
-from . import gamestategraph
+from .model import game_state, tree_node
 from .node_operations_view import NodeOperationsView
-from . import operations
+from .model import operations, operation_base, selection_hint
 from nicegui import ui, html
 import json
+
+
+def get_ui_tree(state: tree_node.Node):
+    d = {
+        "compress": state.compress,
+        "uid": state.uid,
+        "fullname": state.fullname(),
+        "name": state.name,
+        "children": [get_ui_tree(child) for child in state.children],
+    }
+    # Within the state explorer, don't interact with root
+    if state.is_root and isinstance(state, game_state.GameStateTree):
+        d["tickable"] = False
+        d["selectable"] = False
+    # Within a given state, only tick
+    # if not isinstance(state, GameState):
+    # 	d["selectable"] = False
+    return d
 
 
 class SelectRangeButton:
     def __init__(self):
         self.active = False
-        self.node_start: gamestategraph.Node = None
-        self.node_end: gamestategraph.Node = None
+        self.node_start: tree_node.Node = None
+        self.node_end: tree_node.Node = None
         self.untick = False
 
     def get_label(self):
@@ -95,17 +113,17 @@ class SelectRangeButton:
 class StateTreeViewBase:
     width = "64"
     height = "48"
-    allowed_operations: list[operations.OperationBase.__class__] = []
+    allowed_operations: list[operation_base.OperationBase.__class__] = []
 
     def __init__(self, view, state=None, game_state=None, label="") -> None:
         self.view = view
         self.label = label
-        self.state: gamestategraph.Node = state
-        self.game_state: gamestategraph.GameState = game_state
+        self.state: tree_node.Node = state
+        self.game_state: tree_node.GameState = game_state
 
         self.treeElement = None
-        self.nodes_ticked: list[gamestategraph.Node] = []
-        self.node_selected: gamestategraph.Node = None
+        self.nodes_ticked: list[tree_node.Node] = []
+        self.node_selected: tree_node.Node = None
 
         self.select_range_button = SelectRangeButton()
 
@@ -139,12 +157,12 @@ class StateTreeViewBase:
     async def select_node_callback(self, e) -> None:
         print(e)
         if e.value != None:
-            node: gamestategraph.Node | None = self.state.find_node(node_uid=e.value)
+            node: tree_node.Node | None = self.state.find_node(node_uid=e.value)
             self.node_selected = node
         if self.node_selected:
             await self.select_node(self.node_selected)
 
-    async def select_node(self, node: gamestategraph.Node) -> None:
+    async def select_node(self, node: tree_node.Node) -> None:
         pass
 
     async def tick_node_callback(self, e) -> None:
@@ -170,7 +188,7 @@ class StateTreeViewBase:
             return
         self.tick_node(self.nodes_ticked)
 
-    def tick_node(self, nodes: list[gamestategraph.Node]) -> None:
+    def tick_node(self, nodes: list[tree_node.Node]) -> None:
         pass
 
     async def apply_operation(self, operation):
@@ -194,7 +212,7 @@ class StateTreeViewBase:
                 with ui.card().tight().classes("bg-gray-50"):
                     ui.markdown(
                         "```\n"
-                        + json.dumps(gamestategraph.get_ui_tree(self.state), indent=2)
+                        + json.dumps(get_ui_tree(self.state), indent=2)
                         + "\n```"
                     ).classes("text-xs")
             with ui.row():
@@ -204,7 +222,7 @@ class StateTreeViewBase:
                 f"w-{self.width} h-{self.height} border"
             ) as scroll_area:
                 self.treeElement: Tree = ui.tree(
-                    [gamestategraph.get_ui_tree(self.state)],
+                    [get_ui_tree(self.state)],
                     label_key="name",
                     node_key="uid",
                     children_key="children",
@@ -254,12 +272,12 @@ class StateTreeView(StateTreeViewBase):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
-    def tick_node(self, nodes: list[gamestategraph.Node]) -> None:
+    def tick_node(self, nodes: list[tree_node.Node]) -> None:
         self.node_operations_view.ticked_nodes = nodes
         self.node_operations_view.state = self.state
         self.node_operations_view.refresh()
 
-    async def after_operation(self, select_hint: operations.SelectionHint):
+    async def after_operation(self, select_hint: selection_hint.SelectionHint):
         self.state.update_tree()
         if select_hint:
             if select_hint.erase_ticked:
@@ -287,7 +305,10 @@ class AllStatesTree(StateTreeView):
 class SingleStateTree(StateTreeView):
     width = "94"
     height = "128"
-    allowed_operations = [operations.OperationAddNode, operations.OperationDeleteNode]
+    allowed_operations = [
+        operations.OperationAddNode,
+        operations.OperationDeleteNode,
+    ]
 
     async def apply_operation(self, operation):
         print(

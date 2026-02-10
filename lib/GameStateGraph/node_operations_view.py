@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 from nicegui.elements.dialog import Dialog
-from lib.GameStateGraph import gamestategraph
-from lib.GameStateGraph import operations
+from lib.GameStateGraph.model import tree_node
+from lib.GameStateGraph.model import operation_base
 from lib.GameStateGraph import state_tree_view
 from nicegui import ui, html
 
@@ -11,13 +11,13 @@ from nicegui import ui, html
 class NodeOperationsView:
     def __init__(
         self,
-        nodes_ticked: list[gamestategraph.Node],
-        state: gamestategraph.Node,
-        allowed_operations: list[operations.OperationBase],
+        nodes_ticked: list[tree_node.Node],
+        state: tree_node.Node,
+        allowed_operations: list[operation_base.OperationBase],
         parent: state_tree_view.StateTreeView,
     ) -> None:
-        self.ticked_nodes: list[gamestategraph.Node] = nodes_ticked
-        self.state: gamestategraph.Node = state
+        self.ticked_nodes: list[tree_node.Node] = nodes_ticked
+        self.state: tree_node.Node = state
         self.operations_dialog = None
         self.allowed_operations = allowed_operations
         self.parent = parent
@@ -52,7 +52,7 @@ class NodeOperationsView:
         return s
 
     async def on_click_operation(
-        self, operation_class: operations.OperationBase.__class__
+        self, operation_class: operation_base.OperationBase.__class__
     ):
         self.current_operation = operation_class(
             [node.uid for node in self.ticked_nodes]
@@ -76,11 +76,11 @@ class NodeOperationsView:
         with ui.dialog() as dialog, ui.card():
             ui.label(operation.name)
             for arg in operation.args.values():
-                if arg.input_type() == operations.OperationArgInputType.INPUT:
+                if arg.input_type() == operation_base.OperationArgInputType.INPUT:
                     ui.input(arg.name, validation=arg.validate).bind_value(
                         operation, "arg_" + arg.name
                     )
-                elif arg.input_type() == operations.OperationArgInputType.CHECK:
+                elif arg.input_type() == operation_base.OperationArgInputType.CHECK:
                     print(arg.default)
                     ui.checkbox(arg.name).bind_value(operation, "arg_" + arg.name)
             ui.button("Confirm", on_click=confirm)
