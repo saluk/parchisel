@@ -272,7 +272,6 @@ class GameState(Node):
     def add_next(self):
         """Make a new child clone of this state as the next move"""
         state = self.copy()
-        state.uid = None
         state.delete_children()
         state.action_level += 1
         state.attributes["game_state_owner"] = self
@@ -282,6 +281,7 @@ class GameState(Node):
 
     def copy(self):
         state = super().copy()
+        state.uid = None
         state.current_state = self.current_state.copy()
         state.operation_stack = copy.deepcopy(self.operation_stack)
         # TODO - maybe need to change the root state for the operations to the new current_state
