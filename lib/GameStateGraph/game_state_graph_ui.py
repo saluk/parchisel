@@ -22,7 +22,9 @@ class GameStateGraphUI:
             ]
         )
         self.game_states.children[0].add_next()
-        self.game_states.children[0].children[0].current_state.name = "something2"
+        self.game_states.children[0].children[
+            0
+        ].current_state.name = "something2"  # Shouldn't be setting the state directly, but this is just for debug
         self.game_states.update_tree()
         print("PRINTING STATE")
         game_state.print_state(self.game_states)

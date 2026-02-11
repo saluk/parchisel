@@ -4,6 +4,7 @@ from nicegui.elements.tree import Tree
 from nicegui.elements.button import Button
 from .model import game_state, tree_node
 from .node_operations_view import NodeOperationsView
+from .operation_queue_view import OperationQueueView
 from .model import operations, operation_base, selection_hint
 from nicegui import ui, html
 import json
@@ -315,3 +316,10 @@ class SingleStateTree(StateTreeView):
         operation_result = self.game_state.apply_gamestate_operation(operation)
         print("RESULT IN SingleStateTree", operation_result)
         return await self.after_operation(operation_result)
+
+    @ui.refreshable
+    async def build(self):
+        await super().build()
+        if self.game_state:
+            self.operation_queue_view = OperationQueueView(self, self.game_state)
+            await self.operation_queue_view.build()

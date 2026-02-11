@@ -88,15 +88,17 @@ class OperationBase:
             crash
         return found
 
-    def __str__(self):
+    def get_string(self, root_node: tree_node.Node):
         s = f"{self.name}:"
-        if self.nodes_selected:
-            s += (
-                f" Targets - [{", ".join([node.name for node in self.nodes_selected])}]"
-            )
-        if self.nodes_resulting:
-            s += f" Outcomes - [{", ".join([node.name for node in self.nodes_resulting])}]"
+        s += f" Args - {repr(self.get_args())}"
+        if self.node_uids_selected:
+            s += f" Targets - [{", ".join([str(uid) for uid in self.node_uids_selected])}]"
         return s
+
+    def get_args(self):
+        return {
+            arg.name: getattr(self, "arg_" + arg.name) for arg in self.args.values()
+        }
 
     def invalid_nodes(self, root_node: tree_node.Node):
         return None
@@ -107,7 +109,7 @@ class OperationBase:
 
         nodes_selected = self.get_nodes(root_node)
 
-        args = [getattr(self, "arg_" + arg.name) for arg in self.args.values()]
+        args = self.get_args().values()
         select_hint = None
         if self.operate_type == self.OPERATE_ONLY_ONE:
             select_hint = self.apply_one(nodes_selected[-1])

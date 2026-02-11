@@ -82,7 +82,6 @@ class OperationAddNode(OperationBase):
             children.append(tree_node.Node(node_name + str(start)))
             if increment:
                 start += 1
-        self.nodes_resulting = children
         node.add_children(children)
         if select_new_nodes:
             return selection_hint.SelectionHint(children, children[0], True)

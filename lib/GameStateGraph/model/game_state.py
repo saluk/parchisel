@@ -22,7 +22,8 @@ class GameState(Node):
 
     def __init__(self, initial_state, action_level=1):
         super().__init__()
-        self.operation_stack = OperationQueue()
+        self.operation_queue = OperationQueue()
+        self.initial_state = initial_state
         self.current_state = initial_state
         self.action_level = action_level
 
@@ -44,8 +45,8 @@ class GameState(Node):
         try:
             operation_result = self.current_state.apply_operation(operation)
             print(f"Result:{operation_result}")
-            self.operation_stack.append(operation)
-            print(f"Stack:{repr(self.operation_stack)}")
+            self.operation_queue.add(operation, self)
+            print(f"Stack:{repr(self.operation_queue)}")
             return operation_result
         except:
             raise
@@ -75,8 +76,9 @@ class GameState(Node):
         state = super().copy()
         state.uid = None
         state.current_state = self.current_state.copy()
-        state.operation_stack = copy.deepcopy(self.operation_stack)
-        # TODO - maybe need to change the root state for the operations to the new current_state
+        state.initial_state = self.initial_state.copy()
+        # Each state has its own operation_queue
+        state.operation_queue = OperationQueue()
         return state
 
 
