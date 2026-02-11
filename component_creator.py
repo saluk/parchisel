@@ -2,9 +2,9 @@
 
 # TODO very bad, let's make cairo the same as cairocffi
 
-#import cairo
-#import sys
-#sys.modules["cairocffi"] = cairo
+# import cairo
+# import sys
+# sys.modules["cairocffi"] = cairo
 
 import platform
 import os
@@ -13,6 +13,7 @@ from nicegui import ui, app
 from nicegui.events import KeyEventArguments
 
 from multiprocessing import freeze_support
+
 freeze_support()
 
 from lib.project import LocalProject
@@ -26,30 +27,34 @@ from lib.data.profile import global_profile
 # TODO make a parchisel app that has component creator and virtual table as modes to select between
 from lib.virtualtable import virtual_table
 
-@ui.page('/')
+
+@ui.page("/")
 async def main():
 
     view_manager = ViewManager()
 
     async def initial_project_load():
         print(global_profile.profile)
-        if global_profile.profile['last_project']:
-            project = LocalProject(global_profile.profile['last_project'], global_profile.profile['last_project'])
+        if global_profile.profile["last_project"]:
+            project = LocalProject(
+                global_profile.profile["last_project"],
+                global_profile.profile["last_project"],
+            )
             await project.load()
             # we don't need to refresh when we are building from the initial load
             view_manager.set_project(project, refresh=False)
 
-    with ui.header().classes(replace='row items-center') as header:
+    with ui.header().classes(replace="row items-center") as header:
         MainMenu(view_manager, view_manager.ui_project_manage).build()
         with ui.tabs() as tab_buttons:
             view_manager.toplevel = list(tab_buttons.ancestors())[1]
             project_view = ui.tab("Project")
-            template_view = ui.tab('Templates')
-            virtual_table_view = ui.tab('Virtual Tables')
-            graph_view = ui.tab('Game State Graph')
+            template_view = ui.tab("Templates")
+            virtual_table_view = ui.tab("Virtual Tables")
+            graph_view = ui.tab("Game State Graph")
 
     view_manager.header = header
-    with ui.tab_panels(tab_buttons, value=project_view).classes('w-full') as tab_views:
+    with ui.tab_panels(tab_buttons, value=project_view).classes("w-full") as tab_views:
         # with ui.tab_panel(virtual_table_view):
         #     view = virtual_table.TableView()
         #     with ui.card():
@@ -82,18 +87,27 @@ async def main():
 
     # Note, storage.general is only good for the desktop app as we would want each user storage
     # to be independant. This needs a database.
-    print("Last Tab=", app.storage.user.get('last_tab', "Project"))
-    tab_buttons.set_value(app.storage.user.get('last_tab', "Project"))
+    print("Last Tab=", app.storage.user.get("last_tab", "Project"))
+    tab_buttons.set_value(app.storage.user.get("last_tab", "Project"))
+
     def save_tab(e):
         print(f"saving tab: {e}")
-        app.storage.user['last_tab'] = e.value
+        app.storage.user["last_tab"] = e.value
+
     tab_buttons.on_value_change(save_tab)
 
     ui.timer(0.1, initial_project_load, once=True)
 
-app.add_static_files('/images', 'lib/images')
-app.on_startup(main)
+
+app.add_static_files("/images", "lib/images")
 
 # NOTE: On Windows reload must be disabled to make asyncio.create_subprocess_exec work (see https://github.com/zauberzeug/nicegui/issues/486)
-#ui.run(reload=platform.system() != 'Windows', native=True, title="Parchisel Component Creator", port=6812)
-ui.run(reload=True, native=False, title="Parchisel Component Creator", port=6812, show=False, storage_secret="secretxyz")
+# ui.run(reload=platform.system() != 'Windows', native=True, title="Parchisel Component Creator", port=6812)
+ui.run(
+    reload=True,
+    native=False,
+    title="Parchisel Component Creator",
+    port=6812,
+    show=False,
+    storage_secret="secretxyz",
+)
