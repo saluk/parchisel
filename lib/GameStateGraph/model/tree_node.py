@@ -8,6 +8,8 @@ TODO
 
 import copy, random
 
+import uuid
+
 
 class Node:
     def __init__(
@@ -16,7 +18,7 @@ class Node:
         children=None,
         compress=False,
         is_root=False,
-        parent=None,
+        uid=None,
         **kwargs,
     ):
         self.name = name
@@ -26,7 +28,7 @@ class Node:
         self.children: list[Node] = children
         self.compress = compress
 
-        self.uid: int | None = None  # Must be set at some point before used
+        self.uid: str = uid or str(uuid.uuid4())
 
         self.is_root = is_root  # The root node will keep track of ids as an attribute
         self.root: Node = None
@@ -37,7 +39,6 @@ class Node:
 
         if self.is_root:
             self.root = self
-            self.attributes["last_id"] = 0
             self.uid = 0
             self.dirty = True
             self.update_tree()
@@ -67,10 +68,6 @@ class Node:
                 continue
             node.root = self
             node.is_root = False
-            if node.uid == None:
-                # print("--- setting uid", self.root.attributes)
-                node.uid = self.root.attributes["last_id"] + 1
-                self.root.attributes["last_id"] += 1
 
     def walk(self):
         """Iterator to get all nodes, with depth-first search.
@@ -83,9 +80,9 @@ class Node:
                 child_node.parent = cur_node
                 search_nodes.append(child_node)
 
-    def find_node(self, node_name: str = None, node_uid: int = None):
+    def find_node(self, node_name: str = None, node_uid: str = None):
         assert (isinstance(node_name, str) or node_name == None) and (
-            isinstance(node_uid, int) or node_uid == None
+            isinstance(node_uid, str) or node_uid == None
         )
         print(
             "find node in:",
@@ -119,8 +116,6 @@ class Node:
 
     def delete_children(self):
         self.children[:] = []
-        if self.is_root:
-            self.attributes["last_id"] = 0
 
     def add_children(self, children):
         self.root.dirty = True

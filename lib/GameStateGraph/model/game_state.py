@@ -1,6 +1,7 @@
 from .tree_node import Node, print_state
 from .operation_queue import OperationQueue
 
+import uuid
 import itertools, random, copy
 
 random.seed(50)
@@ -23,7 +24,7 @@ class GameState(Node):
     def __init__(self, initial_state, action_level=1):
         super().__init__()
         self.operation_queue = OperationQueue()
-        self.initial_state = initial_state
+        self._initial_state = initial_state
         self.current_state = initial_state
         self.action_level = action_level
 
@@ -34,6 +35,16 @@ class GameState(Node):
     @name.setter
     def name(self, value):
         pass
+
+    @property
+    def initial_state(self):
+        if isinstance(self.parent, GameState):
+            return self.parent.current_state
+        return self._initial_state
+
+    @initial_state.setter
+    def initial_state(self, v):
+        self._initial_state = v
 
     def apply_gamestate_operation(self, operation):
         print(
@@ -74,7 +85,7 @@ class GameState(Node):
 
     def copy(self):
         state = super().copy()
-        state.uid = None
+        state.uid = str(uuid.uuid4())
         state.current_state = self.current_state.copy()
         state.initial_state = self.initial_state.copy()
         # Each state has its own operation_queue
