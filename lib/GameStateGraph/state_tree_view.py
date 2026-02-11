@@ -309,6 +309,14 @@ class SingleStateTree(StateTreeView):
         operations.OperationDeleteNode,
     ]
 
+    @property
+    def state(self):
+        return self.game_state.current_state if self.game_state else None
+
+    @state.setter
+    def state(self, v):
+        pass
+
     async def apply_operation(self, operation):
         print(
             f"APPLYING OPERATION TO GAMESTATE: {self.game_state.name}, {self.game_state.uid}"
