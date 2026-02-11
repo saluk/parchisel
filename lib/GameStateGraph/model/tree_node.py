@@ -1,20 +1,5 @@
 """
 TODO
-- change interaction method for state to:
-                check items to perform operation on
-                select a checked or unchecked node
-                menu popup asks to do action
-                        if you select a checked node, action is performed on selected nodes
-                        if you select an unchecked node, action is performed on the selected node with the checked nodes as targets
-                actions: move checked nodes under selected node, shuffle selected node children, shuffle checked nodes
-- add states navigation
-                state navigator is left column, individual state view is middle column, node details is right column
-                state navigator shows id, label of each state in tree
-                        list of sequential states
-                        if there is branching, create a branch node
-                        select a state to open it in the middle column individual state view
-                        button on state to delete or create new branch
-                state view shows the state tree
 - save/load state tree
 - nicegui exposes initial state generation
 - save state change commands instead of individual states and generate entire tree

@@ -277,7 +277,6 @@ class StateTreeView(StateTreeViewBase):
         self.node_operations_view.refresh()
 
     async def after_operation(self, select_hint: selection_hint.SelectionHint):
-        self.state.update_tree()
         if select_hint:
             if select_hint.erase_ticked:
                 self.nodes_ticked = []

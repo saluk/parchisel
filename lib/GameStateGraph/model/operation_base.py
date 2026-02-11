@@ -105,9 +105,6 @@ class OperationBase:
         print("SELECTED:", self.node_uids_selected)
         print("ROOT NODE NAME:", root_node.name)
 
-        # Steps:
-        # - Apply action
-        # - If action applied successfully push Action(current_state) onto the action list
         nodes_selected = self.get_nodes(root_node)
 
         args = [getattr(self, "arg_" + arg.name) for arg in self.args.values()]
@@ -143,13 +140,7 @@ class OperationBase:
         else:
             raise Exception("Invalid operation type")
 
-        gamestate: GameState = nodes_selected[0].root.attributes.get(
-            "game_state_owner", None
-        )
-        if gamestate:
-            gamestate.add_action(node.Action("test", self, gamestate.current_state))
-
-        nodes_selected[0].update_tree()
+        root_node.update_tree()
         return select_hint
 
     def apply_one(self, node: tree_node.Node):
