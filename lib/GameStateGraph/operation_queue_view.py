@@ -20,6 +20,8 @@ class OperationQueueView:
         with ui.card():
             with ui.list():
                 # TODO shouldn't call .queue directly
+                if not self.game_state.operation_queue.queue:
+                    ui.label("(No operations performed yet)")
                 for i, operation in enumerate(self.game_state.operation_queue.queue):
                     with ui.item():
 
