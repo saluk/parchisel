@@ -16,6 +16,7 @@ class OperationArgType(Enum):
     TYPE_INTEGER = "type integer"
     TYPE_BOOLEAN = "type boolean"
     TYPE_UID_LIST = "type uid list"
+    TYPE_INTERNAL = "internal type, don't show on UIs"
 
 
 class OperationArgInputType(Enum):
@@ -36,6 +37,8 @@ class OperationArg:
 
     def input_type(self):
         # Handled by which nodes are selected
+        if self.datatype == OperationArgType.TYPE_INTERNAL:
+            return None
         if self.datatype == OperationArgType.TYPE_UID_LIST:
             return None
         if self.datatype in [OperationArgType.TYPE_BOOLEAN]:
@@ -102,6 +105,10 @@ class OperationBase:
 
     def invalid_nodes(self, root_node: tree_node.Node):
         return None
+
+    def replay(self, root_node: tree_node.Node):
+        """Usually, run apply again"""
+        return self.apply(root_node)
 
     def apply(self, root_node: tree_node.Node):
         print("SELECTED:", self.node_uids_selected)

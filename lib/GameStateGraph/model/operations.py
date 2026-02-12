@@ -34,6 +34,7 @@ class OperationAddNode(OperationBase):
                 OperationArg("times", 1, OperationArgType.TYPE_DECIMAL),
                 OperationArg("increment_names", False, OperationArgType.TYPE_BOOLEAN),
                 OperationArg("select_new_nodes", False, OperationArgType.TYPE_BOOLEAN),
+                OperationArg("added_nodes", False, OperationArgType.TYPE_INTERNAL),
             ]
         ]
         old_validate = self.args["times"].validate
@@ -47,6 +48,19 @@ class OperationAddNode(OperationBase):
 
         self.args["times"].validate = validate_times
 
+    def apply(self, root_node: tree_node.Node):
+        if not self.arg_added_nodes:
+            self.arg_added_nodes = {}
+        super().apply(root_node)
+
+    def replay(self, root_node: tree_node.Node):
+        for parent_uid in self.arg_added_nodes:
+            parent = root_node.find_node(node_uid=parent_uid)
+            children = self.arg_added_nodes[parent_uid]
+            parent.add_children(
+                [tree_node.Node(child["name"], uid=child["uid"]) for child in children]
+            )
+
     def apply_one(
         self,
         node: tree_node.Node,
@@ -54,6 +68,7 @@ class OperationAddNode(OperationBase):
         num_times: int,
         increment: bool,
         select_new_nodes: bool,
+        added_nodes: list,
     ):
         start = ""
         if increment:
@@ -83,6 +98,9 @@ class OperationAddNode(OperationBase):
             if increment:
                 start += 1
         node.add_children(children)
+        self.arg_added_nodes[node.uid] = [
+            {"name": child.name, "uid": child.uid} for child in children
+        ]
         if select_new_nodes:
             return selection_hint.SelectionHint(children, children[0], True)
 

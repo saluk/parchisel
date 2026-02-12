@@ -39,7 +39,6 @@ class Node:
 
         if self.is_root:
             self.root = self
-            self.uid = 0
             self.dirty = True
             self.update_tree()
 
