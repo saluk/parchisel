@@ -19,10 +19,11 @@ class Node:
         compress=False,
         is_root=False,
         uid=None,
+        attributes=None,
         **kwargs,
     ):
         self.name = name
-        self.attributes = kwargs
+        self.attributes = attributes or {}
         if not children:
             children = []
         self.children: list[Node] = children
@@ -152,28 +153,6 @@ class Node:
         else:
             print("COPYING NON-ROOT", copied)
         return copied
-
-    def to_dict(self):
-        d = {}
-        d["name"] = self.name
-        d["children"] = [child.to_dict() for child in self.children]
-        d["compress"] = self.compress
-        d["is_root"] = self.is_root
-        d["attributes"] = self.attributes
-        return d
-
-    @staticmethod
-    def from_dict(d):
-        n = Node(
-            d["name"],
-            [Node.from_dict(child_d) for child_d in d["children"]],
-            d["compress"],
-            d["is_root"],
-        )
-        n.attributes = d["attributes"]
-        if n.is_root:
-            n.update_tree()
-        return n
 
     def apply_operation(self, operation):
         """Apply an operation which may change the graph"""

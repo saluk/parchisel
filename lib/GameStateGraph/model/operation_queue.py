@@ -1,4 +1,4 @@
-from . import operation_base, game_state
+from . import operation_base
 
 
 class OperationQueue:

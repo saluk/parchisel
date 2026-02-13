@@ -77,6 +77,8 @@ class OperationBase:
     name = "base"
 
     def __init__(self, node_uids_selected=[]):
+        # Args are stored as arg_[name] for each argument
+        # Arg values should be json compatible
         for arg in self.args.values():
             setattr(self, "arg_" + arg.name, arg.default)
         self.node_uids_selected = node_uids_selected

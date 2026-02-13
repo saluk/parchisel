@@ -21,8 +21,8 @@ class GameState(Node):
     """A GameState contains the actual state (to keep tree roots separate) as well as a stack
     of actions that was performed on the parent game state to get to this state"""
 
-    def __init__(self, initial_state, action_level=1):
-        super().__init__()
+    def __init__(self, initial_state=None, action_level=1, **kwargs):
+        super().__init__(**kwargs)
         self.operation_queue = OperationQueue()
         self._initial_state = initial_state
         self.current_state = initial_state
@@ -69,7 +69,6 @@ class GameState(Node):
         print(id(self.attributes), id(state.attributes))
         if branch_name:
             state.attributes["branch_name"] = branch_name
-        state.attributes["game_state_owner"] = self
         self.parent.add_children([state])
         return state
 
@@ -78,7 +77,6 @@ class GameState(Node):
         state = self.copy()
         state.delete_children()
         state.action_level += 1
-        state.attributes["game_state_owner"] = self
         self.add_children([state])
         print_state(self)
         return state
@@ -111,9 +109,6 @@ class GameStateTree(Node):
                             state3
     """
 
-    def __init__(self):
-        super().__init__("GameStateTree", is_root=True)
-
     def update_tree(self):
         super().update_tree()
         for node in self.walk():
@@ -130,7 +125,7 @@ def test_annotate_tree():
         ],
         is_root=True,
     )
-    gs_tree = GameStateTree()
+    gs_tree = GameStateTree("GameStateTree", is_root=True)
     gs1 = GameState(state1)
     gs_tree.add_children([gs1])
     gs2 = gs1.add_next()
