@@ -4,11 +4,14 @@ from nicegui import ui, html, app
 from .model import game_state, tree_node
 from .model.game_state import GameState
 from .state_tree_view import AllStatesTree, SingleStateTree
+from . import save_load_view
 
 
 class GameStateGraphUI:
     def __init__(self, ov):
         self.view = ov
+        self.file_menu = save_load_view.SaveLoadView(self)
+
         self.game_states = game_state.GameStateTree("Tree", is_root=True)
         self.game_states.add_children(
             [
@@ -40,23 +43,8 @@ class GameStateGraphUI:
         self.regen_views()
         self.refresh()
 
-    def save_graph(self):
-        from .model import saveload
-
-        import json
-
-        saved = saveload.Saver().to_dict(self.game_states)
-        print(json.dumps(saved, indent=2))
-        app.storage.user["gsg"] = saveload.Saver().to_dict(self.game_states)
-
-    def load_graph(self):
-        from .model import saveload
-        import json
-
-        # saved = saveload.Saver().to_dict(self.game_states)
-        saved = app.storage.user["gsg"]
-        print(json.dumps(saved, indent=2))
-        self.game_states = saveload.Saver().from_dict(saved)
+    def replace_graph(self, game_states):
+        self.game_states = game_states
         self.game_states.update_tree()
         self.regen_views()
         self.refresh()
@@ -84,9 +72,7 @@ class GameStateGraphUI:
         ov = self.view
         project = ov.project
         ui.label("Game State Graph")
-        ui.button("New Graph", on_click=self.new_graph)
-        ui.button("Save", on_click=self.save_graph)
-        ui.button("Load", on_click=self.load_graph)
+        await self.file_menu.build()
         with ui.row():
             await self.all_states_tree.build()
             await self.single_state_tree.build()
