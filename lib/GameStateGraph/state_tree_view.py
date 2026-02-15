@@ -5,6 +5,7 @@ from nicegui.elements.button import Button
 from .model import game_state, tree_node
 from .node_operations_view import NodeOperationsView
 from .operation_queue_view import OperationQueueView
+from .node_arguments_view import SingleNodeArgumentsView
 from .model import operations, operation_base, selection_hint
 from nicegui import ui, html
 import json
@@ -274,6 +275,9 @@ class StateTreeViewBase:
             )
             await self.node_operations_view.build()
 
+        self.single_node_arguments_view = SingleNodeArgumentsView(None, self)
+        await self.single_node_arguments_view.build()
+
 
 class StateTreeView(StateTreeViewBase):
     def __init__(self, *args, **kwargs) -> None:
@@ -337,3 +341,7 @@ class SingleStateTree(StateTreeView):
             self.operation_queue_view = OperationQueueView(self, self.game_state)
             await self.operation_queue_view.build()
         self.operation_queue_dialog.open()
+
+    async def select_node(self, node):
+        self.single_node_arguments_view.node_selected = node
+        self.single_node_arguments_view.refresh()
