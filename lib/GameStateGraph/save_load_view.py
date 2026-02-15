@@ -25,10 +25,13 @@ class FileList:
 
 class SaveLoadView:
     files_key = "GameStateGraph.files"
+    lastfile_key = "GameStateGraph.last_filename"
 
     def __init__(self, parent):
         self.parent = parent
         self.filename = ""
+        if self.lastfile_key in app.storage.user:
+            self.filename = app.storage.user[self.lastfile_key]
 
     @property
     def files(self):
@@ -39,22 +42,27 @@ class SaveLoadView:
     def save(self):
         saved = saveload.Saver().to_dict(self.parent.game_states)
         self.files[self.filename] = saved
+        app.storage.user[self.lastfile_key] = self.filename
         self.build.refresh()
         ui.notify(f"Saved {self.filename}!")
 
     async def show_load_dialog(self):
+        self.original_filename = self.filename
+
         def confirm():
             self.load_dialog.close()
             self.reload()
+            app.storage.user[self.lastfile_key] = self.filename
+
+        def close():
+            self.load_dialog.close()
+            self.filename = self.original_filename
 
         with ui.dialog(value=True) as self.load_dialog, ui.card():
             self.file_list = FileList(self)
             await self.file_list.build()
-            # ui.select(list(self.files.keys())).props("use-input").bind_value(
-            #    self, "filename"
-            # )
             ui.button("Load", on_click=confirm)
-            ui.button("Close", on_click=self.load_dialog.close)
+            ui.button("Close", on_click=close)
 
     def show_save_as_dialog(self):
         def confirm():
@@ -70,6 +78,7 @@ class SaveLoadView:
         saved = self.files[self.filename]
         tree = saveload.Saver().from_dict(saved)
         self.parent.replace_graph(tree)
+        app.storage.user[self.lastfile_key] = self.filename
 
     @ui.refreshable
     async def build(self):

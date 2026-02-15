@@ -71,7 +71,10 @@ class GameStateGraphUI:
         print("building gamestategraph")
         ov = self.view
         project = ov.project
-        ui.label("Game State Graph")
+        ui.markdown(
+            "##### Game State Graph"
+            + (f": **{self.file_menu.filename}**" if self.file_menu.filename else "")
+        )
         await self.file_menu.build()
         with ui.row():
             await self.all_states_tree.build()
