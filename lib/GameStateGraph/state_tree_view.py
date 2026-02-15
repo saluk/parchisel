@@ -116,7 +116,7 @@ class StateTreeViewBase:
     height = "48"
     allowed_operations: list[operation_base.OperationBase.__class__] = []
 
-    def __init__(self, view, state=None, game_state=None, label="") -> None:
+    def __init__(self, view, state=None, label="", game_state=None) -> None:
         self.view = view
         self.label = label
         self.state: tree_node.Node = state
@@ -200,6 +200,9 @@ class StateTreeViewBase:
     async def after_operation(self, operation_result):
         pass
 
+    async def show_operations(self):
+        pass
+
     @ui.refreshable
     async def build(self) -> None:
         if not self.state:
@@ -218,6 +221,10 @@ class StateTreeViewBase:
             with ui.row():
                 ui.markdown(self.label).classes("text-lg")
                 ui.button("debug", on_click=lambda: debug_popup.open())
+                if self.game_state:
+                    ui.button(
+                        f"ops:{len(self.game_state.operation_queue.queue)}"
+                    ).on_click(self.show_operations)
             with ui.scroll_area().classes(
                 f"w-{self.width} h-{self.height} border"
             ) as scroll_area:
@@ -325,9 +332,8 @@ class SingleStateTree(StateTreeView):
         print("RESULT IN SingleStateTree", operation_result)
         return await self.after_operation(operation_result)
 
-    @ui.refreshable
-    async def build(self):
-        await super().build()
-        if self.game_state:
+    async def show_operations(self):
+        with ui.dialog() as self.operation_queue_dialog, ui.card():
             self.operation_queue_view = OperationQueueView(self, self.game_state)
             await self.operation_queue_view.build()
+        self.operation_queue_dialog.open()
