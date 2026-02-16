@@ -19,6 +19,7 @@ def get_ui_tree(state: tree_node.Node):
         "name": state.name,
         "children": [get_ui_tree(child) for child in state.children],
         "attributes": state.attributes,
+        "attribute_display": show_attributes(state),
     }
     # Within the state explorer, don't interact with root
     if state.is_root and isinstance(state, game_state.GameStateTree):
@@ -28,6 +29,10 @@ def get_ui_tree(state: tree_node.Node):
     # if not isinstance(state, GameState):
     # 	d["selectable"] = False
     return d
+
+
+def show_attributes(node: tree_node.Node):
+    return " <br> ".join(f"{key} = {value}" for key, value in node.attributes.items())
 
 
 class SelectRangeButton:
@@ -250,7 +255,9 @@ class StateTreeViewBase:
                     <q-tooltip :props="props">
                         Fullname: {{ props.node.fullname }} <br>
                         ID:{{ props.node.uid }} <br>
-                        {{ props.node.attributes }}
+                        <li v-for="(value, key) in props.node.attributes">
+                            {{ key }}: {{ value }}
+                        </li>
                     </q-tooltip>
                     <span :props="props">
                     {{ props.node.name }} 
