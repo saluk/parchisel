@@ -18,6 +18,7 @@ def get_ui_tree(state: tree_node.Node):
         "fullname": state.fullname(),
         "name": state.name,
         "children": [get_ui_tree(child) for child in state.children],
+        "attributes": state.attributes,
     }
     # Within the state explorer, don't interact with root
     if state.is_root and isinstance(state, game_state.GameStateTree):
@@ -204,6 +205,11 @@ class StateTreeViewBase:
     async def show_operations(self):
         pass
 
+    def regen_tree(self):
+        nodes = self.treeElement.props["nodes"]
+        nodes[:] = [get_ui_tree(self.state)]
+        self.treeElement.props["nodes"] = nodes
+
     @ui.refreshable
     async def build(self) -> None:
         if not self.state:
@@ -243,7 +249,8 @@ class StateTreeViewBase:
                     """
                     <q-tooltip :props="props">
                         Fullname: {{ props.node.fullname }} <br>
-                        ID:{{ props.node.uid }}
+                        ID:{{ props.node.uid }} <br>
+                        {{ props.node.attributes }}
                     </q-tooltip>
                     <span :props="props">
                     {{ props.node.name }} 

@@ -37,6 +37,7 @@ class SingleNodeAttributesView:
         self.parent.game_state.apply_gamestate_operation(
             self.operation, self.operation.applied == False
         )
+        self.parent.regen_tree()
         if refresh:
             self.refresh()
 
@@ -49,10 +50,6 @@ class SingleNodeAttributesView:
         def name_change_operation(e):
             self.operation.arg_attribute_dict["__name__"] = e.value
             self.update_operation(refresh=False)
-            # TODO slow and should be handled by the state view
-            for node in self.parent.treeElement.nodes():
-                if node["uid"] == self.node_selected.uid:
-                    node["name"] = e.value
 
         def existing_key_rename_operation(old_key, new_key):
             if old_key in self.node_selected.attributes:

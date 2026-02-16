@@ -1,9 +1,12 @@
 """
 TODO
-- bug when deleting a game state and that game state was currently viewed
-- nicegui exposes initial state generation
-- generate entire tree when edit parent GameStates
+- operations can have notes applied, such as choosing the current player
+- Make operations propogate when editing the past
         - show states that are invalid after a state change command
+        - Have a game state that's disconnected from the past (halts propogation)
+
+- bug when deleting a game state and that game state was currently viewed
+
 """
 
 import copy, random
