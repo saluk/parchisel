@@ -1,8 +1,8 @@
 """
 TODO
-- save/load state tree
+- bug when deleting a game state and that game state was currently viewed
 - nicegui exposes initial state generation
-- save state change commands instead of individual states and generate entire tree
+- generate entire tree when edit parent GameStates
         - show states that are invalid after a state change command
 """
 

@@ -20,6 +20,38 @@ class OperationTypeOnlyOne(OperationBase):
             return InvalidNodeError(nodes_selected, "Only applies to a single node")
 
 
+class OperationSetAttributes(OperationBase):
+    operate_type = OperationBase.OPERATE_SINGLE
+    args = {
+        "attribute_dict": OperationArg(
+            "attribute_dict", {}, OperationArgType.TYPE_INTERNAL
+        ),
+        "delete_attribute_list": OperationArg(
+            "delete_attribute_list", [], OperationArgType.TYPE_INTERNAL
+        ),
+    }
+    name = "set"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.delete_attribute_list: list = []
+        self.arg_attribute_dict: dict = {}
+
+    def apply_one(
+        self, node: tree_node.Node, attribute_dict: dict, delete_attribute_list: list
+    ):
+        print(attribute_dict, delete_attribute_list)
+        for key in delete_attribute_list:
+            if key in node.attributes:
+                del node.attributes[key]
+        for key in attribute_dict:
+            if key == "__name__":
+                node.name = attribute_dict[key]
+                print("setname")
+            else:
+                node.attributes[key] = attribute_dict[key]
+
+
 class OperationAddNode(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE
     args = {}

@@ -114,6 +114,7 @@ class Saver:
     def from_dict_operation(self, d):
         class_ = getattr(operations, d["operation_class"])
         operation = class_(d["node_uids_selected"])
+        operation.applied = True
         for arg in d["args"]:
             setattr(operation, "arg_" + arg, d["args"][arg])
         return operation

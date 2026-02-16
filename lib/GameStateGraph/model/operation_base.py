@@ -9,6 +9,8 @@ from . import tree_node
 from .selection_hint import SelectionHint
 from enum import Enum
 
+import json
+
 
 class OperationArgType(Enum):
     TYPE_STRING = "type string"
@@ -80,9 +82,10 @@ class OperationBase:
         # Args are stored as arg_[name] for each argument
         # Arg values should be json compatible
         for arg in self.args.values():
-            setattr(self, "arg_" + arg.name, arg.default)
+            setattr(self, "arg_" + arg.name, json.loads(json.dumps(arg.default)))
         self.node_uids_selected = node_uids_selected
         print("Operation Init:", self.name, " node ids selected", node_uids_selected)
+        self.applied = False  # Used to track of the operation is in the queue already or not, in case we want to update it
 
     def get_nodes(self, root_node: tree_node.Node):
         print(self.node_uids_selected)
@@ -151,6 +154,7 @@ class OperationBase:
         else:
             raise Exception("Invalid operation type")
 
+        self.applied = True
         root_node.update_tree()
         return select_hint
 

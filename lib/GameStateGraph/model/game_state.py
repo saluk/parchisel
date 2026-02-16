@@ -46,7 +46,7 @@ class GameState(Node):
     def initial_state(self, v):
         self._initial_state = v
 
-    def apply_gamestate_operation(self, operation):
+    def apply_gamestate_operation(self, operation, add_to_queue=True):
         print(
             "GameState.apply_gamestate_operation",
             self.uid,
@@ -56,7 +56,8 @@ class GameState(Node):
         try:
             operation_result = self.current_state.apply_operation(operation)
             print(f"Result:{operation_result}")
-            self.operation_queue.add(operation, self)
+            if add_to_queue:
+                self.operation_queue.add(operation, self)
             print(f"Stack:{repr(self.operation_queue)}")
             return operation_result
         except:
