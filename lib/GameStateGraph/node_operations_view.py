@@ -18,6 +18,7 @@ class NodeOperationsView:
     ) -> None:
         self.ticked_nodes: list[tree_node.Node] = nodes_ticked
         self.state: tree_node.Node = state
+        self.game_state = None
         self.operations_dialog = None
         self.allowed_operations = allowed_operations
         self.parent = parent
@@ -58,12 +59,12 @@ class NodeOperationsView:
             [node.uid for node in self.ticked_nodes]
         )
         if self.current_operation.args:
-            self.show_dialog()
+            self.show_operation_arguments_dialog()
         else:
             print("apply operation on its own")
             await self.parent.apply_operation(self.current_operation)
 
-    def show_dialog(self):
+    def show_operation_arguments_dialog(self):
         operation = self.current_operation
         if self.operations_dialog:
             self.operations_dialog.clear()
@@ -88,11 +89,33 @@ class NodeOperationsView:
         self.operations_dialog: Dialog = dialog
         self.operations_dialog.open()
 
+    def find_operators(self):
+        operators = {"": None}
+        for node in self.state.walk():
+            if node.attributes.get("operator", None):
+                operators[node.uid] = node.name
+        return operators
+
+    def set_operator(self, e):
+        operators = self.find_operators()
+        name = operators[e.value]
+        self.game_state.operator = {"uid": e.value, "name": name}
+
     @ui.refreshable
     async def build(self) -> None:
-        with ui.context_menu() as self.root_widget:
+        with ui.dialog() as self.main_dialog:
             with ui.card():
-                ui.label(self.state.name)
+                with ui.row():
+                    ui.label(self.state.name)
+                    if self.game_state:
+                        ui.select(
+                            self.find_operators(),
+                            value=(
+                                self.game_state.operator["uid"]
+                                if self.game_state.operator
+                                else ""
+                            ),
+                        ).on_value_change(self.set_operator)
                 with ui.row():
                     ui.button("Select None", on_click=self.parent.select_none)
                     await self.parent.select_range_button.build()

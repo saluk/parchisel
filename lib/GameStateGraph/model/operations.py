@@ -82,6 +82,7 @@ class OperationSetAttributes(OperationBase):
                 node.attributes[new_key_op["new_key"]] = new_key_op["value"]
 
     def do_combine(self, operation):
+        # TODO not handled - alter operation such that it is a no-op
         print("combine self:", self.arg_attribute_dict)
         print("     them:", operation.arg_attribute_dict)
 

@@ -2,7 +2,6 @@
 # Define a transformation they can make on a tree
 # They have a type
 # They can contain arguments controlling that operation
-# They can be applied and unapplied
 
 
 from . import tree_node
@@ -85,7 +84,7 @@ class OperationBase:
             setattr(self, "arg_" + arg.name, json.loads(json.dumps(arg.default)))
         self.node_uids_selected = node_uids_selected
         print("Operation Init:", self.name, " node ids selected", node_uids_selected)
-        self.applied = False  # Used to track of the operation is in the queue already or not, in case we want to update it
+        self.operator: dict = None
 
     def get_nodes(self, root_node: tree_node.Node):
         print(self.node_uids_selected)
@@ -97,7 +96,7 @@ class OperationBase:
         return found
 
     def get_string(self, root_node: tree_node.Node):
-        s = f"{self.name}:"
+        s = f"{self.operator} performs {self.name}:"
         s += f" Args - {repr(self.get_args())}"
         if self.node_uids_selected:
             s += f" Targets - [{", ".join([str(uid) for uid in self.node_uids_selected])}]"
@@ -154,7 +153,6 @@ class OperationBase:
         else:
             raise Exception("Invalid operation type")
 
-        self.applied = True
         root_node.update_tree()
         return select_hint
 

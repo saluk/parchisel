@@ -164,6 +164,9 @@ class StateTreeViewBase:
     def refresh_ops(self):
         pass
 
+    def refresh_operations_view(self):
+        self.node_operations_view.build.refresh()
+
     async def select_none(self) -> None:
         self.treeElement.untick(None)
         self.treeElement.deselect()
@@ -235,11 +238,15 @@ class StateTreeViewBase:
                     ).classes("text-xs")
             with ui.row():
                 ui.markdown(self.label).classes("text-lg")
+            with ui.row():
                 ui.button("debug", on_click=lambda: debug_popup.open())
                 if self.game_state:
                     self.ops_button = ui.button(
                         f"ops:{len(self.game_state.operation_queue.queue)}"
                     ).on_click(self.show_operations)
+                self.ops_dropdown_button = ui.button("ACT").on_click(
+                    lambda: self.node_operations_view.main_dialog.open()
+                )
             with ui.scroll_area().classes(
                 f"w-{self.width} h-{self.height} border"
             ) as scroll_area:
@@ -290,6 +297,8 @@ class StateTreeViewBase:
             self.node_operations_view: NodeOperationsView = NodeOperationsView(
                 self.nodes_ticked, self.state, self.allowed_operations, self
             )
+            if self.game_state:
+                self.node_operations_view.game_state = self.game_state
             await self.node_operations_view.build()
 
         self.single_node_arguments_view = SingleNodeAttributesView(None, self)

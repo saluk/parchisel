@@ -27,6 +27,9 @@ class GameState(Node):
         self._initial_state = initial_state
         self.current_state = initial_state
         self.action_level = action_level
+        self.operator = (
+            {}
+        )  # Indication of who/what is performing operations, data type meant to be open ended (but serializable)
 
     @property
     def name(self):
@@ -47,6 +50,8 @@ class GameState(Node):
         self._initial_state = v
 
     def apply_gamestate_operation(self, operation, add_to_queue=True):
+        if not operation.operator:
+            operation.operator = self.operator
         print(
             "GameState.apply_gamestate_operation",
             self.uid,

@@ -24,6 +24,7 @@ class SingleNodeAttributesView:
     def update_operation(self, refresh=True):
         self.parent.refresh_tree()
         self.parent.refresh_ops()
+        self.parent.refresh_operations_view()
         if refresh:
             self.refresh()
 

@@ -76,6 +76,7 @@ class Saver:
         d["_initial_state"] = self.to_dict(game_state_node._initial_state)
         d["current_state"] = self.to_dict(game_state_node.current_state)
         d["action_level"] = game_state_node.action_level
+        d["operator"] = game_state_node.operator
         return d
 
     def from_dict_gamestate(self, d, create_class=game_state.GameState):
@@ -84,6 +85,7 @@ class Saver:
         gs._initial_state = self.from_dict(d["_initial_state"])
         gs.current_state = self.from_dict(d["current_state"])
         gs.action_level = d["action_level"]
+        gs.operator = d.get("operator", {})
         return gs
 
     def to_dict_gamestatetree(self, game_state_tree):
@@ -109,12 +111,13 @@ class Saver:
         assert (d["operation_class"]) in dir(operations)
         d["args"] = operation.get_args()
         d["node_uids_selected"] = operation.node_uids_selected
+        d["operator"] = operation.operator
         return d
 
     def from_dict_operation(self, d):
         class_ = getattr(operations, d["operation_class"])
         operation = class_(d["node_uids_selected"])
-        operation.applied = True
+        operation.operator = d.get("operator", {})
         for arg in d["args"]:
             setattr(operation, "arg_" + arg, d["args"][arg])
         return operation
