@@ -6,6 +6,9 @@ class OperationQueue:
         self.queue: list[operation_base.OperationBase] = []
 
     def add(self, operation: operation_base.OperationBase, game_state):
+        if self.queue:
+            if self.queue[-1].combine(operation):
+                return
         self.queue.append(operation)
 
     def remove(self, index: int, game_state):

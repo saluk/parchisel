@@ -169,3 +169,21 @@ class OperationBase:
 
     def apply_one_many(self, from_node: tree_node.Node, to_nodes: list[tree_node.Node]):
         pass
+
+    def combine(self, operation):
+        if operation.name != self.name:
+            return False
+        if operation.node_uids_selected != self.node_uids_selected:
+            return False
+        return self.do_combine(operation)
+
+    def do_combine(self, operation):
+        """Default implementation: join dicts, set other arguments to new value"""
+        for arg in self.args.keys():
+            our_v = getattr(self, "arg_" + arg)
+            their_v = getattr(operation, "arg_" + arg)
+            if isinstance(our_v, dict):
+                our_v.update(their_v)
+            else:
+                setattr(self, "arg_" + arg, their_v)
+        return

@@ -22,34 +22,96 @@ class OperationTypeOnlyOne(OperationBase):
 
 class OperationSetAttributes(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE
+    ATTRIBUTE_CHANGE_ADD = "add"  # {'value': 'blah'}
+    ATTRIBUTE_CHANGE_SET = "set"  # {'value': 'blah'}
+    ATTRIBUTE_CHANGE_NEW_KEY = "new_key"  # {'new_key': 'blah', 'new_value': 'blah'}
+    ATTRIBUTE_CHANGE_DELETE = "delete"  # {}
+    """ Attribute dict:
+    some_key: {attribute_change_type: {args}}"""
     args = {
         "attribute_dict": OperationArg(
             "attribute_dict", {}, OperationArgType.TYPE_INTERNAL
-        ),
-        "delete_attribute_list": OperationArg(
-            "delete_attribute_list", [], OperationArgType.TYPE_INTERNAL
         ),
     }
     name = "set"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.delete_attribute_list: list = []
         self.arg_attribute_dict: dict = {}
 
-    def apply_one(
-        self, node: tree_node.Node, attribute_dict: dict, delete_attribute_list: list
-    ):
-        print(attribute_dict, delete_attribute_list)
-        for key in delete_attribute_list:
-            if key in node.attributes:
-                del node.attributes[key]
-        for key in attribute_dict:
-            if key == "__name__":
-                node.name = attribute_dict[key]
-                print("setname")
-            else:
-                node.attributes[key] = attribute_dict[key]
+    def prepare_add(self, key, value):
+        self.arg_attribute_dict[key] = {self.ATTRIBUTE_CHANGE_ADD: {"value": value}}
+
+    def prepare_set(self, key, value):
+        self.arg_attribute_dict[key] = {self.ATTRIBUTE_CHANGE_SET: {"value": value}}
+
+    def prepare_rename(self, key, new_key, value):
+        print("prepare rename", key, new_key, value)
+        self.arg_attribute_dict[key] = {
+            self.ATTRIBUTE_CHANGE_NEW_KEY: {"new_key": new_key, "value": value}
+        }
+
+    def prepare_delete(self, key):
+        self.arg_attribute_dict[key] = {self.ATTRIBUTE_CHANGE_DELETE: {}}
+
+    def apply_one(self, node: tree_node.Node, attribute_dict: dict):
+        for key, change in attribute_dict.items():
+            add_op = change.get(self.ATTRIBUTE_CHANGE_ADD, None)
+            set_op = change.get(self.ATTRIBUTE_CHANGE_SET, None)
+            new_key_op = change.get(self.ATTRIBUTE_CHANGE_NEW_KEY, None)
+            delete_op = change.get(self.ATTRIBUTE_CHANGE_DELETE, None)
+            if add_op != None:
+                if key == "__name__":
+                    node.name = add_op["value"]
+                else:
+                    node.attributes[key] = add_op["value"]
+            elif set_op != None:
+                if key == "__name__":
+                    node.name = set_op["value"]
+                else:
+                    node.attributes[key] = set_op["value"]
+            elif delete_op != None:
+                print("DO DELETE")
+                print(node.attributes, key)
+                if key in node.attributes:
+                    del node.attributes[key]
+                print(node.attributes, key)
+            elif new_key_op != None:
+                if key in node.attributes:
+                    del node.attributes[key]
+                node.attributes[new_key_op["new_key"]] = new_key_op["value"]
+
+    def do_combine(self, operation):
+        print("combine self:", self.arg_attribute_dict)
+        print("     them:", operation.arg_attribute_dict)
+
+        for key, their_change in operation.arg_attribute_dict.items():
+            if key not in self.arg_attribute_dict:
+                self.arg_attribute_dict[key] = their_change
+                continue
+            our_change = self.arg_attribute_dict[key]
+            # Error cases
+            if our_change.get(self.ATTRIBUTE_CHANGE_DELETE, None) != None:
+                if their_change.get(self.ATTRIBUTE_CHANGE_SET, None) != None:
+                    # Reject attempts to delete or rename a key that we have deleted
+                    continue
+            # if we delete something that was previously added, we should NOT add it
+            # if we set something that was previously added, we should STILL add it
+            # if we rename something that was previously added, we should add the new neame
+            if our_change.get(self.ATTRIBUTE_CHANGE_ADD, None) != None:
+                set_op = their_change.get(self.ATTRIBUTE_CHANGE_SET, None)
+                new_key_op = their_change.get(self.ATTRIBUTE_CHANGE_NEW_KEY, None)
+                delete_op = their_change.get(self.ATTRIBUTE_CHANGE_DELETE, None)
+                if set_op != None:
+                    self.prepare_add(key, set_op["value"])
+                elif new_key_op != None:
+                    del self.arg_attribute_dict[key]
+                    self.prepare_add(new_key_op["new_key"], new_key_op["value"])
+                elif delete_op != None:
+                    del self.arg_attribute_dict[key]
+                continue
+            self.arg_attribute_dict[key] = their_change
+        return True
 
 
 class OperationAddNode(OperationBase):
