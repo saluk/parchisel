@@ -46,7 +46,7 @@ class OperationSetAttributes(OperationBase):
         self.arg_attribute_dict[key] = {self.ATTRIBUTE_CHANGE_SET: {"value": value}}
 
     def prepare_rename(self, key, new_key, value):
-        print("prepare rename", key, new_key, value)
+        # Having the value here makes the combination business logic easier
         self.arg_attribute_dict[key] = {
             self.ATTRIBUTE_CHANGE_NEW_KEY: {"new_key": new_key, "value": value}
         }

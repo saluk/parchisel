@@ -146,7 +146,7 @@ class StateTreeViewBase:
     def refresh(self, reset_ticked=True) -> None:
         print("refresh stateTreeViewBase:", self.state.name)
         if reset_ticked:
-            self.nodes_selected = None
+            self.node_selected = None
             self.nodes_ticked[:] = []
         # If some nodes were deleted, we might need to update our selection
         if self.node_selected and not self.node_selected.parent:
@@ -162,9 +162,7 @@ class StateTreeViewBase:
         self.treeElement.props["nodes"] = nodes
 
     def refresh_ops(self):
-        if hasattr(self, "ops_button") and self.ops_button:
-            self.ops_button.text = f"ops:{len(self.game_state.operation_queue.queue)}"
-            self.ops_button.update()
+        pass
 
     async def select_none(self) -> None:
         self.treeElement.untick(None)
@@ -326,9 +324,16 @@ class AllStatesTree(StateTreeView):
         operations.OperationAddBranchingGameState,
         operations.OperationDeleteNode,
     ]
+    single_state_tree: SingleStateTree = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    async def select_node(self, node):
+        self.single_state_tree.state = node.current_state
+        self.single_state_tree.game_state = node
+        self.single_state_tree.label = f"Decision Node: **{node.name}**"
+        self.single_state_tree.refresh(True)
 
 
 class SingleStateTree(StateTreeView):
@@ -346,6 +351,10 @@ class SingleStateTree(StateTreeView):
     @state.setter
     def state(self, v):
         pass
+
+    def refresh_ops(self):
+        self.ops_button.text = f"ops:{len(self.game_state.operation_queue.queue)}"
+        self.ops_button.update()
 
     async def apply_operation(self, operation):
         print(

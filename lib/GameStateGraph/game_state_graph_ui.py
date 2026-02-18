@@ -53,18 +53,12 @@ class GameStateGraphUI:
         self.all_states_tree = AllStatesTree(
             self.view, self.game_states, "Decision Tree"
         )
-        self.all_states_tree.select_node = self.on_all_states_select
         self.single_state_tree = SingleStateTree(self.view)
+        self.all_states_tree.single_state_tree = self.single_state_tree
         self.selected_node_inspector = None
 
     def refresh(self):
         self.build.refresh()
-
-    async def on_all_states_select(self, node: tree_node.Node):
-        self.single_state_tree.state = node.current_state
-        self.single_state_tree.game_state = node
-        self.single_state_tree.label = f"Decision Node: **{node.name}**"
-        self.single_state_tree.refresh()
 
     @ui.refreshable
     async def build(self):
