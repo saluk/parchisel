@@ -22,7 +22,8 @@ class SingleNodeAttributesView:
         self.build.refresh()
 
     def update_operation(self, refresh=True):
-        self.parent.regen_tree()
+        self.parent.refresh_tree()
+        self.parent.refresh_ops()
         if refresh:
             self.refresh()
 

@@ -210,10 +210,15 @@ class StateTreeViewBase:
     async def show_operations(self):
         pass
 
-    def regen_tree(self):
+    def refresh_tree(self):
         nodes = self.treeElement.props["nodes"]
         nodes[:] = [get_ui_tree(self.state)]
         self.treeElement.props["nodes"] = nodes
+
+    def refresh_ops(self):
+        if hasattr(self, "ops_button") and self.ops_button:
+            self.ops_button.text = f"ops:{len(self.game_state.operation_queue.queue)}"
+            self.ops_button.update()
 
     @ui.refreshable
     async def build(self) -> None:
@@ -234,7 +239,7 @@ class StateTreeViewBase:
                 ui.markdown(self.label).classes("text-lg")
                 ui.button("debug", on_click=lambda: debug_popup.open())
                 if self.game_state:
-                    ui.button(
+                    self.ops_button = ui.button(
                         f"ops:{len(self.game_state.operation_queue.queue)}"
                     ).on_click(self.show_operations)
             with ui.scroll_area().classes(
