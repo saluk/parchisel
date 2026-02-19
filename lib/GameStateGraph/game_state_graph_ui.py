@@ -33,6 +33,9 @@ class GameStateGraphUI:
         game_state.print_state(self.game_states)
         game_state.print_state(self.game_states.children[0].children[0].current_state)
 
+        if self.file_menu.filename:
+            self.file_menu.reload()
+
         self.regen_views()
 
     def new_graph(self):
