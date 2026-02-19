@@ -87,10 +87,10 @@ class OperationBase:
         self.operator: dict = None
 
     def get_nodes(self, root_node: tree_node.Node):
-        print(self.node_uids_selected)
+        print("selected", self.node_uids_selected)
         tree_node.print_state(root_node)
         found = [root_node.find_node(node_uid=uid) for uid in self.node_uids_selected]
-        print(found)
+        print("found", found)
         if None in found:
             crash
         return found
@@ -108,6 +108,14 @@ class OperationBase:
         }
 
     def invalid_nodes(self, root_node: tree_node.Node):
+        if (
+            self.operate_type in [self.OPERATE_MANY_ONE, self.OPERATE_ONE_MANY]
+            and len(self.node_uids_selected) <= 1
+        ):
+            return InvalidNodeError(
+                self.node_uids_selected,
+                f"Must select multiple nodes to perform {self.name}",
+            )
         return None
 
     def replay(self, root_node: tree_node.Node):
@@ -144,11 +152,11 @@ class OperationBase:
             select_hint = self.apply_many(nodes_selected, *args)
         elif self.operate_type == self.OPERATE_MANY_ONE:
             select_hint = self.apply_many_one(
-                self, nodes_selected[:-1], nodes_selected[-1], *args
+                nodes_selected[:-1], nodes_selected[-1], *args
             )
         elif self.operate_type == self.OPERATE_ONE_MANY:
             select_hint = self.apply_one_many(
-                self, nodes_selected[0], nodes_selected[1:], *args
+                nodes_selected[0], nodes_selected[1:], *args
             )
         else:
             raise Exception("Invalid operation type")

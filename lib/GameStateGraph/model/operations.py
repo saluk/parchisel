@@ -200,6 +200,19 @@ class OperationAddNode(OperationBase):
             return selection_hint.SelectionHint(children, children[0], True)
 
 
+class OperationMoveNodes(OperationBase):
+    operate_type = OperationBase.OPERATE_MANY_ONE
+    args = {}
+    name = "move"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def apply_many_one(self, from_nodes: list[tree_node.Node], to_node: tree_node.Node):
+        for node in from_nodes:
+            node.reparent(to_node)
+
+
 class OperationDeleteNode(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE
     name = "delete"

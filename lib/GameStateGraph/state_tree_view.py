@@ -351,6 +351,7 @@ class SingleStateTree(StateTreeView):
     allowed_operations = [
         operations.OperationAddNode,
         operations.OperationDeleteNode,
+        operations.OperationMoveNodes,
     ]
 
     @property
