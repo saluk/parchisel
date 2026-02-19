@@ -22,14 +22,18 @@ class OperationQueueView:
                 # TODO shouldn't call .queue directly
                 if not self.game_state.operation_queue.queue:
                     ui.label("(No operations performed yet)")
-                for i, operation in enumerate(self.game_state.operation_queue.queue):
-                    with ui.item():
+                    return
+                with ui.scroll_area().classes(f"w-100 h-150 border") as scroll_area:
+                    for i, operation in enumerate(
+                        self.game_state.operation_queue.queue
+                    ):
+                        with ui.item():
 
-                        async def d(i=i):
-                            await self.remove_operation(i)
+                            async def d(i=i):
+                                await self.remove_operation(i)
 
-                        ui.button("x", on_click=d)
-                        ui.label(
-                            f"{i} - "
-                            + operation.get_string(self.game_state.current_state)
-                        )
+                            ui.button("x", on_click=d)
+                            ui.label(
+                                f"{i} - "
+                                + operation.get_string(self.game_state.current_state)
+                            )
