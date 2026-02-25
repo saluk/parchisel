@@ -338,9 +338,10 @@ class AllStatesTree(StateTreeView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    async def select_node(self, node):
+    async def select_node(self, node: game_state.GameState):
         self.single_state_tree.state = node.current_state
         self.single_state_tree.game_state = node
+        node.replay_all()
         self.single_state_tree.label = f"Decision Node: **{node.name}**"
         self.single_state_tree.refresh(True)
 

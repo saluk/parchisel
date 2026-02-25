@@ -96,6 +96,24 @@ class GameState(Node):
         state.operation_queue = OperationQueue()
         return state
 
+    def replay_all(self):
+        # TODO - this algorithm doesn't scale well:
+        #   if you are selecting a deeply nested node all parents have to be replayed
+        #   A better algorithm would mark GameStates as dirty and replay from the earliest dirty one
+        """Replay all states before this one and replay this one"""
+        print("REPLAY")
+        chain = [self]
+        node: GameState = self
+        while node.parent:
+            chain.append(node.parent)
+            node = node.parent
+        chain.reverse()
+        print(chain)
+        for node in chain:
+            if isinstance(node, GameState):
+                print("Run Replay", node)
+                node.operation_queue.replay(node)
+
 
 class GameStateTree(Node):
     """A GameStateTree is a tree of GameStates.
