@@ -266,7 +266,7 @@ class StateTreeViewBase:
                     tick_strategy="strict",
                     on_select=self.select_node_callback,
                     on_tick=self.tick_node_callback,
-                )
+                ).props("no-selection-unset no-transition dense")
                 self.treeElement.add_slot(
                     "default-header",
                     """
