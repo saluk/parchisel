@@ -18,5 +18,7 @@ class OperationQueue:
     def replay(self, game_state):
         state = game_state.initial_state.copy()
         for operation in self.queue:
+            operation.recently_successful = False
+        for operation in self.queue:
             operation.replay(state)
         game_state.current_state = state

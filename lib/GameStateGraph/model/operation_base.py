@@ -85,6 +85,7 @@ class OperationBase:
         self.node_uids_selected = node_uids_selected
         print("Operation Init:", self.name, " node ids selected", node_uids_selected)
         self.operator: dict = None
+        self.recently_successful = None  # Whether the last apply() was successful or had an error. None if not yet run in last replay
 
     def get_nodes(self, root_node: tree_node.Node):
         print("selected", self.node_uids_selected)
@@ -126,41 +127,52 @@ class OperationBase:
         print("SELECTED:", self.node_uids_selected)
         print("ROOT NODE NAME:", root_node.name)
 
-        nodes_selected = self.get_nodes(root_node)
+        try:
+            nodes_selected = self.get_nodes(root_node)
 
-        args = self.get_args().values()
-        select_hint = None
-        if self.operate_type == self.OPERATE_ONLY_ONE:
-            select_hint = self.apply_one(nodes_selected[-1])
-        elif self.operate_type == self.OPERATE_SINGLE:
-            # Operate in order of ticked
-            nodes_ticked = []
-            node_selected = []
-            erase_ticked = None
-            select_hint_one = None
-            for node in reversed(nodes_selected):
-                select_hint_one = self.apply_one(node, *args)
+            args = self.get_args().values()
+            select_hint = None
+            if self.operate_type == self.OPERATE_ONLY_ONE:
+                select_hint = self.apply_one(nodes_selected[-1])
+            elif self.operate_type == self.OPERATE_SINGLE:
+                # Operate in order of ticked
+                nodes_ticked = []
+                node_selected = []
+                erase_ticked = None
+                select_hint_one = None
+                for node in reversed(nodes_selected):
+                    select_hint_one = self.apply_one(node, *args)
+                    if select_hint_one:
+                        nodes_ticked.extend(select_hint_one.new_nodes_ticked)
+                        if not node_selected:
+                            node_selected = select_hint_one.new_node_selected
+                        if erase_ticked == None:
+                            erase_ticked = select_hint_one.erase_ticked
                 if select_hint_one:
-                    nodes_ticked.extend(select_hint_one.new_nodes_ticked)
-                    if not node_selected:
-                        node_selected = select_hint_one.new_node_selected
-                    if erase_ticked == None:
-                        erase_ticked = select_hint_one.erase_ticked
-            if select_hint_one:
-                select_hint = SelectionHint(nodes_ticked, node_selected, erase_ticked)
-        elif self.operate_type == self.OPERATE_MANY:
-            select_hint = self.apply_many(nodes_selected, *args)
-        elif self.operate_type == self.OPERATE_MANY_ONE:
-            select_hint = self.apply_many_one(
-                nodes_selected[:-1], nodes_selected[-1], *args
-            )
-        elif self.operate_type == self.OPERATE_ONE_MANY:
-            select_hint = self.apply_one_many(
-                nodes_selected[0], nodes_selected[1:], *args
-            )
-        else:
-            raise Exception("Invalid operation type")
+                    select_hint = SelectionHint(
+                        nodes_ticked, node_selected, erase_ticked
+                    )
+            elif self.operate_type == self.OPERATE_MANY:
+                select_hint = self.apply_many(nodes_selected, *args)
+            elif self.operate_type == self.OPERATE_MANY_ONE:
+                select_hint = self.apply_many_one(
+                    nodes_selected[:-1], nodes_selected[-1], *args
+                )
+            elif self.operate_type == self.OPERATE_ONE_MANY:
+                select_hint = self.apply_one_many(
+                    nodes_selected[0], nodes_selected[1:], *args
+                )
+            else:
+                self.recently_successful = False
+                raise Exception("Invalid operation type")
+        except:
+            import traceback
 
+            traceback.print_exc()
+            self.recently_successful = False
+            return
+
+        self.recently_successful = True
         root_node.update_tree()
         return select_hint
 

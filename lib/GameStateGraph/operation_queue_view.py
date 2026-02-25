@@ -36,4 +36,12 @@ class OperationQueueView:
                             ui.label(
                                 f"{i} - "
                                 + operation.get_string(self.game_state.current_state)
+                            ).classes(
+                                "text-red"
+                                if operation.recently_successful == False
+                                else (
+                                    "text-green"
+                                    if operation.recently_successful == True
+                                    else ""
+                                )
                             )
