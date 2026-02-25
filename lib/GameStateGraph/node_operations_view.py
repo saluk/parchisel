@@ -107,12 +107,14 @@ class NodeOperationsView:
             with ui.card():
                 with ui.row():
                     ui.label(self.state.name)
-                    if self.game_state:
+                    if self.game_state and self.find_operators():
+                        operators = self.find_operators()
                         ui.select(
-                            self.find_operators(),
+                            operators,
                             value=(
                                 self.game_state.operator["uid"]
                                 if self.game_state.operator
+                                and self.game_state.operator["uid"] in operators
                                 else ""
                             ),
                         ).on_value_change(self.set_operator)
