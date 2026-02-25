@@ -1,9 +1,16 @@
 """
 TODO
-- operations can have notes applied, such as choosing the current player
 - Make operations propogate when editing the past
         - show states that are invalid after a state change command
         - Have a game state that's disconnected from the past (halts propogation)
+- Save expanded/unexpanded node state to the tree
+- Make accessible all of the properties that have been set for nodes before to make it easier to place
+    them on new nodes
+- operations: randomize, transfer quantity
+- functional property - perform math on child nodes to get a prop on parent
+    - count:regex count all nodes matching some regex
+    - sum - sum all of a particular property
+
 
 - bug when deleting a game state and that game state was currently viewed
 
