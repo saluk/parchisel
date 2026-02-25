@@ -175,10 +175,19 @@ class StateTreeViewBase:
 
     async def select_node_callback(self, e) -> None:
         print(e)
+        self.treeElement.untick(None)
+        self.nodes_ticked = []
+
         if e.value != None:
             node: tree_node.Node | None = self.state.find_node(node_uid=e.value)
             self.node_selected = node
         if self.node_selected:
+            self.treeElement.tick([self.node_selected.uid])
+
+            class o:
+                value = [self.node_selected.uid]
+
+            await self.tick_node_callback(o())
             await self.select_node(self.node_selected)
 
     async def select_node(self, node: tree_node.Node) -> None:
