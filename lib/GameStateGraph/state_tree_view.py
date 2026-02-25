@@ -235,7 +235,6 @@ class StateTreeViewBase:
         if not self.state:
             ui.label("No state selected")
             return
-        print("Building statetreeview", self.state.name)
         with ui.card():
             with ui.dialog() as debug_popup, ui.card():
                 ui.button("Close", on_click=debug_popup.close)

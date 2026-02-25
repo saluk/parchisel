@@ -65,7 +65,6 @@ class GameStateGraphUI:
 
     @ui.refreshable
     async def build(self):
-        print("building gamestategraph")
         ov = self.view
         project = ov.project
         ui.markdown(

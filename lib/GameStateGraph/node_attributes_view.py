@@ -47,7 +47,6 @@ class SingleNodeAttributesView:
     async def build(self) -> None:
         if not self.node_selected:
             return
-        ui.notify(f"building {self.node_selected.uid}, {self.node_selected.root.name}")
 
         self.new_key_name = ""
         self.new_key_value = ""
