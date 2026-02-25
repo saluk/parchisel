@@ -332,6 +332,8 @@ class AllStatesTree(StateTreeView):
         operations.OperationAddNextGameState,
         operations.OperationAddBranchingGameState,
         operations.OperationDeleteNode,
+        operations.OperationDeleteAndShiftNode,
+        operations.OperationMoveNodes,
     ]
     single_state_tree: SingleStateTree = None
 

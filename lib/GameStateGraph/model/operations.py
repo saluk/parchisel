@@ -230,6 +230,25 @@ class OperationDeleteNode(OperationBase):
         node.parent = None
 
 
+class OperationDeleteAndShiftNode(OperationBase):
+    operate_type = OperationBase.OPERATE_SINGLE
+    name = "delete/shift"
+
+    def invalid_nodes(self, root_node: tree_node.Node):
+        nodes_selected = self.get_nodes(root_node)
+        invalid = [node for node in nodes_selected if node.is_root]
+        if invalid:
+            return InvalidNodeError(
+                invalid, f"Cannot delete a root node {[node.uid for node in invalid]}"
+            )
+
+    def apply_one(self, node: tree_node.Node):
+        node.parent.children.remove(node)
+        for child in node.children:
+            child.reparent(node.parent)
+        node.parent = None
+
+
 class OperationAddNextGameState(OperationTypeOnlyOne):
     name = "next"
 
