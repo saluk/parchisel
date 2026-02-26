@@ -157,8 +157,6 @@ class Node:
             print("COPYING ROOT", copied)
             copied.dirty = True
             copied.update_tree()
-            print(copied.children[0].root == copied)
-            print(copied.children[0].root != self.children[0].root)
             self.recursive_update = True
         else:
             print("COPYING NON-ROOT", copied)
