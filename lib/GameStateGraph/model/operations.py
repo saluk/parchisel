@@ -3,6 +3,8 @@ from .operation_base import (
     OperationArg,
     OperationArgType,
     InvalidNodeError,
+    RunStatus,
+    RunMode,
 )
 from . import game_state
 from . import selection_hint
@@ -143,18 +145,24 @@ class OperationAddNode(OperationBase):
 
         self.args["times"].validate = validate_times
 
-    def apply(self, root_node: tree_node.Node):
+    def before_apply(self, root_node: tree_node.Node):
         if not self.arg_added_nodes:
             self.arg_added_nodes = {}
-        super().apply(root_node)
 
     def replay(self, root_node: tree_node.Node):
-        for parent_uid in self.arg_added_nodes:
-            parent = root_node.find_node(node_uid=parent_uid)
-            children = self.arg_added_nodes[parent_uid]
-            parent.add_children(
-                [tree_node.Node(child["name"], uid=child["uid"]) for child in children]
-            )
+        def f():
+            for parent_uid in self.arg_added_nodes:
+                parent = root_node.find_node(node_uid=parent_uid)
+                children = self.arg_added_nodes[parent_uid]
+                parent.add_children(
+                    [
+                        tree_node.Node(child["name"], uid=child["uid"])
+                        for child in children
+                    ]
+                )
+                self.recent_run = RunStatus(success=True, mode=RunMode.REPLAY)
+
+        self.perform_with_run_status(f, mode=RunMode.REPLAY)
 
     def apply_one(
         self,

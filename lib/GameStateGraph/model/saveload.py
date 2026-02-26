@@ -112,7 +112,6 @@ class Saver:
         d["args"] = operation.get_args()
         d["node_uids_selected"] = operation.node_uids_selected
         d["operator"] = operation.operator
-        d["recently_successful"] = operation.recently_successful
         return d
 
     def from_dict_operation(self, d):
@@ -121,5 +120,4 @@ class Saver:
         operation.operator = d.get("operator", {})
         for arg in d["args"]:
             setattr(operation, "arg_" + arg, d["args"][arg])
-        operation.recently_successful = d.get("recently_successful") or True
         return operation

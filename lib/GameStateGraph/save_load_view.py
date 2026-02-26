@@ -82,7 +82,6 @@ class SaveLoadView:
 
     @ui.refreshable
     async def build(self):
-        ui.notify("build menu filename:" + self.filename)
         # menu button
         # save, save as, load
         with ui.element("div"):

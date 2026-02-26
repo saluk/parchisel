@@ -3,7 +3,7 @@
 # They have a type
 # They can contain arguments controlling that operation
 
-
+from nicegui import ui
 from . import tree_node
 from .selection_hint import SelectionHint
 from enum import Enum
@@ -67,6 +67,18 @@ class InvalidNodeError:
         self.message = message
 
 
+class RunMode(Enum):
+    APPLY = "apply"
+    REPLAY = "replay"
+
+
+class RunStatus:
+    def __init__(self, success: bool, mode: RunMode, traceback: str = ""):
+        self.success = success
+        self.mode = mode
+        self.traceback = traceback
+
+
 class OperationBase:
     OPERATE_SINGLE = "Apply to individual nodes"
     OPERATE_MANY = "Apply to many nodes"
@@ -85,7 +97,11 @@ class OperationBase:
         self.node_uids_selected = node_uids_selected
         print("Operation Init:", self.name, " node ids selected", node_uids_selected)
         self.operator: dict = None
-        self.recently_successful = None  # Whether the last apply() was successful or had an error. None if not yet run in last replay
+        self.recent_run = None
+
+    @property
+    def recently_successful(self):
+        return self.recent_run and self.recent_run.success
 
     def get_nodes(self, root_node: tree_node.Node):
         print("selected", self.node_uids_selected)
@@ -93,7 +109,7 @@ class OperationBase:
         found = [root_node.find_node(node_uid=uid) for uid in self.node_uids_selected]
         print("found", found)
         if None in found:
-            crash
+            raise Exception("Couldn't retrieve some nodes")
         return found
 
     def get_string(self, root_node: tree_node.Node):
@@ -121,17 +137,35 @@ class OperationBase:
 
     def replay(self, root_node: tree_node.Node):
         """Usually, run apply again"""
-        return self.apply(root_node)
+        return self.apply(root_node, mode=RunMode.REPLAY)
 
-    def apply(self, root_node: tree_node.Node):
+    def before_apply(self, root_node: tree_node.Node):
+        """Hook for operations to run code before applying, such as validating arguments or nodes"""
+        return
+
+    def perform_with_run_status(self, func, mode: RunMode):
+        try:
+            func()
+            self.recent_run = RunStatus(success=True, mode=mode)
+        except Exception as e:
+            self.recent_run = RunStatus(success=False, mode=mode, traceback=str(e))
+            raise
+
+    def apply(self, root_node: tree_node.Node, mode: RunMode = RunMode.APPLY):
+        self.before_apply(root_node)
+        ui.notify(f"Apply: {self.get_string(root_node)}", type="info")
         print("SELECTED:", self.node_uids_selected)
         print("ROOT NODE NAME:", root_node.name)
 
-        try:
+        global select_hint
+        select_hint = None
+
+        def perform_apply():
+            global select_hint
             nodes_selected = self.get_nodes(root_node)
 
             args = self.get_args().values()
-            select_hint = None
+
             if self.operate_type == self.OPERATE_ONLY_ONE:
                 select_hint = self.apply_one(nodes_selected[-1])
             elif self.operate_type == self.OPERATE_SINGLE:
@@ -163,16 +197,10 @@ class OperationBase:
                     nodes_selected[0], nodes_selected[1:], *args
                 )
             else:
-                self.recently_successful = False
-                raise Exception("Invalid operation type")
-        except:
-            import traceback
+                raise Exception("Invalid operate type")
 
-            traceback.print_exc()
-            self.recently_successful = False
-            return
+        self.perform_with_run_status(perform_apply, mode=mode)
 
-        self.recently_successful = True
         root_node.update_tree()
         return select_hint
 

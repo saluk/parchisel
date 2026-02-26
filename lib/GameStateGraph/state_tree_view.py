@@ -181,6 +181,8 @@ class StateTreeViewBase:
         if e.value != None:
             node: tree_node.Node | None = self.state.find_node(node_uid=e.value)
             self.node_selected = node
+        elif self.node_selected:
+            self.treeElement.select(self.node_selected.uid)
         if self.node_selected:
             self.treeElement.tick([self.node_selected.uid])
 
@@ -266,7 +268,7 @@ class StateTreeViewBase:
                     tick_strategy="strict",
                     on_select=self.select_node_callback,
                     on_tick=self.tick_node_callback,
-                ).props("no-selection-unset no-transition dense")
+                ).props("no-transition dense")
                 self.treeElement.add_slot(
                     "default-header",
                     """
@@ -351,7 +353,9 @@ class AllStatesTree(StateTreeView):
     async def select_node(self, node: game_state.GameState):
         self.single_state_tree.state = node.current_state
         self.single_state_tree.game_state = node
+        ui.notify("Replaying nodes", type="info")
         node.replay_all()
+        ui.notify("Replaying nodes complete", type="info")
         self.single_state_tree.label = f"Decision Node: **{node.name}**"
         self.single_state_tree.refresh(True)
 
