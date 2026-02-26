@@ -86,13 +86,13 @@ class OperationBase:
     OPERATE_ONE_MANY = "Apply from one node to many"
     OPERATE_ONLY_ONE = "Apply to only the last ticked node"
     operate_type = OPERATE_SINGLE
-    args: dict = {}
+    args: list[OperationArg] = []
     name = "base"
 
     def __init__(self, node_uids_selected=[]):
         # Args are stored as arg_[name] for each argument
         # Arg values should be json compatible
-        for arg in self.args.values():
+        for arg in self.args:
             setattr(self, "arg_" + arg.name, json.loads(json.dumps(arg.default)))
         self.node_uids_selected = node_uids_selected
         print("Operation Init:", self.name, " node ids selected", node_uids_selected)
@@ -120,9 +120,7 @@ class OperationBase:
         return s
 
     def get_args(self):
-        return {
-            arg.name: getattr(self, "arg_" + arg.name) for arg in self.args.values()
-        }
+        return {arg.name: getattr(self, "arg_" + arg.name) for arg in self.args}
 
     def invalid_nodes(self, root_node: tree_node.Node):
         if (
@@ -148,12 +146,13 @@ class OperationBase:
             func()
             self.recent_run = RunStatus(success=True, mode=mode)
         except Exception as e:
+            import traceback
+
+            traceback.print_exc()
             self.recent_run = RunStatus(success=False, mode=mode, traceback=str(e))
-            raise
 
     def apply(self, root_node: tree_node.Node, mode: RunMode = RunMode.APPLY):
         self.before_apply(root_node)
-        ui.notify(f"Apply: {self.get_string(root_node)}", type="info")
         print("SELECTED:", self.node_uids_selected)
         print("ROOT NODE NAME:", root_node.name)
 
@@ -164,7 +163,7 @@ class OperationBase:
             global select_hint
             nodes_selected = self.get_nodes(root_node)
 
-            args = self.get_args().values()
+            args = self.get_args()
 
             if self.operate_type == self.OPERATE_ONLY_ONE:
                 select_hint = self.apply_one(nodes_selected[-1])
@@ -175,7 +174,7 @@ class OperationBase:
                 erase_ticked = None
                 select_hint_one = None
                 for node in reversed(nodes_selected):
-                    select_hint_one = self.apply_one(node, *args)
+                    select_hint_one = self.apply_one(node)
                     if select_hint_one:
                         nodes_ticked.extend(select_hint_one.new_nodes_ticked)
                         if not node_selected:
@@ -187,15 +186,13 @@ class OperationBase:
                         nodes_ticked, node_selected, erase_ticked
                     )
             elif self.operate_type == self.OPERATE_MANY:
-                select_hint = self.apply_many(nodes_selected, *args)
+                select_hint = self.apply_many(nodes_selected)
             elif self.operate_type == self.OPERATE_MANY_ONE:
                 select_hint = self.apply_many_one(
-                    nodes_selected[:-1], nodes_selected[-1], *args
+                    nodes_selected[:-1], nodes_selected[-1]
                 )
             elif self.operate_type == self.OPERATE_ONE_MANY:
-                select_hint = self.apply_one_many(
-                    nodes_selected[0], nodes_selected[1:], *args
-                )
+                select_hint = self.apply_one_many(nodes_selected[0], nodes_selected[1:])
             else:
                 raise Exception("Invalid operate type")
 
@@ -224,12 +221,4 @@ class OperationBase:
         return self.do_combine(operation)
 
     def do_combine(self, operation):
-        """Default implementation: join dicts, set other arguments to new value"""
-        for arg in self.args.keys():
-            our_v = getattr(self, "arg_" + arg)
-            their_v = getattr(operation, "arg_" + arg)
-            if isinstance(our_v, dict):
-                our_v.update(their_v)
-            else:
-                setattr(self, "arg_" + arg, their_v)
-        return
+        return False

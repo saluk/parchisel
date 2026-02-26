@@ -353,9 +353,7 @@ class AllStatesTree(StateTreeView):
     async def select_node(self, node: game_state.GameState):
         self.single_state_tree.state = node.current_state
         self.single_state_tree.game_state = node
-        ui.notify("Replaying nodes", type="info")
         node.replay_all()
-        ui.notify("Replaying nodes complete", type="info")
         self.single_state_tree.label = f"Decision Node: **{node.name}**"
         self.single_state_tree.refresh(True)
 

@@ -11,7 +11,6 @@ class OperationQueueView:
         self.build.refresh()
 
     async def remove_operation(self, index):
-        ui.notify(f"Delete action {index}")
         self.game_state.operation_queue.remove(index, self.game_state)
         self.state_view.refresh()
 

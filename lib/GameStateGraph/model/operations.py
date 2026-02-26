@@ -30,11 +30,7 @@ class OperationSetAttributes(OperationBase):
     ATTRIBUTE_CHANGE_DELETE = "delete"  # {}
     """ Attribute dict:
     some_key: {attribute_change_type: {args}}"""
-    args = {
-        "attribute_dict": OperationArg(
-            "attribute_dict", {}, OperationArgType.TYPE_INTERNAL
-        ),
-    }
+    args = [OperationArg("attribute_dict", {}, OperationArgType.TYPE_INTERNAL)]
     name = "set"
 
     def __init__(self, *args, **kwargs):
@@ -56,7 +52,8 @@ class OperationSetAttributes(OperationBase):
     def prepare_delete(self, key):
         self.arg_attribute_dict[key] = {self.ATTRIBUTE_CHANGE_DELETE: {}}
 
-    def apply_one(self, node: tree_node.Node, attribute_dict: dict):
+    def apply_one(self, node: tree_node.Node):
+        attribute_dict = self.arg_attribute_dict
         for key, change in attribute_dict.items():
             add_op = change.get(self.ATTRIBUTE_CHANGE_ADD, None)
             set_op = change.get(self.ATTRIBUTE_CHANGE_SET, None)
@@ -119,22 +116,18 @@ class OperationSetAttributes(OperationBase):
 
 class OperationAddNode(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE
-    args = {}
+    args = [
+        OperationArg("node_name", "Node"),
+        OperationArg("times", 1, OperationArgType.TYPE_DECIMAL),
+        OperationArg("increment_names", False, OperationArgType.TYPE_BOOLEAN),
+        OperationArg("select_new_nodes", False, OperationArgType.TYPE_BOOLEAN),
+        OperationArg("added_nodes", False, OperationArgType.TYPE_INTERNAL),
+    ]
     name = "add"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        [
-            self.args.setdefault(o.name, o)
-            for o in [
-                OperationArg("node_name", "Node"),
-                OperationArg("times", 1, OperationArgType.TYPE_DECIMAL),
-                OperationArg("increment_names", False, OperationArgType.TYPE_BOOLEAN),
-                OperationArg("select_new_nodes", False, OperationArgType.TYPE_BOOLEAN),
-                OperationArg("added_nodes", False, OperationArgType.TYPE_INTERNAL),
-            ]
-        ]
-        old_validate = self.args["times"].validate
+        old_validate = self.args[1].validate
 
         def validate_times(value):
             old = old_validate(value)
@@ -143,7 +136,7 @@ class OperationAddNode(OperationBase):
             if int(value) < 1:
                 return "Must be >= 1"
 
-        self.args["times"].validate = validate_times
+        self.args[1].validate = validate_times
 
     def before_apply(self, root_node: tree_node.Node):
         if not self.arg_added_nodes:
@@ -164,17 +157,9 @@ class OperationAddNode(OperationBase):
 
         self.perform_with_run_status(f, mode=RunMode.REPLAY)
 
-    def apply_one(
-        self,
-        node: tree_node.Node,
-        node_name: str,
-        num_times: int,
-        increment: bool,
-        select_new_nodes: bool,
-        added_nodes: list,
-    ):
+    def apply_one(self, node: tree_node.Node):
         start = ""
-        if increment:
+        if self.arg_increment_names:
             start = 1
 
             def get_digit_suffix(name: str):
@@ -193,18 +178,18 @@ class OperationAddNode(OperationBase):
                 key=lambda v: get_digit_suffix(v),
             )
             for child_name in sorted_names:
-                if child_name == node_name + str(start):
+                if child_name == self.arg_node_name + str(start):
                     start += 1
         children = []
-        for t in range(int(num_times)):
-            children.append(tree_node.Node(node_name + str(start)))
-            if increment:
+        for t in range(int(self.arg_times)):
+            children.append(tree_node.Node(self.arg_node_name + str(start)))
+            if self.arg_increment_names:
                 start += 1
         node.add_children(children)
         self.arg_added_nodes[node.uid] = [
             {"name": child.name, "uid": child.uid} for child in children
         ]
-        if select_new_nodes:
+        if self.arg_select_new_nodes:
             return selection_hint.SelectionHint(children, children[0], True)
 
 

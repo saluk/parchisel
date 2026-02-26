@@ -55,28 +55,25 @@ class NodeOperationsView:
     async def on_click_operation(
         self, operation_class: operation_base.OperationBase.__class__
     ):
-        self.current_operation = operation_class(
-            [node.uid for node in self.ticked_nodes]
-        )
-        if self.current_operation.args:
-            self.show_operation_arguments_dialog()
+        operation = operation_class([node.uid for node in self.ticked_nodes])
+        if operation.args:
+            self.show_operation_arguments_dialog(operation)
         else:
             print("apply operation on its own")
-            await self.parent.apply_operation(self.current_operation)
+            await self.parent.apply_operation(operation)
 
-    def show_operation_arguments_dialog(self):
-        operation = self.current_operation
+    def show_operation_arguments_dialog(self, operation: operation_base.OperationBase):
         if self.operations_dialog:
             self.operations_dialog.clear()
 
         async def confirm() -> None:
             print("Applying operation:", self.parent.state.name)
-            await self.parent.apply_operation(self.current_operation)
+            await self.parent.apply_operation(operation)
             self.operations_dialog.close()
 
         with ui.dialog() as dialog, ui.card():
-            ui.label(operation.name)
-            for arg in operation.args.values():
+            ui.label(operation.name + " " + str(id(operation)))
+            for arg in operation.args:
                 if arg.input_type() == operation_base.OperationArgInputType.INPUT:
                     ui.input(arg.name, validation=arg.validate).bind_value(
                         operation, "arg_" + arg.name
