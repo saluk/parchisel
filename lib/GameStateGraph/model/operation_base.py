@@ -25,6 +25,11 @@ class OperationArgInputType(Enum):
     CHECK = "check"
 
 
+class OperationContextValid(Enum):
+    SINGLE_STATE = "single state"
+    GAME_STATE = "game state"
+
+
 class OperationArg:
     def __init__(
         self,
@@ -86,6 +91,7 @@ class OperationBase:
     OPERATE_ONE_MANY = "Apply from one node to many"
     OPERATE_ONLY_ONE = "Apply to only the last ticked node"
     operate_type = OPERATE_SINGLE
+    operation_contexts_valid: list[OperationContextValid] = []
     args: list[OperationArg] = []
     name = "base"
 

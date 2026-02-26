@@ -1,5 +1,6 @@
 from .operation_base import (
     OperationBase,
+    OperationContextValid,
     OperationArg,
     OperationArgType,
     InvalidNodeError,
@@ -13,6 +14,7 @@ from . import tree_node
 
 class OperationTypeOnlyOne(OperationBase):
     operate_type = OperationBase.OPERATE_ONLY_ONE
+    operation_contexts_valid: list[OperationContextValid] = []
 
     def invalid_nodes(self, root_node: tree_node.Node):
         nodes_selected = self.get_nodes(root_node)
@@ -24,6 +26,9 @@ class OperationTypeOnlyOne(OperationBase):
 
 class OperationSetAttributes(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE
+    operation_contexts_valid: list[OperationContextValid] = (
+        []
+    )  # Set is managed internally
     ATTRIBUTE_CHANGE_ADD = "add"  # {'value': 'blah'}
     ATTRIBUTE_CHANGE_SET = "set"  # {'value': 'blah'}
     ATTRIBUTE_CHANGE_NEW_KEY = "new_key"  # {'new_key': 'blah', 'new_value': 'blah'}
@@ -116,6 +121,9 @@ class OperationSetAttributes(OperationBase):
 
 class OperationAddNode(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE
+    operation_contexts_valid: list[OperationContextValid] = [
+        OperationContextValid.SINGLE_STATE
+    ]
     args = [
         OperationArg("node_name", "Node"),
         OperationArg("times", 1, OperationArgType.TYPE_DECIMAL),
@@ -195,19 +203,42 @@ class OperationAddNode(OperationBase):
 
 class OperationMoveNodes(OperationBase):
     operate_type = OperationBase.OPERATE_MANY_ONE
+    operation_contexts_valid: list[OperationContextValid] = [
+        OperationContextValid.SINGLE_STATE,
+        OperationContextValid.GAME_STATE,
+    ]
     args = {}
     name = "move"
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
     def apply_many_one(self, from_nodes: list[tree_node.Node], to_node: tree_node.Node):
         for node in from_nodes:
             node.reparent(to_node)
 
 
+class OperationMoveNodesUp(OperationBase):
+    operate_type = OperationBase.OPERATE_SINGLE
+    operation_contexts_valid: list[OperationContextValid] = [
+        OperationContextValid.SINGLE_STATE,
+        OperationContextValid.GAME_STATE,
+    ]
+    args = {}
+    name = "moveup"
+
+    def apply_one(self, node: tree_node.Node):
+        i = node.parent.children.index(node)
+        if i > 0:
+            node.parent.children[i], node.parent.children[i - 1] = (
+                node.parent.children[i - 1],
+                node.parent.children[i],
+            )
+
+
 class OperationDeleteNode(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE
+    operation_contexts_valid: list[OperationContextValid] = [
+        OperationContextValid.SINGLE_STATE,
+        OperationContextValid.GAME_STATE,
+    ]
     name = "delete"
 
     def invalid_nodes(self, root_node: tree_node.Node):
@@ -225,6 +256,10 @@ class OperationDeleteNode(OperationBase):
 
 class OperationDeleteAndShiftNode(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE
+    operation_contexts_valid: list[OperationContextValid] = [
+        OperationContextValid.SINGLE_STATE,
+        OperationContextValid.GAME_STATE,
+    ]
     name = "delete/shift"
 
     def invalid_nodes(self, root_node: tree_node.Node):
@@ -244,6 +279,9 @@ class OperationDeleteAndShiftNode(OperationBase):
 
 class OperationAddNextGameState(OperationTypeOnlyOne):
     name = "next"
+    operation_contexts_valid: list[OperationContextValid] = [
+        OperationContextValid.GAME_STATE
+    ]
 
     def apply_one(self, node: game_state.GameState):
         print("add next state")
@@ -253,6 +291,9 @@ class OperationAddNextGameState(OperationTypeOnlyOne):
 
 class OperationAddBranchingGameState(OperationTypeOnlyOne):
     name = "branch"
+    operation_contexts_valid: list[OperationContextValid] = [
+        OperationContextValid.GAME_STATE
+    ]
 
     def apply_one(self, node: game_state.GameState):
         print("add branching state")

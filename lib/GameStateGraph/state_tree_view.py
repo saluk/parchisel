@@ -339,11 +339,11 @@ class AllStatesTree(StateTreeView):
     width = "64"
     height = "48"
     allowed_operations = [
-        operations.OperationAddNextGameState,
-        operations.OperationAddBranchingGameState,
-        operations.OperationDeleteNode,
-        operations.OperationDeleteAndShiftNode,
-        operations.OperationMoveNodes,
+        getattr(operations, clsname)
+        for clsname in dir(operations)
+        if hasattr(getattr(operations, clsname), "operation_contexts_valid")
+        and operation_base.OperationContextValid.GAME_STATE
+        in getattr(operations, clsname).operation_contexts_valid
     ]
     single_state_tree: SingleStateTree = None
 
@@ -362,9 +362,11 @@ class SingleStateTree(StateTreeView):
     width = "94"
     height = "128"
     allowed_operations = [
-        operations.OperationAddNode,
-        operations.OperationDeleteNode,
-        operations.OperationMoveNodes,
+        getattr(operations, clsname)
+        for clsname in dir(operations)
+        if hasattr(getattr(operations, clsname), "operation_contexts_valid")
+        and operation_base.OperationContextValid.SINGLE_STATE
+        in getattr(operations, clsname).operation_contexts_valid
     ]
 
     @property
