@@ -7,6 +7,8 @@ from lib.GameStateGraph.model import operation_base
 from lib.GameStateGraph import state_tree_view
 from nicegui import ui, html
 
+from lib.base_components.small_button import SmallButton
+
 
 class NodeOperationsView:
     def __init__(
@@ -81,8 +83,8 @@ class NodeOperationsView:
                 elif arg.input_type() == operation_base.OperationArgInputType.CHECK:
                     print(arg.default)
                     ui.checkbox(arg.name).bind_value(operation, "arg_" + arg.name)
-            ui.button("Confirm", on_click=confirm)
-            ui.button("Close", on_click=dialog.close)
+            SmallButton("Confirm", on_click=confirm)
+            SmallButton("Close", on_click=dialog.close)
         self.operations_dialog: Dialog = dialog
         self.operations_dialog.open()
 
@@ -116,7 +118,7 @@ class NodeOperationsView:
                             ),
                         ).on_value_change(self.set_operator)
                 with ui.row():
-                    ui.button("Select None", on_click=self.parent.select_none)
+                    SmallButton("Select None", on_click=self.parent.select_none)
                     await self.parent.select_range_button.build()
                 ui.separator()
                 with ui.row():
@@ -131,7 +133,7 @@ class NodeOperationsView:
                     with ui.row():
                         print(self.allowed_operations)
                         for operation_class in self.allowed_operations:
-                            button = ui.button(
+                            button = SmallButton(
                                 operation_class.name,
                                 on_click=lambda op_class=operation_class: self.on_click_operation(
                                     op_class

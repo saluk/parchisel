@@ -31,6 +31,78 @@ from lib.virtualtable import virtual_table
 @ui.page("/")
 async def main():
 
+    # Brand palette
+    ui.colors(
+        primary="#8c3b2a",  # deep rust
+        secondary="#5a3e36",  # dark clay brown
+        accent="#a3472a",  # brighter rust accent
+        positive="#2f6b3f",  # forest green
+        negative="#ff6a00",  # bright safety orange
+        warning="#ff6a00",
+        info="#3e5f4e",  # muted forest-teal
+    )
+
+    # Typography + background system
+    ui.add_head_html(
+        """
+    <style>
+
+    /* 🌄 App background */
+    body {
+    background-color: #f4eee8;  /* warm parchment */
+    color: #3b1f18;             /* dark warm brown */
+    font-weight: 400;
+    }
+
+    /* 🧱 Headings feel branded */
+    h1, h2, h3, h4, h5, h6 {
+    color: #8c3b2a;
+    font-weight: 600;
+    }
+
+    /* Subtle text */
+    .text-caption,
+    .text-subtitle2 {
+    color: #6b3a2f;
+    }
+
+    /* Links */
+    a {
+    color: #a3472a;
+    text-decoration: none;
+    }
+    a:hover {
+    color: #ff6a00;
+    }
+
+    /* 🪵 Cards feel warm instead of stark white */
+    .q-card {
+    background: #fbf7f3;
+    border-radius: 12px;
+    }
+
+    /* Buttons slightly softened */
+    .q-btn {
+    border-radius: 10px;
+    font-weight: 500;
+    }
+
+    /* Outline buttons use rust */
+    .q-btn--outline {
+    border-color: var(--q-primary);
+    color: var(--q-primary);
+    }
+
+    /* Inputs blend with theme */
+    .q-field__control {
+    background: #ffffff;
+    border-radius: 8px;
+    }
+
+    </style>
+    """
+    )
+
     view_manager = ViewManager()
 
     async def initial_project_load():

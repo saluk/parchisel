@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from nicegui.elements.tree import Tree
 from nicegui.elements.button import Button
+
+from lib.base_components.small_button import SmallButton
 from .model import game_state, tree_node
 from .node_operations_view import NodeOperationsView
 from .operation_queue_view import OperationQueueView
@@ -63,7 +65,7 @@ class SelectRangeButton:
 
     @ui.refreshable
     async def build(self):
-        button = ui.button(self.get_label(), on_click=self.click)
+        button = SmallButton(self.get_label(), on_click=self.click)
         self.button = button
         self.update()
         return
@@ -239,7 +241,7 @@ class StateTreeViewBase:
             return
         with ui.card():
             with ui.dialog() as debug_popup, ui.card():
-                ui.button("Close", on_click=debug_popup.close)
+                SmallButton("Close", on_click=debug_popup.close)
                 with ui.card().tight().classes("bg-gray-50"):
                     ui.markdown(
                         "```\n"
@@ -249,12 +251,12 @@ class StateTreeViewBase:
             with ui.row():
                 ui.markdown(self.label).classes("text-lg")
             with ui.row():
-                ui.button("debug", on_click=lambda: debug_popup.open())
+                SmallButton("debug", on_click=lambda: debug_popup.open())
                 if self.game_state:
-                    self.ops_button = ui.button(
+                    self.ops_button = SmallButton(
                         f"ops:{len(self.game_state.operation_queue.queue)}"
                     ).on_click(self.show_operations)
-                self.ops_dropdown_button = ui.button("ACT").on_click(
+                self.ops_dropdown_button = SmallButton("ACT").on_click(
                     lambda: self.node_operations_view.main_dialog.open()
                 )
             with ui.scroll_area().classes(

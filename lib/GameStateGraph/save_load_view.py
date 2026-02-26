@@ -1,4 +1,6 @@
 from nicegui import ui, app
+
+from lib.base_components.small_button import SmallButton
 from .model import saveload
 import json
 
@@ -61,8 +63,8 @@ class SaveLoadView:
         with ui.dialog(value=True) as self.load_dialog, ui.card():
             self.file_list = FileList(self)
             await self.file_list.build()
-            ui.button("Load", on_click=confirm)
-            ui.button("Close", on_click=close)
+            SmallButton("Load", on_click=confirm)
+            SmallButton("Close", on_click=close)
 
     def show_save_as_dialog(self):
         def confirm():
@@ -71,8 +73,8 @@ class SaveLoadView:
 
         with ui.dialog(value=True) as self.save_as_dialog, ui.card():
             ui.input("Filename").bind_value(self, "filename")
-            ui.button("Save", on_click=confirm)
-            ui.button("Close", on_click=self.save_as_dialog.close)
+            SmallButton("Save", on_click=confirm)
+            SmallButton("Close", on_click=self.save_as_dialog.close)
 
     def reload(self):
         saved = self.files[self.filename]
@@ -85,7 +87,7 @@ class SaveLoadView:
         # menu button
         # save, save as, load
         with ui.element("div"):
-            with ui.button("Menu"):
+            with SmallButton("Menu"):
                 with ui.menu().props("auto-close"):
                     ui.menu_item("New Graph", on_click=self.parent.new_graph)
                     self.save_menu_item = ui.menu_item(

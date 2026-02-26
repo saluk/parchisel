@@ -1,4 +1,6 @@
 from nicegui import ui
+
+from lib.base_components.small_button import SmallButton
 from .model.game_state import GameState
 
 
@@ -31,7 +33,7 @@ class OperationQueueView:
                             async def d(i=i):
                                 await self.remove_operation(i)
 
-                            ui.button("x", on_click=d)
+                            SmallButton("x", on_click=d)
                             ui.label(
                                 f"{i} - "
                                 + operation.get_string(self.game_state.current_state)
@@ -42,10 +44,10 @@ class OperationQueueView:
                                     else ""
                                 )
                             ).classes(
-                                "text-red"
+                                "text-negative"
                                 if operation.recently_successful == False
                                 else (
-                                    "text-green"
+                                    "text-positive"
                                     if operation.recently_successful == True
                                     else ""
                                 )
@@ -64,6 +66,7 @@ class OperationQueueView:
                                 self.state_view.refresh()
 
                             if i > 0:
-                                ui.button("^", on_click=move_up)
+                                SmallButton("^", on_click=move_up)
                             if i < len(self.game_state.operation_queue.queue) - 1:
-                                ui.button("v", on_click=move_down)
+                                SmallButton("v", on_click=move_down)
+                    scroll_area.scroll_to(percent=100)

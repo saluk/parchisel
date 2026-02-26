@@ -8,6 +8,8 @@ from lib.GameStateGraph.model import operations
 from lib.GameStateGraph import state_tree_view
 from nicegui import ui, html
 
+from lib.base_components.small_button import SmallButton
+
 
 class SingleNodeAttributesView:
     def __init__(
@@ -77,7 +79,7 @@ class SingleNodeAttributesView:
                             self.node_selected, key, e.value
                         )
                     )
-                    ui.button("-").on_click(
+                    SmallButton("-").on_click(
                         lambda e: self.set_attribute_value(
                             self.node_selected, None, None, delete_key=key
                         )
@@ -90,7 +92,7 @@ class SingleNodeAttributesView:
                 ui.input("New Value:").bind_value(
                     self, "new_key_value"
                 ).on_value_change(change_new_input)
-                ui.button("+").on_click(
+                SmallButton("+").on_click(
                     lambda e: self.set_attribute_value(
                         self.node_selected,
                         self.new_key_name,
