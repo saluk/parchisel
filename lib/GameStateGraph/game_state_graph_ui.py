@@ -67,11 +67,16 @@ class GameStateGraphUI:
     async def build(self):
         ov = self.view
         project = ov.project
-        ui.markdown(
-            "##### Game State Graph"
-            + (f": **{self.file_menu.filename}**" if self.file_menu.filename else "")
-        )
-        await self.file_menu.build()
+        with ui.row():
+            await self.file_menu.build()
+            ui.markdown(
+                "##### Game State Graph"
+                + (
+                    f": **{self.file_menu.filename}**"
+                    if self.file_menu.filename
+                    else ""
+                )
+            )
         with ui.row():
             await self.all_states_tree.build()
             await self.single_state_tree.build()
