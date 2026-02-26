@@ -22,3 +22,19 @@ class OperationQueue:
         for operation in self.queue:
             operation.replay(state)
         game_state.current_state = state
+
+    def move_up(self, index: int, game_state):
+        if index > 0:
+            self.queue[index], self.queue[index - 1] = (
+                self.queue[index - 1],
+                self.queue[index],
+            )
+            self.replay(game_state)
+
+    def move_down(self, index: int, game_state):
+        if index < len(self.queue) - 1:
+            self.queue[index], self.queue[index + 1] = (
+                self.queue[index + 1],
+                self.queue[index],
+            )
+            self.replay(game_state)

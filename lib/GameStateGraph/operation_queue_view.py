@@ -50,3 +50,20 @@ class OperationQueueView:
                                     else ""
                                 )
                             )
+
+                            async def move_up(i=i):
+                                self.game_state.operation_queue.move_up(
+                                    i, self.game_state
+                                )
+                                self.state_view.refresh()
+
+                            async def move_down(i=i):
+                                self.game_state.operation_queue.move_down(
+                                    i, self.game_state
+                                )
+                                self.state_view.refresh()
+
+                            if i > 0:
+                                ui.button("^", on_click=move_up)
+                            if i < len(self.game_state.operation_queue.queue) - 1:
+                                ui.button("v", on_click=move_down)
