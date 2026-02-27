@@ -1,3 +1,5 @@
+import itertools
+
 from .operation_base import (
     OperationBase,
     OperationContextValid,
@@ -10,6 +12,8 @@ from .operation_base import (
 from . import game_state
 from . import selection_hint
 from . import tree_node
+
+from nicegui import ui
 
 
 class OperationTypeOnlyOne(OperationBase):
@@ -128,6 +132,7 @@ class OperationAddNode(OperationBase):
         OperationArg("node_name", "Node"),
         OperationArg("times", 1, OperationArgType.TYPE_DECIMAL),
         OperationArg("increment_names", False, OperationArgType.TYPE_BOOLEAN),
+        OperationArg("concat_names", "", OperationArgType.TYPE_STRING),
         OperationArg("select_new_nodes", False, OperationArgType.TYPE_BOOLEAN),
         OperationArg("added_nodes", False, OperationArgType.TYPE_INTERNAL),
     ]
@@ -146,9 +151,18 @@ class OperationAddNode(OperationBase):
 
         self.args[1].validate = validate_times
 
+    def get_concat_names(self):
+        categories = [
+            category.strip().split(",") for category in self.arg_concat_names.split(" ")
+        ]
+        names = [" - ".join(items) for items in itertools.product(*categories)]
+        return names
+
     def before_apply(self, root_node: tree_node.Node):
         if not self.arg_added_nodes:
             self.arg_added_nodes = {}
+        if self.arg_concat_names:
+            self.arg_times = len(self.get_concat_names())
 
     def replay(self, root_node: tree_node.Node):
         def f():
@@ -166,7 +180,8 @@ class OperationAddNode(OperationBase):
         self.perform_with_run_status(f, mode=RunMode.REPLAY)
 
     def apply_one(self, node: tree_node.Node):
-        start = ""
+        names = []
+
         if self.arg_increment_names:
             start = 1
 
@@ -188,11 +203,18 @@ class OperationAddNode(OperationBase):
             for child_name in sorted_names:
                 if child_name == self.arg_node_name + str(start):
                     start += 1
-        children = []
-        for t in range(int(self.arg_times)):
-            children.append(tree_node.Node(self.arg_node_name + str(start)))
-            if self.arg_increment_names:
+            for t in range(int(self.arg_times)):
+                names.append(self.arg_node_name + str(start))
                 start += 1
+        elif self.arg_concat_names:
+            names = self.get_concat_names()
+        else:
+            names = [self.arg_node_name] * int(self.arg_times)
+        ui.notify(f"Adding nodes {names} to {node.name}")
+        children = []
+        for name in names:
+            child = tree_node.Node(name)
+            children.append(child)
         node.add_children(children)
         self.arg_added_nodes[node.uid] = [
             {"name": child.name, "uid": child.uid} for child in children
