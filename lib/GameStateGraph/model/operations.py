@@ -258,6 +258,63 @@ class OperationMoveNodesUp(OperationBase):
             )
 
 
+class OperationMoveNodesDown(OperationBase):
+    operate_type = OperationBase.OPERATE_SINGLE
+    operation_contexts_valid: list[OperationContextValid] = [
+        OperationContextValid.SINGLE_STATE,
+        OperationContextValid.GAME_STATE,
+    ]
+    args = {}
+    name = "movedown"
+
+    def get_nodes(self, root_node):
+        # Reverse the order of nodes so that when we move down, we move the bottom ones first, otherwise we can get into a situation where we move a node down, then the node that was below it is now above it and doesn't get moved
+        return list(reversed(super().get_nodes(root_node)))
+
+    def apply_one(self, node: tree_node.Node):
+        i = node.parent.children.index(node)
+        if i < len(node.parent.children) - 1:
+            node.parent.children[i], node.parent.children[i + 1] = (
+                node.parent.children[i + 1],
+                node.parent.children[i],
+            )
+
+
+class OperationShuffle(OperationBase):
+    operate_type = OperationBase.OPERATE_MANY
+    operation_contexts_valid: list[OperationContextValid] = [
+        OperationContextValid.SINGLE_STATE,
+        OperationContextValid.GAME_STATE,
+    ]
+    args = [
+        OperationArg("positions", False, OperationArgType.TYPE_INTERNAL),
+    ]
+    name = "shuffle"
+
+    def before_apply(self, root_node):
+        if not self.arg_positions:
+            self.arg_positions = {}
+            keys = [child.uid for child in self.get_nodes(root_node)]
+            positions = [
+                child.parent.children.index(child)
+                for child in self.get_nodes(root_node)
+            ]
+            import random
+
+            random.shuffle(keys)
+            positions.sort()
+            for i, key in enumerate(keys):
+                self.arg_positions[key] = positions[i]
+
+    def apply_many(self, nodes):
+        if any(1 for node in nodes if node.parent != nodes[0].parent):
+            raise Exception("All nodes must have the same parent to shuffle")
+        for node in nodes:
+            parent = node.parent
+            position = self.arg_positions[node.uid]
+            parent.children[position] = node
+
+
 class OperationDeleteNode(OperationBase):
     operate_type = OperationBase.OPERATE_SINGLE
     operation_contexts_valid: list[OperationContextValid] = [
