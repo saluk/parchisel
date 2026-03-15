@@ -155,7 +155,10 @@ class OperationAddNode(OperationBase):
         categories = [
             category.strip().split(",") for category in self.arg_concat_names.split(" ")
         ]
-        names = [" - ".join(items) for items in itertools.product(*categories)]
+        names = [
+            self.arg_node_name + ":" + " - ".join(items)
+            for items in itertools.product(*categories)
+        ]
         return names
 
     def before_apply(self, root_node: tree_node.Node):
