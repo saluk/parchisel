@@ -33,7 +33,7 @@ class GameState(Node):
 
     @property
     def name(self):
-        return "state" + str(self.action_level)
+        return "state" + str(self.action_level) + ":" + self.current_state.name
 
     @name.setter
     def name(self, value):
