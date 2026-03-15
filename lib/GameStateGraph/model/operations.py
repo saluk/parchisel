@@ -307,12 +307,18 @@ class OperationShuffle(OperationBase):
                 self.arg_positions[key] = positions[i]
 
     def apply_many(self, nodes):
-        if any(1 for node in nodes if node.parent != nodes[0].parent):
-            raise Exception("All nodes must have the same parent to shuffle")
         for node in nodes:
             parent = node.parent
             position = self.arg_positions[node.uid]
             parent.children[position] = node
+
+    def invalid_nodes(self, root_node):
+        nodes_selected = self.get_nodes(root_node)
+        if any(1 for node in nodes_selected if node.parent != nodes_selected[0].parent):
+            return InvalidNodeError(
+                self.node_uids_selected,
+                f"All nodes must have the same parent to shuffle",
+            )
 
 
 class OperationDeleteNode(OperationBase):
